@@ -20,7 +20,7 @@ export function HeroGemini() {
 
     return (
         <div
-            className="h-[200vh] w-full relative pt-20 overflow-clip"
+            className="h-[200vh] w-full relative pt-6 overflow-clip"
             ref={ref}
         >
             <GoogleGeminiEffect

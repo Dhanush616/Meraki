@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 from routers import (
     health, assets, beneficiaries, intent,
-    documents, escalation, verification, execution
+    documents, escalation, verification, execution,
+    auth, vault
 )
 
 app = FastAPI(
@@ -28,3 +29,5 @@ app.include_router(documents.router, prefix="/api/documents", tags=["Documents"]
 app.include_router(escalation.router, prefix="/api/escalation", tags=["Escalation"])
 app.include_router(verification.router, prefix="/api/verification", tags=["Verification"])
 app.include_router(execution.router, prefix="/api/execution", tags=["Execution"])
+app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
+app.include_router(vault.router, prefix="/api/vault", tags=["Vault"])

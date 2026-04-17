@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRightIcon, ShieldCheckIcon, KeySquareIcon, EyeOffIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,14 +18,47 @@ const steps = [
 ];
 
 export default function SignUpPage() {
+    const router = useRouter();
     const [step, setStep] = useState(0);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleNext = (e: React.FormEvent) => {
+    const handleNext = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (step === 0 && email) setStep(1);
-        // Submit on step 1
+        setError(null);
+
+        if (step === 0 && email) {
+            setStep(1);
+            return;
+        }
+
+        if (step === 1 && password) {
+            setLoading(true);
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+                const response = await fetch(`${apiUrl}/api/auth/signup`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || "Failed to sign up");
+                }
+
+                console.log("Signup successful", data);
+                // Optionally auto-login and push to /dashboard
+                router.push("/dashboard"); 
+            } catch (err: any) {
+                setError(err.message || "An unexpected error occurred");
+            } finally {
+                setLoading(false);
+            }
+        }
     };
 
     return (
@@ -48,6 +82,12 @@ export default function SignUpPage() {
                         <h1 className="text-3xl font-serif text-near-black mb-2">Build your vault</h1>
                         <p className="text-olive-gray font-sans">Step {step + 1} of 2: {steps[step].title}</p>
                     </div>
+
+                    {error && (
+                        <div className="p-3 mb-6 rounded-lg bg-red-50 text-red-600 text-sm font-sans border border-red-100">
+                            {error}
+                        </div>
+                    )}
 
                     <form className="flex flex-col flex-1" onSubmit={handleNext}>
                         <AnimatePresence mode="wait">
@@ -87,7 +127,7 @@ export default function SignUpPage() {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         className="w-full bg-parchment border-2 border-brand rounded-lg px-4 py-4 outline-none focus:ring-4 focus:ring-brand/20 transition-all font-sans text-near-black text-lg shadow-inner"
-                                        placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                                        placeholder="••••••••"
                                         autoFocus
                                         required
                                     />
@@ -106,9 +146,9 @@ export default function SignUpPage() {
                             ) : (
                                 <div />
                             )}
-                            <Button type="submit" className="bg-brand text-ivory hover:bg-[#b05637] transition-all rounded-full py-6 px-8 group self-end ml-auto">
-                                <span className="font-medium text-base ml-2">{step === 0 ? "Continue" : "Create Vault"}</span>
-                                <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                            <Button type="submit" disabled={loading} className="bg-brand text-ivory hover:bg-[#b05637] transition-all rounded-full py-6 px-8 group self-end ml-auto">
+                                <span className="font-medium text-base ml-2">{loading ? "Wait..." : (step === 0 ? "Continue" : "Create Vault")}</span>
+                                {!loading && <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />}
                             </Button>
                         </div>
                     </form>

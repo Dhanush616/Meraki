@@ -21,7 +21,7 @@ export function Navbar() {
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-olive-gray">
           <Link href="/#how-it-works" className="hover:text-brand transition-colors">How it Works</Link>
           <Link href="/#features" className="hover:text-brand transition-colors">Features</Link>
-          <Link href="/#pricing" className="hover:text-brand transition-colors">Pricing</Link>
+          <Link href="/#faq" className="hover:text-brand transition-colors">FAQ</Link>
         </nav>
         <div className="flex items-center space-x-2">
           <Link href="/auth/signin">
