@@ -41,15 +41,17 @@ export async function proxy(request: NextRequest) {
   const isAuthRoute = AUTH_ROUTES.some(r => request.nextUrl.pathname.startsWith(r))
 
   if (isProtected && !session) {
-    const url = request.nextUrl.clone()
-    url.pathname = "/auth/signin"
-    return NextResponse.redirect(url)
+    // Disabled next.js server-side protection because we are using localStorage + FastAPI 
+    // const url = request.nextUrl.clone()
+    // url.pathname = "/auth/signin"
+    // return NextResponse.redirect(url)
   }
 
   if (isAuthRoute && session) {
-    const url = request.nextUrl.clone()
-    url.pathname = "/dashboard"
-    return NextResponse.redirect(url)
+    // Disabled for same reason
+    // const url = request.nextUrl.clone()
+    // url.pathname = "/dashboard"
+    // return NextResponse.redirect(url)
   }
 
   return supabaseResponse

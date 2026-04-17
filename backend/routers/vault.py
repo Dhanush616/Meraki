@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from typing import Dict, Any
 from core.supabase import get_supabase_client
-from routers.assets import get_current_user_id
+from core.security import get_current_user_id
 
 router = APIRouter()
 
