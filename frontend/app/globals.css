@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 60 40% 95%;
+        /* parchment #f5f4ed */
+        --foreground: 60 5% 8%;
+        /* near black #141413 */
+
+        --card: 50 33% 97%;
+        /* ivory #faf9f5 */
+        --card-foreground: 60 5% 8%;
+
+        --popover: 60 40% 95%;
+        --popover-foreground: 60 5% 8%;
+
+        --primary: 15 54% 52%;
+        /* brand #c96442 */
+        --primary-foreground: 50 33% 97%;
+        /* ivory #faf9f5 */
+
+        --secondary: 47 18% 88%;
+        /* warm sand #e8e6dc */
+        --secondary-foreground: 50 4% 29%;
+        /* charcoal warm #4d4c48 */
+
+        --muted: 47 18% 88%;
+        --muted-foreground: 50 4% 29%;
+
+        --accent: 15 62% 60%;
+        /* coral accent #d97757 */
+        --accent-foreground: 50 33% 97%;
+
+        --destructive: 0 56% 45%;
+        /* error #b53333 */
+        --destructive-foreground: 50 33% 97%;
+
+        --border: 45 28% 92%;
+        /* border cream #f0eee6 */
+        --input: 45 28% 92%;
+        --ring: 208 81% 57%;
+        /* focus blue #3898ec */
+
+        --radius: 0.5rem;
+    }
+
+    .dark {
+        --background: 60 5% 8%;
+        /* near black #141413 */
+        --foreground: 50 33% 97%;
+        /* ivory */
+
+        --card: 60 3% 18%;
+        /* dark surface #30302e */
+        --card-foreground: 50 33% 97%;
+
+        --popover: 60 3% 18%;
+        --popover-foreground: 50 33% 97%;
+
+        --primary: 15 54% 52%;
+        --primary-foreground: 50 33% 97%;
+
+        --secondary: 47 18% 88%;
+        --secondary-foreground: 50 4% 29%;
+
+        --muted: 60 3% 18%;
+        --muted-foreground: 60 10% 67%;
+        /* warm silver #b0aea5 */
+
+        --accent: 15 62% 60%;
+        --accent-foreground: 50 33% 97%;
+
+        --destructive: 0 56% 45%;
+        --destructive-foreground: 50 33% 97%;
+
+        --border: 60 3% 18%;
+        /* dark surface */
+        --input: 60 3% 18%;
+        --ring: 208 81% 57%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+}
