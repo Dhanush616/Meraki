@@ -4,73 +4,64 @@
 
 @layer base {
     :root {
-        --background: 40 20% 97%;
-        /* Warm Cream #faf9f7 */
-        --foreground: 0 0% 0%;
-        /* Clay Black #000000 */
+        --background: 0 0% 100%; /* Pure White */
+        --foreground: 0 0% 0%; /* Pure Black */
 
-        --card: 0 0% 100%;
-        /* Pure White #ffffff */
-        --card-foreground: 0 0% 0%;
+        --card: 0 0% 100%; /* Pure White */
+        --card-foreground: 0 0% 0%; /* Pure Black */
 
-        --popover: 40 20% 97%;
+        --popover: 0 0% 100%;
         --popover-foreground: 0 0% 0%;
 
-        --primary: 15 54% 52%;
-        /* brand #c96442 */
-        --primary-foreground: 0 0% 100%;
+        --primary: 0 0% 0%; /* Black Pill Buttons */
+        --primary-foreground: 0 0% 100%; /* White Text */
 
-        --secondary: 38 14% 82%;
-        /* Oat Border #dad4c8 */
-        --secondary-foreground: 40 4% 32%;
-        /* Warm Charcoal #55534e */
+        --secondary: 0 0% 90%; /* Light Gray #e5e5e5 */
+        --secondary-foreground: 0 0% 15%; /* Near Black #262626 */
 
-        --muted: 38 14% 82%;
-        --muted-foreground: 40 5% 60%;
-        /* Warm Silver #9f9b93 */
+        --muted: 0 0% 98%; /* Snow #fafafa */
+        --muted-foreground: 0 0% 45%; /* Stone #737373 */
 
-        --accent: 15 62% 60%;
-        --accent-foreground: 0 0% 100%;
+        --accent: 0 0% 90%;
+        --accent-foreground: 0 0% 0%;
 
-        --destructive: 0 56% 45%;
+        --destructive: 0 84% 60%;
         --destructive-foreground: 0 0% 100%;
 
-        --border: 38 14% 82%;
-        /* Oat Border #dad4c8 */
-        --input: 38 14% 82%;
-        --ring: 215 85% 51%;
-        /* Focus blue rgb(20,110,245) */
+        --border: 0 0% 90%; /* Light Gray #e5e5e5 */
+        --input: 0 0% 90%; /* Light Gray #e5e5e5 */
+        --ring: 215 85% 51%; /* Focus blue rgb(20,110,245) - the only color allowed */
 
-        --radius: 0.5rem;
+        --radius: 0.75rem; /* 12px for containers, buttons should manually use rounded-full */
     }
 
     .dark {
-        --background: 0 0% 0%;
-        --foreground: 0 0% 100%;
+        --background: 0 0% 4%; /* Darkest Surface */
+        --foreground: 0 0% 100%; /* Pure White */
 
-        --card: 60 3% 18%;
+        --card: 0 0% 10%; /* Near Black */
         --card-foreground: 0 0% 100%;
 
-        --popover: 60 3% 18%;
+        --popover: 0 0% 10%;
         --popover-foreground: 0 0% 100%;
 
-        --primary: 15 54% 52%;
-        --primary-foreground: 0 0% 100%;
+        --primary: 0 0% 100%; /* White Pill Buttons */
+        --primary-foreground: 0 0% 0%; /* Black Text */
 
-        --secondary: 38 14% 82%;
-        --secondary-foreground: 40 4% 32%;
+        --secondary: 0 0% 15%; /* Dark Gray */
+        --secondary-foreground: 0 0% 90%; /* Light Gray */
 
-        --muted: 60 3% 18%;
-        --muted-foreground: 40 5% 60%;
+        --muted: 0 0% 10%;
+        --muted-foreground: 0 0% 64%; /* Silver */
 
-        --accent: 15 62% 60%;
+        --accent: 0 0% 15%;
         --accent-foreground: 0 0% 100%;
 
-        --destructive: 0 56% 45%;
+        --destructive: 0 62% 30%;
         --destructive-foreground: 0 0% 100%;
 
-        --border: 60 3% 18%;
-        --input: 60 3% 18%;
+        --border: 0 0% 15%; /* Dark Border */
+        --input: 0 0% 15%;
         --ring: 215 85% 51%;
     }
 }
@@ -81,6 +72,6 @@
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground font-sans;
     }
 }
