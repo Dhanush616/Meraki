@@ -1,0 +1,96 @@
+"use client";
+import Link from "next/link";
+import { ShieldCheckIcon, CalendarIcon, ArrowRightIcon } from "lucide-react";
+import { addDays, format, parseISO, isValid } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface LevelInfo {
+    label: string;
+    badgeClass: string;
+    iconClass: string;
+}
+
+const LEVEL_INFO: Record<string, LevelInfo> = {
+    level_0_normal:             { label: "All Clear",          badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",  iconClass: "text-emerald-500" },
+    level_1_concern:            { label: "Concern",            badgeClass: "bg-amber-50 text-amber-700 border-amber-200",        iconClass: "text-amber-500" },
+    level_2_alert:              { label: "Alert",              badgeClass: "bg-amber-50 text-amber-700 border-amber-200",        iconClass: "text-amber-500" },
+    level_3_suspected_death:    { label: "Suspected Death",    badgeClass: "bg-rose-50 text-rose-700 border-rose-200",           iconClass: "text-rose-500" },
+    level_4_death_claimed:      { label: "Death Claimed",      badgeClass: "bg-rose-50 text-rose-700 border-rose-200",           iconClass: "text-rose-500" },
+    level_5_executed:           { label: "Vault Executed",     badgeClass: "bg-gray-100 text-gray-700 border-gray-200",          iconClass: "text-gray-500" },
+};
+
+function formatDate(iso: string | null): string {
+    if (!iso) return "Never";
+    try {
+        const d = parseISO(iso);
+        return isValid(d) ? format(d, "d MMM yyyy") : "—";
+    } catch {
+        return "—";
+    }
+}
+
+function nextCheckInDate(lastCheckIn: string | null, frequencyDays: number): string {
+    if (!lastCheckIn) return "—";
+    try {
+        const base = parseISO(lastCheckIn);
+        if (!isValid(base)) return "—";
+        return format(addDays(base, frequencyDays), "d MMM yyyy");
+    } catch {
+        return "—";
+    }
+}
+
+interface Props {
+    level: string;
+    lastCheckIn: string | null;
+    checkInFrequencyDays: number;
+    isLoading: boolean;
+}
+
+export function EscalationStatus({ level, lastCheckIn, checkInFrequencyDays, isLoading }: Props) {
+    const info = LEVEL_INFO[level] ?? LEVEL_INFO.level_0_normal;
+
+    return (
+        <div className="bg-ivory rounded-2xl p-6 border border-oat-border shadow-sm">
+            <h3 className="text-sm font-medium uppercase tracking-wider text-olive-gray flex items-center gap-2 mb-5">
+                <ShieldCheckIcon className={`w-4 h-4 ${info.iconClass}`} /> Escalation Status
+            </h3>
+
+            {isLoading ? (
+                <div className="space-y-3">
+                    <Skeleton className="h-14 rounded-xl" />
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-4 w-40" />
+                </div>
+            ) : (
+                <>
+                    <div className={`flex items-center justify-between p-4 rounded-xl border mb-4 ${info.badgeClass}`}>
+                        <div>
+                            <p className="text-xs opacity-70 uppercase tracking-wider font-semibold mb-1">Current State</p>
+                            <p className="text-lg font-serif font-bold">{info.label}</p>
+                        </div>
+                        <ShieldCheckIcon className={`w-8 h-8 opacity-40`} />
+                    </div>
+
+                    <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2 text-near-black">
+                            <CalendarIcon className="w-4 h-4 text-olive-gray shrink-0" />
+                            <span>Last check-in: <strong className="font-medium">{formatDate(lastCheckIn)}</strong></span>
+                        </div>
+                        <div className="flex items-center gap-2 text-near-black">
+                            <CalendarIcon className="w-4 h-4 text-olive-gray shrink-0" />
+                            <span>Next check-in: <strong className="font-medium">{nextCheckInDate(lastCheckIn, checkInFrequencyDays)}</strong></span>
+                        </div>
+                    </div>
+
+                    <Link
+                        href="/dashboard/escalation"
+                        className="mt-5 flex items-center gap-1 text-xs text-brand font-medium hover:underline"
+                    >
+                        Configure monitoring <ArrowRightIcon className="w-3 h-3" />
+                    </Link>
+                </>
+            )}
+        </div>
+    );
+}
