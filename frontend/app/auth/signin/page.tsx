@@ -1,13 +1,46 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function SignInPage() {
+    const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null);
+        setLoading(true);
+
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const response = await fetch(`${apiUrl}/api/auth/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || "Failed to sign in");
+            }
+
+            console.log("Login successful", data);
+            // Redirect to dashboard on success
+            router.push("/dashboard");
+        } catch (err: any) {
+            setError(err.message || "An unexpected error occurred");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-parchment flex items-center justify-center p-4">
@@ -29,7 +62,12 @@ export default function SignInPage() {
                 </div>
 
                 <div className="bg-ivory rounded-2xl p-8 border border-border-cream shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
-                    <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+                    {error && (
+                        <div className="p-3 mb-6 rounded-lg bg-red-50 text-red-600 text-sm font-sans border border-red-100">
+                            {error}
+                        </div>
+                    )}
+                    <form className="space-y-5" onSubmit={handleLogin}>
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-near-black font-sans">Email address</label>
                             <input
@@ -56,9 +94,9 @@ export default function SignInPage() {
                             />
                         </div>
 
-                        <Button type="submit" className="w-full bg-brand text-ivory hover:bg-[#b05637] transition-all rounded-lg py-6 mt-4 group">
-                            <span className="font-medium text-base">Sign In</span>
-                            <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                        <Button type="submit" disabled={loading} className="w-full bg-brand text-ivory hover:bg-[#b05637] transition-all rounded-lg py-6 mt-4 group">
+                            <span className="font-medium text-base">{loading ? "Signing in..." : "Sign In"}</span>
+                            {!loading && <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />}
                         </Button>
                     </form>
                 </div>

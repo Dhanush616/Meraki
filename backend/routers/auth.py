@@ -33,7 +33,7 @@ async def signup(credentials: SignupRequest):
         response = await client.post(
             f"{settings.SUPABASE_URL}/auth/v1/signup",
             headers={
-                "apikey": settings.SUPABASE_KEY,
+                "apikey": settings.SUPABASE_SERVICE_ROLE_KEY,
                 "Content-Type": "application/json"
             },
             json={
@@ -69,7 +69,7 @@ async def login(credentials: LoginRequest):
         response = await client.post(
             f"{settings.SUPABASE_URL}/auth/v1/token?grant_type=password",
             headers={
-                "apikey": settings.SUPABASE_KEY,
+                "apikey": settings.SUPABASE_SERVICE_ROLE_KEY,
                 "Content-Type": "application/json"
             },
             json={
@@ -107,7 +107,7 @@ async def logout(access_token: str):
         await client.post(
             f"{settings.SUPABASE_URL}/auth/v1/logout",
             headers={
-                "apikey": settings.SUPABASE_KEY,
+                "apikey": settings.SUPABASE_SERVICE_ROLE_KEY,
                 "Authorization": f"Bearer {access_token}"
             }
         )
