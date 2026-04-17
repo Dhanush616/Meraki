@@ -56,16 +56,16 @@ function FAQItem({
     return (
         <motion.div
             variants={fadeUp}
-            className="border-b border-oat-border last:border-0"
+            className="border-b border-[#e5e5e5] last:border-0"
         >
             <button
                 onClick={onClick}
                 className="w-full flex items-start justify-between gap-6 py-7 text-left group"
             >
-                <span className="font-serif text-xl text-near-black group-hover:text-brand transition-colors leading-snug">
+                <span className="font-sans text-xl text-black group-hover:text-black transition-colors leading-snug">
                     {q}
                 </span>
-                <span className="shrink-0 mt-1 w-6 h-6 rounded-full border border-oat-border flex items-center justify-center text-olive-gray group-hover:border-brand group-hover:text-brand transition-all">
+                <span className="shrink-0 mt-1 w-6 h-6 rounded-full border border-[#e5e5e5] flex items-center justify-center text-[#737373] group-hover:border-brand group-hover:text-black transition-all">
                     {isOpen ? <MinusIcon className="w-3.5 h-3.5" /> : <PlusIcon className="w-3.5 h-3.5" />}
                 </span>
             </button>
@@ -79,7 +79,7 @@ function FAQItem({
                         transition={{ duration: 0.35, ease: "easeInOut" }}
                         className="overflow-hidden"
                     >
-                        <p className="pb-7 font-sans text-warm-charcoal leading-relaxed text-[15px] max-w-2xl">
+                        <p className="pb-7 font-sans text-[#525252] leading-relaxed text-[15px] max-w-2xl">
                             {a}
                         </p>
                     </motion.div>
@@ -93,7 +93,7 @@ export default function LandingPage() {
     const [openFAQ, setOpenFAQ] = useState<number | null>(null);
 
     return (
-        <main className="min-h-screen bg-parchment w-full">
+        <main className="min-h-screen bg-white w-full">
 
             {/* Hero */}
             <section className="w-full relative z-20">
@@ -101,7 +101,7 @@ export default function LandingPage() {
             </section>
 
             {/* Stats Bar */}
-            <section className="bg-ivory border-t border-b border-oat-border py-16 relative z-10">
+            <section className="bg-[#fafafa] border-t border-b border-[#e5e5e5] py-12 relative z-10">
                 <motion.div
                     className="max-w-[1200px] mx-auto px-4 flex flex-col md:flex-row gap-8 justify-between text-center divide-y md:divide-y-0 md:divide-x divide-oat-border"
                     initial="hidden"
@@ -115,33 +115,33 @@ export default function LandingPage() {
                         { value: "6–18 Months", label: "average time families\nspend navigating claims" },
                     ].map((stat, i) => (
                         <motion.div key={i} variants={fadeUp} className="flex-1 pt-6 md:pt-0">
-                            <h3 className="text-4xl font-serif text-brand mb-2 font-medium">{stat.value}</h3>
-                            <p className="font-sans text-olive-gray text-base leading-relaxed whitespace-pre-line">{stat.label}</p>
+                            <h3 className="text-4xl font-sans text-black mb-2 font-medium">{stat.value}</h3>
+                            <p className="font-sans text-[#737373] text-base leading-relaxed whitespace-pre-line">{stat.label}</p>
                         </motion.div>
                     ))}
                 </motion.div>
-                <p className="text-center mt-12 text-sm text-stone-gray font-sans">
+                <p className="text-center mt-12 text-sm text-[#a3a3a3] font-sans">
                     Statistics sourced from RBI, Outlook Money, and Chainalysis reports.
                 </p>
             </section>
 
             {/* Problem Section */}
             <section className="relative">
-                <DottedSurface size={24} dotColor="rgba(94, 93, 89, 0.08)">
-                    <div className="py-32 px-4 max-w-[1200px] mx-auto relative z-10 w-full">
+                <div className="bg-white">
+                    <div className="py-12 px-4 max-w-[1200px] mx-auto relative z-10 w-full">
                         <motion.div
                             className="text-center mb-16"
                             initial="hidden" whileInView="show" viewport={{ once: true }}
                             variants={fadeUp}
                         >
-                            <span className="text-sm font-sans tracking-widest uppercase text-olive-gray mb-4 block font-medium">
+                            <span className="text-sm font-sans tracking-widest uppercase text-[#737373] mb-4 block font-medium">
                                 The Problem
                             </span>
-                            <h2 className="text-[48px] font-serif text-near-black leading-[1.10] font-medium mb-6">
-                                Your family loves you.<br />But they don't know what you own.
+                            <h2 className="text-4xl md:text-5xl font-sans text-black leading-[1.10] font-medium mb-6">
+                                Secure your digital and physical assets.<br />Ensure smooth transfer when it matters.
                             </h2>
-                            <p className="text-lg font-sans text-olive-gray max-w-2xl mx-auto leading-relaxed">
-                                When someone passes away in India, their family faces three crises at once — a paperwork nightmare during the worst week of their lives.
+                            <p className="text-lg font-sans text-[#737373] max-w-2xl mx-auto leading-relaxed">
+                                The modern portfolio is fragmented across institutions, wallets, and accounts. We organize, secure, and legally route your life's work without friction.
                             </p>
                         </motion.div>
 
@@ -153,19 +153,19 @@ export default function LandingPage() {
                             {[
                                 {
                                     title: "The Discovery Problem",
-                                    icon: <SearchIcon className="w-8 h-8 text-brand mb-6" />,
+                                    icon: <SearchIcon className="w-8 h-8 text-black mb-6" />,
                                     desc: "Your family doesn't know what bank accounts exist, which insurance policies are active, or whether you have any crypto. Assets worth crores disappear simply because no one knew to look.",
                                     stat: "₹1.5 lakh crore unclaimed in Indian banks",
                                 },
                                 {
                                     title: "The Crypto Black Hole",
-                                    icon: <LockIcon className="w-8 h-8 text-brand mb-6" />,
+                                    icon: <LockIcon className="w-8 h-8 text-black mb-6" />,
                                     desc: "When a crypto investor dies, their private key dies with them. No court order, no lawyer, no amount of grief can recover a wallet without its key. The money is mathematically gone.",
                                     stat: "3.7 million BTC lost to inaccessible wallets",
                                 },
                                 {
                                     title: "The Paperwork Nightmare",
-                                    icon: <FileTextIcon className="w-8 h-8 text-brand mb-6" />,
+                                    icon: <FileTextIcon className="w-8 h-8 text-black mb-6" />,
                                     desc: "A death certificate alone unlocks almost nothing. Banks need a succession certificate. Property needs mutation. Each institution has different forms, different offices, different waiting periods.",
                                     stat: "6–18 months of bureaucratic delays",
                                 },
@@ -175,33 +175,33 @@ export default function LandingPage() {
                                     variants={fadeUp}
                                     whileHover={{ y: -4 }}
                                     transition={{ duration: 0.2 }}
-                                    className="bg-ivory rounded-2xl p-10 border border-oat-border shadow-[0_1px_1px_rgba(0,0,0,0.05),0_-1px_1px_rgba(0,0,0,0.02)_inset] group cursor-default"
+                                    className="bg-[#fafafa] rounded-xl p-10 border border-[#e5e5e5] shadow-none group cursor-default"
                                 >
                                     {item.icon}
-                                    <h3 className="font-serif text-2xl font-medium text-near-black mb-4">{item.title}</h3>
-                                    <p className="font-sans text-olive-gray leading-[1.70] mb-8 min-h-[120px]">{item.desc}</p>
-                                    <div className="font-sans text-sm font-medium text-brand bg-brand/10 px-3 py-1.5 rounded-full inline-block">
+                                    <h3 className="font-sans text-2xl font-medium text-black mb-4">{item.title}</h3>
+                                    <p className="font-sans text-[#737373] leading-[1.70] mb-8 min-h-[120px]">{item.desc}</p>
+                                    <div className="font-sans text-sm font-medium text-black bg-[#e5e5e5] px-3 py-1.5 rounded-full inline-block">
                                         {item.stat}
                                     </div>
                                 </motion.div>
                             ))}
                         </motion.div>
                     </div>
-                </DottedSurface>
+                </div>
             </section>
 
             {/* Solution Section */}
-            <section id="how-it-works" className="bg-ivory py-32 px-4 shadow-[0_-1px_0_0_rgba(218,212,200,1)] relative z-10">
-                <div className="max-w-[1200px] mx-auto text-near-black">
+            <section id="how-it-works" className="bg-[#fafafa] py-12 px-4 border-t border-[#e5e5e5] relative z-10">
+                <div className="max-w-[1200px] mx-auto text-black">
                     <motion.div
-                        className="text-center mb-20"
+                        className="text-center mb-16"
                         initial="hidden" whileInView="show" viewport={{ once: true }}
                         variants={fadeUp}
                     >
-                        <span className="text-sm font-sans tracking-widest uppercase text-olive-gray mb-4 block font-medium">
+                        <span className="text-sm font-sans tracking-widest uppercase text-[#737373] mb-4 block font-medium">
                             The Solution
                         </span>
-                        <h2 className="text-[48px] font-serif leading-[1.10] font-medium mb-6">
+                        <h2 className="text-4xl md:text-5xl font-sans leading-[1.10] font-medium mb-6">
                             Paradosis bridges the gap between<br />your life's work and your family's future.
                         </h2>
                     </motion.div>
@@ -213,19 +213,19 @@ export default function LandingPage() {
                     >
                         {[
                             {
-                                icon: <ShieldIcon className="w-8 h-8 text-brand mb-6" />,
+                                icon: <ShieldIcon className="w-8 h-8 text-black mb-6" />,
                                 phase: "Phase 1 — Before",
                                 title: "Build Your Vault",
                                 desc: "Add every asset you own. Assign exactly who gets what. Record a video will in your own words. We generate a legally valid will document — ready to sign.",
                             },
                             {
-                                icon: <EyeIcon className="w-8 h-8 text-brand mb-6" />,
+                                icon: <EyeIcon className="w-8 h-8 text-black mb-6" />,
                                 phase: "Phase 2 — During",
                                 title: "We Watch Over You",
                                 desc: "We check in quarterly with a single tap. If something seems wrong, we escalate. We never act without a government-verified death certificate.",
                             },
                             {
-                                icon: <MailIcon className="w-8 h-8 text-brand mb-6" />,
+                                icon: <MailIcon className="w-8 h-8 text-black mb-6" />,
                                 phase: "Phase 3 — After",
                                 title: "Your Family Receives Everything",
                                 desc: "The moment death is verified, your crypto routes automatically. Every asset generates a pre-filled legal claim form — delivered directly to beneficiaries. No confusion.",
@@ -236,12 +236,12 @@ export default function LandingPage() {
                                 variants={fadeUp}
                                 whileHover={{ y: -4 }}
                                 transition={{ duration: 0.2 }}
-                                className="bg-parchment rounded-2xl p-8 shadow-[0_1px_1px_rgba(0,0,0,0.05),0_-1px_1px_rgba(0,0,0,0.02)_inset] border border-oat-border"
+                                className="bg-white rounded-xl p-8 shadow-none border border-[#e5e5e5]"
                             >
-                                <span className="text-xs font-sans tracking-widest uppercase text-olive-gray mb-4 block">{item.phase}</span>
+                                <span className="text-xs font-sans tracking-widest uppercase text-[#737373] mb-4 block">{item.phase}</span>
                                 {item.icon}
-                                <h3 className="font-serif text-2xl font-medium text-near-black mb-4">{item.title}</h3>
-                                <p className="font-sans text-olive-gray leading-[1.70]">{item.desc}</p>
+                                <h3 className="font-sans text-2xl font-medium text-black mb-4">{item.title}</h3>
+                                <p className="font-sans text-[#737373] leading-[1.70]">{item.desc}</p>
                             </motion.div>
                         ))}
                     </motion.div>
@@ -249,15 +249,15 @@ export default function LandingPage() {
             </section>
 
             {/* FAQ Section */}
-            <section id="faq" className="bg-parchment py-32 px-4 shadow-[0_-1px_0_0_rgba(218,212,200,1)] relative z-20">
+            <section id="faq" className="bg-white py-12 px-4 border-t border-[#e5e5e5] relative z-20">
                 <div className="max-w-[800px] mx-auto">
                     <motion.div
                         className="text-center mb-16"
                         initial="hidden" whileInView="show" viewport={{ once: true }}
                         variants={fadeUp}
                     >
-                        <span className="text-sm font-sans tracking-widest uppercase text-olive-gray mb-4 block font-medium">Your Questions</span>
-                        <h2 className="text-[48px] font-serif text-near-black leading-[1.10] font-medium">
+                        <span className="text-sm font-sans tracking-widest uppercase text-[#737373] mb-4 block font-medium">Your Questions</span>
+                        <h2 className="text-4xl md:text-5xl font-sans text-black leading-[1.10] font-medium">
                             Everything you need<br />to trust us with everything.
                         </h2>
                     </motion.div>
@@ -265,7 +265,7 @@ export default function LandingPage() {
                     <motion.div
                         initial="hidden" whileInView="show" viewport={{ once: true }}
                         variants={stagger}
-                        className="bg-ivory rounded-[24px] border border-oat-border px-10 shadow-[0_1px_1px_rgba(0,0,0,0.04),0_-1px_1px_rgba(0,0,0,0.02)_inset]"
+                        className="bg-[#fafafa] rounded-xl border border-[#e5e5e5] px-10 shadow-none"
                     >
                         {faqs.map((faq, i) => (
                             <FAQItem
@@ -282,15 +282,15 @@ export default function LandingPage() {
             </section>
 
             {/* Features Grid */}
-            <section id="features" className="bg-ivory py-32 px-4 shadow-[0_-1px_0_0_rgba(218,212,200,1)] relative z-10">
-                <div className="max-w-[1200px] mx-auto text-near-black">
+            <section id="features" className="bg-[#fafafa] py-12 px-4 border-t border-[#e5e5e5] relative z-10">
+                <div className="max-w-[1200px] mx-auto text-black">
                     <motion.div
-                        className="text-center mb-20"
+                        className="text-center mb-16"
                         initial="hidden" whileInView="show" viewport={{ once: true }}
                         variants={fadeUp}
                     >
-                        <span className="text-sm font-sans tracking-widest uppercase text-olive-gray mb-4 block font-medium">What's Inside</span>
-                        <h2 className="text-[48px] font-serif leading-[1.10] font-medium">
+                        <span className="text-sm font-sans tracking-widest uppercase text-[#737373] mb-4 block font-medium">What's Inside</span>
+                        <h2 className="text-4xl md:text-5xl font-sans leading-[1.10] font-medium">
                             Everything your family needs.<br />Nothing they'll have to figure out alone.
                         </h2>
                     </motion.div>
@@ -302,37 +302,37 @@ export default function LandingPage() {
                     >
                         {[
                             {
-                                icon: <VideoIcon className="w-5 h-5 text-brand" />,
+                                icon: <VideoIcon className="w-5 h-5 text-black" />,
                                 title: "AI Video Will",
                                 desc: "Record yourself in plain language. Paradosis transcribes it, extracts the intent, and maps it to your vault — automatically.",
                                 tag: "Powered by Gemini AI",
                             },
                             {
-                                icon: <FolderIcon className="w-5 h-5 text-brand" />,
+                                icon: <FolderIcon className="w-5 h-5 text-black" />,
                                 title: "Complete Asset Vault",
                                 desc: "Bank accounts, fixed deposits, property, insurance, mutual funds, crypto. Every asset in one place, encrypted so only you can read it.",
                                 tag: "12 Asset Types",
                             },
                             {
-                                icon: <FileWarningIcon className="w-5 h-5 text-brand" />,
+                                icon: <FileWarningIcon className="w-5 h-5 text-black" />,
                                 title: "Legal Will & Claim Forms",
                                 desc: "We generate a legally valid will. After death, we auto-fill bank claim forms, succession petitions, and insurance claim forms.",
                                 tag: "India's Legal Framework",
                             },
                             {
-                                icon: <ShieldAlertIcon className="w-5 h-5 text-brand" />,
+                                icon: <ShieldAlertIcon className="w-5 h-5 text-black" />,
                                 title: "Beneficiary Privacy",
                                 desc: "You control who knows what — and when. Each person receives only their portion, in a private portal, after death is confirmed.",
                                 tag: "Per-person controls",
                             },
                             {
-                                icon: <SettingsIcon className="w-5 h-5 text-brand" />,
+                                icon: <SettingsIcon className="w-5 h-5 text-black" />,
                                 title: "Smart Escalation",
                                 desc: "Quarterly check-ins. If you go quiet, we reach out to an emergency contact, then beneficiaries. Governed by verified death certificates.",
                                 tag: "No guardians required",
                             },
                             {
-                                icon: <GitBranchIcon className="w-5 h-5 text-brand" />,
+                                icon: <GitBranchIcon className="w-5 h-5 text-black" />,
                                 title: "Crypto Routing",
                                 desc: "Assign crypto wallets to beneficiaries beforehand. Smart contracts route assets automatically. No private key handoff needed.",
                                 tag: "Polygon Smart Contract",
@@ -341,14 +341,14 @@ export default function LandingPage() {
                             <motion.div
                                 key={i}
                                 variants={fadeUp}
-                                whileHover={{ y: -5, boxShadow: "0 8px 32px rgba(0,0,0,0.08), 0 0 0 1px rgba(218,212,200,1)" }}
+                                whileHover={{ y: -5, boxShadow: "none" }}
                                 transition={{ duration: 0.2 }}
-                                className="p-8 shadow-[0_0_0_1px_rgba(218,212,200,1)] rounded-2xl bg-parchment cursor-default"
+                                className="p-8 border border-[#e5e5e5] rounded-xl bg-white cursor-default"
                             >
-                                <div className="mb-6 bg-ivory w-12 h-12 flex items-center justify-center rounded-xl shadow-[0_0_0_1px_rgba(218,212,200,1)]">{ft.icon}</div>
-                                <h3 className="text-[22px] font-serif font-medium text-near-black mb-3">{ft.title}</h3>
-                                <p className="font-sans text-olive-gray leading-[1.70] mb-6 min-h-[88px]">{ft.desc}</p>
-                                <span className="text-[12px] font-sans font-medium text-brand bg-brand/10 px-3 py-1.5 rounded-full tracking-wide">{ft.tag}</span>
+                                <div className="mb-6 bg-[#fafafa] w-12 h-12 flex items-center justify-center rounded-xl border border-[#e5e5e5]">{ft.icon}</div>
+                                <h3 className="text-[22px] font-sans font-medium text-black mb-3">{ft.title}</h3>
+                                <p className="font-sans text-[#737373] leading-[1.70] mb-6 min-h-[88px]">{ft.desc}</p>
+                                <span className="text-[12px] font-sans font-medium text-black bg-[#e5e5e5] px-3 py-1.5 rounded-full tracking-wide">{ft.tag}</span>
                             </motion.div>
                         ))}
                     </motion.div>
@@ -356,16 +356,16 @@ export default function LandingPage() {
             </section>
 
             {/* Security Section */}
-            <section className="bg-near-black py-32 px-4">
+            <section className="bg-white py-12 px-4">
                 <div className="max-w-[1200px] mx-auto w-full text-center">
                     <motion.div
                         initial="hidden" whileInView="show" viewport={{ once: true }}
                         variants={fadeUp}
                     >
-                        <span className="text-sm font-sans tracking-widest uppercase text-warm-silver mb-4 block font-medium">
+                        <span className="text-sm font-sans tracking-widest uppercase text-[#737373] mb-4 block font-medium">
                             Your Trust is Everything
                         </span>
-                        <h2 className="text-[48px] font-serif text-ivory leading-[1.10] font-medium mb-20">
+                        <h2 className="text-4xl md:text-5xl font-sans text-black leading-[1.10] font-medium mb-16">
                             We can't read your data.<br />Even if we wanted to.
                         </h2>
                     </motion.div>
@@ -377,25 +377,25 @@ export default function LandingPage() {
                     >
                         {[
                             {
-                                icon: <ShieldCheckIcon className="w-8 h-8 text-brand mx-auto mb-6" />,
+                                icon: <ShieldCheckIcon className="w-8 h-8 text-black mx-auto mb-6" />,
                                 title: "Zero-Knowledge Encryption",
                                 desc: "Every sensitive field — account numbers, Aadhaar, PAN, wallet addresses — is encrypted in your browser before it ever reaches our servers. Only your password can unlock it.",
                             },
                             {
-                                icon: <FileTextIcon className="w-8 h-8 text-brand mx-auto mb-6" />,
+                                icon: <FileTextIcon className="w-8 h-8 text-black mx-auto mb-6" />,
                                 title: "Government-Verified Trigger",
                                 desc: "We never execute a vault on someone's word alone. A government-issued death certificate, verified against India's Civil Registration System, is the only key that unlocks a vault.",
                             },
                             {
-                                icon: <LockIcon className="w-8 h-8 text-brand mx-auto mb-6" />,
+                                icon: <LockIcon className="w-8 h-8 text-black mx-auto mb-6" />,
                                 title: "Your Data, Always Yours",
                                 desc: "Download an encrypted backup of your entire vault at any time. If Paradosis ever shuts down, your data is never held hostage. It belongs to you.",
                             },
                         ].map((item, i) => (
                             <motion.div key={i} variants={fadeUp}>
                                 {item.icon}
-                                <h3 className="text-2xl font-serif text-ivory mb-4">{item.title}</h3>
-                                <p className="text-warm-silver font-sans leading-[1.70] text-[15px]">{item.desc}</p>
+                                <h3 className="text-2xl font-sans text-black mb-4">{item.title}</h3>
+                                <p className="text-[#737373] font-sans leading-[1.70] text-[15px]">{item.desc}</p>
                             </motion.div>
                         ))}
                     </motion.div>
@@ -403,16 +403,16 @@ export default function LandingPage() {
             </section>
 
             {/* Final CTA */}
-            <section className="bg-brand py-32 px-4 relative z-20">
+            <section className="bg-black py-12 px-4 relative z-20">
                 <motion.div
                     className="max-w-[800px] mx-auto text-center"
                     initial="hidden" whileInView="show" viewport={{ once: true }}
                     variants={fadeUp}
                 >
-                    <h2 className="text-[48px] font-serif leading-[1.10] font-medium text-ivory mb-6">
+                    <h2 className="text-4xl md:text-5xl font-sans leading-[1.10] font-medium text-white mb-6">
                         Start building your vault today.
                     </h2>
-                    <p className="font-sans text-parchment/80 leading-[1.70] text-xl mb-10 max-w-[600px] mx-auto">
+                    <p className="font-sans text-[#a3a3a3] leading-[1.70] text-xl mb-10 max-w-[600px] mx-auto">
                         Join the waitlist to secure your family's future. Early access members receive free legal document generation.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -420,7 +420,7 @@ export default function LandingPage() {
                             <motion.button
                                 whileHover={{ scale: 1.03 }}
                                 whileTap={{ scale: 0.98 }}
-                                className="bg-near-black text-ivory px-8 py-4 rounded-full font-sans font-medium hover:bg-dark-surface transition-colors w-full sm:w-auto text-base h-[52px] flex items-center justify-center gap-2"
+                                className="bg-white text-black px-6 py-2.5 rounded-full font-sans font-medium hover:bg-[#e5e5e5] transition-colors w-full sm:w-auto text-base flex items-center justify-center gap-2"
                             >
                                 Get Started Free
                                 <ArrowRightIcon className="w-4 h-4" />
@@ -429,7 +429,7 @@ export default function LandingPage() {
                         <motion.button
                             whileHover={{ scale: 1.03 }}
                             whileTap={{ scale: 0.98 }}
-                            className="bg-transparent border border-parchment/30 text-ivory px-8 py-4 rounded-full font-sans font-medium hover:bg-parchment/10 transition-colors w-full sm:w-auto text-base h-[52px] flex items-center justify-center"
+                            className="bg-transparent border border-white/20 text-white px-6 py-2.5 rounded-full font-sans font-medium hover:bg-white/10 transition-colors w-full sm:w-auto text-base flex items-center justify-center"
                         >
                             View Example Vault
                         </motion.button>
