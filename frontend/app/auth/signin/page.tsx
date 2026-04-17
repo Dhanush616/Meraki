@@ -33,6 +33,12 @@ export default function SignInPage() {
             }
 
             console.log("Login successful", data);
+
+            // Store the token in localStorage for authenticated requests
+            if (data.access_token) {
+                localStorage.setItem("paradosis_access_token", data.access_token);
+            }
+
             // Redirect to dashboard on success
             router.push("/dashboard");
         } catch (err: any) {

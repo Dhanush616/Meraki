@@ -4,6 +4,7 @@ from typing import Optional, List, Dict, Any
 from uuid import UUID
 from datetime import datetime
 from core.supabase import get_supabase_client
+from core.security import get_current_user_id
 
 router = APIRouter()
 
@@ -35,12 +36,6 @@ class AssetResponse(AssetBase):
     owner_id: UUID
     created_at: datetime
     updated_at: datetime
-
-# Mock dependency for getting the current authenticated user's ID
-# In reality, this would decode the JWT from the Authorization header
-def get_current_user_id():
-    # Replace this with actual JWT decoding logic
-    return "b6f12bd2-55af-4b8c-8ab5-336e1c66708c" 
 
 @router.get("", response_model=List[AssetResponse])
 async def list_assets(user_id: str = Depends(get_current_user_id)):
