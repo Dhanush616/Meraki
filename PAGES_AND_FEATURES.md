@@ -1,4 +1,4 @@
-# [APP_NAME] — PAGES & FEATURES SPECIFICATION
+# Paradosis — PAGES & FEATURES SPECIFICATION
 > Every page: purpose, components, state, API calls, backend endpoints
 
 ---

@@ -1,4 +1,4 @@
-# [APP_NAME] — FOLDER STRUCTURE
+# Paradosis — FOLDER STRUCTURE
 
 ---
 

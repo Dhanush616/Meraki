@@ -1,4 +1,4 @@
-# [APP_NAME] — DEVELOPMENT PLAN
+# Paradosis — DEVELOPMENT PLAN
 > Last updated: April 2026  
 > Stack: Next.js 14 · FastAPI · Supabase · Gemini AI · Polygon (simulated)  
 > Target: 36-hour hackathon prototype → production-ready roadmap
