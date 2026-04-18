@@ -12,11 +12,21 @@ export default function SignInPage() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [loginType, setLoginType] = useState<"owner" | "guardian">("owner");
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         setLoading(true);
+
+        if (loginType === "guardian") {
+            // Mock guardian login
+            setTimeout(() => {
+                setLoading(false);
+                router.push("/guardian/portal");
+            }, 800);
+            return;
+        }
 
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -68,6 +78,24 @@ export default function SignInPage() {
                 </div>
 
                 <div className="bg-ivory rounded-2xl p-8 border border-border-cream shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
+                    
+                    <div className="flex p-1 bg-parchment rounded-lg mb-6 border border-border-cream">
+                        <button
+                            type="button"
+                            onClick={() => setLoginType("owner")}
+                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${loginType === "owner" ? "bg-white text-near-black shadow-sm" : "text-olive-gray hover:text-near-black"}`}
+                        >
+                            Vault Owner
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setLoginType("guardian")}
+                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${loginType === "guardian" ? "bg-white text-near-black shadow-sm" : "text-olive-gray hover:text-near-black"}`}
+                        >
+                            Guardian
+                        </button>
+                    </div>
+
                     {error && (
                         <div className="p-3 mb-6 rounded-lg bg-red-50 text-red-600 text-sm font-sans border border-red-100">
                             {error}
@@ -85,20 +113,23 @@ export default function SignInPage() {
                                 required
                             />
                         </div>
-                        <div className="space-y-2">
-                            <div className="flex justify-between">
-                                <label className="text-sm font-medium text-near-black font-sans">Password</label>
-                                <Link href="#" className="text-sm text-brand hover:underline font-sans">Forgot password?</Link>
+                        
+                        {loginType === "owner" && (
+                            <div className="space-y-2">
+                                <div className="flex justify-between">
+                                    <label className="text-sm font-medium text-near-black font-sans">Password</label>
+                                    <Link href="#" className="text-sm text-brand hover:underline font-sans">Forgot password?</Link>
+                                </div>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full bg-parchment border border-border-cream rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/40 transition-all font-sans text-near-black"
+                                    placeholder="••••••••"
+                                    required
+                                />
                             </div>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-parchment border border-border-cream rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/40 transition-all font-sans text-near-black"
-                                placeholder="••••••••"
-                                required
-                            />
-                        </div>
+                        )}
 
                         <Button type="submit" disabled={loading} className="w-full bg-brand text-ivory hover:bg-[#b05637] transition-all rounded-lg py-6 mt-4 group">
                             <span className="font-medium text-base">{loading ? "Signing in..." : "Sign In"}</span>
