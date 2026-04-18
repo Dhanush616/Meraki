@@ -30,6 +30,8 @@ SIGNED_URL_EXPIRY = 3600  # 60 min
 class WillGenerateRequest(BaseModel):
     executor_name: Optional[str] = ""
     special_instructions: Optional[str] = ""
+    witness_1_name: Optional[str] = ""
+    witness_2_name: Optional[str] = ""
 
 
 class SigningStatusRequest(BaseModel):
@@ -45,8 +47,9 @@ class SigningStatusRequest(BaseModel):
 def _get_or_create_signed_url(supabase, storage_path: str) -> str:
     """Get a fresh signed URL for a file in Supabase Storage."""
     try:
+        if not storage_path: return ""
         result = supabase.storage.from_(BUCKET).create_signed_url(
-            storage_path, SIGNED_URL_EXPIRY
+            storage_path, SIGNED_URL_EXPIRY, {"download": False}
         )
         return result.get("signedURL") or result.get("signedUrl") or ""
     except Exception as exc:
@@ -178,6 +181,8 @@ async def generate_will(
             beneficiaries=beneficiaries,
             executor_name=body.executor_name or "",
             special_instructions=body.special_instructions or "",
+            witness_1_name=body.witness_1_name or "",
+            witness_2_name=body.witness_2_name or "",
         )
     except Exception as exc:
         logger.error(f"Will PDF generation failed: {exc}", exc_info=True)
@@ -222,6 +227,8 @@ async def generate_will(
         "is_printed":           False,
         "executor_name":        body.executor_name or "",
         "special_instructions": body.special_instructions or "",
+        "witness_1_name":       body.witness_1_name or "",
+        "witness_2_name":       body.witness_2_name or "",
         "trigger_event":        "manual_generate",
         "created_at":           datetime.now(timezone.utc).isoformat(),
     }

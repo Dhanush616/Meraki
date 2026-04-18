@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import {
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose,
 } from "@/components/ui/dialog";
-
 // ── Types ────────────────────────────────────────────────────────────────────
 
 interface WillDocument {
@@ -68,130 +67,6 @@ function triggerLabel(event?: string) {
     return event ? (map[event] ?? event.replace(/_/g, " ")) : "Generated";
 }
 
-// ── Will Preview ──────────────────────────────────────────────────────────────
-
-interface WillData {
-    testatorName: string;
-    address: string;
-    religion: string;
-    executorName: string;
-    specialInstructions: string;
-    generatedDate: string;
-    version: number;
-}
-
-function WillPreview({ data }: { data: WillData }) {
-    const today = data.generatedDate
-        ? fmtDate(data.generatedDate)
-        : new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
-
-    return (
-        <div className="bg-white text-[#1a1a1a] rounded-xl border border-border shadow-sm font-serif overflow-hidden">
-            <div className="bg-[#c4622d] px-8 py-5 text-center">
-                <p className="text-white/80 text-xs font-sans tracking-widest uppercase mb-1">Legal Document</p>
-                <h2 className="text-white text-xl font-bold tracking-wide">LAST WILL AND TESTAMENT</h2>
-                <p className="text-white/90 text-sm mt-1 font-sans">of {data.testatorName || "[Your Name]"}</p>
-            </div>
-
-            <div className="px-8 py-6 space-y-6 text-sm leading-relaxed">
-                <section>
-                    <h3 className="font-sans text-xs font-bold text-[#c4622d] uppercase tracking-wider mb-2 pb-1 border-b border-[#e5e7eb]">
-                        I. Declaration
-                    </h3>
-                    <p>
-                        I, <strong>{data.testatorName || "[Name]"}</strong>, residing at{" "}
-                        <strong>{data.address || "[Address]"}</strong>, of{" "}
-                        <strong>{data.religion || "[Religion]"}</strong> faith, being of sound and
-                        disposing mind and memory, do hereby make, publish and declare this to be my
-                        Last Will and Testament, revoking all former wills and codicils previously
-                        made by me. This document is executed on <strong>{today}</strong>.
-                    </p>
-                </section>
-
-                <section>
-                    <h3 className="font-sans text-xs font-bold text-[#c4622d] uppercase tracking-wider mb-2 pb-1 border-b border-[#e5e7eb]">
-                        II. Asset Distribution
-                    </h3>
-                    <p className="mb-3 text-[#6b7280] text-xs">
-                        Upon my death, my assets shall be distributed to the beneficiaries in the proportions set
-                        out in the generated PDF. All mappings are sourced from Paradosis Vault at the time of generation.
-                    </p>
-                    <div className="border border-[#e5e7eb] rounded overflow-hidden">
-                        <table className="w-full text-xs font-sans">
-                            <thead>
-                                <tr className="bg-[#f3f4f6]">
-                                    <th className="text-left px-3 py-2 font-semibold text-[#374151]">Asset</th>
-                                    <th className="text-left px-3 py-2 font-semibold text-[#374151]">Type</th>
-                                    <th className="text-left px-3 py-2 font-semibold text-[#374151]">Beneficiary</th>
-                                    <th className="text-left px-3 py-2 font-semibold text-[#374151]">Share %</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr className="border-t border-[#e5e7eb]">
-                                    <td colSpan={4} className="text-center px-3 py-4 text-[#9ca3af] italic">
-                                        Asset distribution details are included in the generated PDF
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <section>
-                    <h3 className="font-sans text-xs font-bold text-[#c4622d] uppercase tracking-wider mb-2 pb-1 border-b border-[#e5e7eb]">
-                        III. Special Instructions
-                    </h3>
-                    <p className="italic text-[#374151]">
-                        {data.specialInstructions?.trim() || "No special instructions have been recorded at this time."}
-                    </p>
-                </section>
-
-                <section>
-                    <h3 className="font-sans text-xs font-bold text-[#c4622d] uppercase tracking-wider mb-2 pb-1 border-b border-[#e5e7eb]">
-                        IV. Executor Appointment
-                    </h3>
-                    <p>
-                        I hereby nominate and appoint{" "}
-                        <strong>{data.executorName?.trim() || "[Executor name not yet nominated]"}</strong> as
-                        the Executor of this Will. If the named Executor is unable or unwilling to serve, I
-                        request the court to appoint a suitable replacement.
-                    </p>
-                </section>
-
-                <section>
-                    <h3 className="font-sans text-xs font-bold text-[#c4622d] uppercase tracking-wider mb-3 pb-1 border-b border-[#e5e7eb]">
-                        V. Witness Signatures
-                    </h3>
-                    <div className="grid grid-cols-2 gap-8 mt-4">
-                        {[1, 2].map((n) => (
-                            <div key={n} className="space-y-3">
-                                <p className="font-sans text-[10px] font-semibold text-[#9ca3af] uppercase">Witness {n}</p>
-                                <div className="border-b border-[#1a1a1a] h-10" />
-                                <p className="font-sans text-[10px] text-[#6b7280]">Signature</p>
-                                <div className="border-b border-[#d1d5db] pt-2">
-                                    <p className="font-sans text-[10px] text-[#6b7280]">Print Name: _________________</p>
-                                </div>
-                                <div className="border-b border-[#d1d5db] pt-2">
-                                    <p className="font-sans text-[10px] text-[#6b7280]">Date: _______________________</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
-                <div className="border-t border-[#e5e7eb] pt-4">
-                    <p className="text-[10px] text-[#9ca3af] italic font-sans leading-relaxed text-center">
-                        This document constitutes the Last Will and Testament of {data.testatorName || "[Name]"}.
-                        It was generated by Paradosis Vault and must be executed, witnessed, and stored in accordance
-                        with applicable laws. This document requires original signatures to be legally valid.
-                        Document version {data.version}, generated on {today}.
-                    </p>
-                </div>
-            </div>
-        </div>
-    );
-}
-
 // ── Generate Modal ────────────────────────────────────────────────────────────
 
 function GenerateModal({
@@ -207,15 +82,23 @@ function GenerateModal({
     onClose: () => void;
     onGenerated: (will: WillDocument) => void;
 }) {
+    const [step, setStep] = useState(1);
     const [executorName, setExecutorName] = useState(defaultExecutor ?? "");
     const [specialInstructions, setSpecialInstructions] = useState(defaultInstructions ?? "");
+    const [witness1Name, setWitness1Name] = useState("");
+    const [witness2Name, setWitness2Name] = useState("");
+    const [isSoundMind, setIsSoundMind] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (open) {
+            setStep(1);
             setExecutorName(defaultExecutor ?? "");
             setSpecialInstructions(defaultInstructions ?? "");
+            setWitness1Name("");
+            setWitness2Name("");
+            setIsSoundMind(false);
             setError(null);
         }
     }, [open, defaultExecutor, defaultInstructions]);
@@ -227,7 +110,12 @@ function GenerateModal({
             const res = await fetch(`${apiUrl()}/api/documents/will/generate`, {
                 method: "POST",
                 headers: authHeaders(),
-                body: JSON.stringify({ executor_name: executorName, special_instructions: specialInstructions }),
+                body: JSON.stringify({
+                    executor_name: executorName,
+                    special_instructions: specialInstructions,
+                    witness_1_name: witness1Name,
+                    witness_2_name: witness2Name
+                }),
             });
             if (!res.ok) {
                 const e = await res.json();
@@ -241,75 +129,147 @@ function GenerateModal({
             onClose();
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Unknown error");
+            setStep(1); // Go back if error
         } finally {
             setIsGenerating(false);
         }
     };
 
+    const canProceedToStep2 = executorName.trim() !== "" && witness1Name.trim() !== "" && witness2Name.trim() !== "" && isSoundMind;
+
     return (
         <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-            <DialogContent className="max-w-lg">
-                <DialogHeader>
+            <DialogContent className="max-w-lg h-[90vh] flex flex-col md:h-auto md:max-h-[85vh] overflow-hidden">
+                <DialogHeader className="shrink-0">
                     <DialogTitle className="flex items-center gap-2">
                         <ScrollTextIcon className="w-5 h-5 text-primary" />
                         Generate Will Document
                     </DialogTitle>
                     <DialogDescription>
-                        A new PDF will be generated based on your current vault and beneficiary data.
+                        {step === 1 ? "Provide mandatory details required for a valid Will in India." : "Review and confirm your vault configuration."}
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 py-2">
-                    <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-foreground">Executor Name</label>
-                        <input
-                            value={executorName}
-                            onChange={(e) => setExecutorName(e.target.value)}
-                            placeholder="Full name of your nominated executor"
-                            className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring transition-all"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                            The person you appoint to carry out the instructions of your will.
-                        </p>
-                    </div>
+                <div className="flex-1 overflow-y-auto py-2 space-y-4 pr-1">
+                    {step === 1 && (
+                        <>
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium text-foreground">Executor Name <span className="text-red-500">*</span></label>
+                                <input
+                                    value={executorName}
+                                    onChange={(e) => setExecutorName(e.target.value)}
+                                    placeholder="Full name of your nominated executor"
+                                    className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring transition-all"
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    The person you appoint to carry out the instructions of your will.
+                                </p>
+                            </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-foreground">
-                            Special Instructions{" "}
-                            <span className="text-muted-foreground font-normal">(optional)</span>
-                        </label>
-                        <textarea
-                            value={specialInstructions}
-                            onChange={(e) => setSpecialInstructions(e.target.value)}
-                            rows={4}
-                            placeholder="Any specific wishes, funeral arrangements, messages, or conditions..."
-                            className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring transition-all resize-none"
-                        />
-                    </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-sm font-medium text-foreground">Witness 1 Name <span className="text-red-500">*</span></label>
+                                    <input
+                                        value={witness1Name}
+                                        onChange={(e) => setWitness1Name(e.target.value)}
+                                        placeholder="First witness name"
+                                        className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-sm font-medium text-foreground">Witness 2 Name <span className="text-red-500">*</span></label>
+                                    <input
+                                        value={witness2Name}
+                                        onChange={(e) => setWitness2Name(e.target.value)}
+                                        placeholder="Second witness name"
+                                        className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring transition-all"
+                                    />
+                                </div>
+                                <p className="text-xs text-muted-foreground col-span-2 -mt-1.5">
+                                    A Will must be attested by at least two independent witnesses.
+                                </p>
+                            </div>
 
-                    {error && (
-                        <div className="flex items-start gap-2 bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground">
-                            <AlertTriangleIcon className="w-4 h-4 shrink-0 mt-0.5" />
-                            {error}
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium text-foreground">
+                                    Special Instructions{" "}
+                                    <span className="text-muted-foreground font-normal">(optional)</span>
+                                </label>
+                                <textarea
+                                    value={specialInstructions}
+                                    onChange={(e) => setSpecialInstructions(e.target.value)}
+                                    rows={3}
+                                    placeholder="Any specific wishes, funeral arrangements, messages..."
+                                    className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring transition-all resize-none"
+                                />
+                            </div>
+
+                            <div className="bg-muted border border-border rounded-xl p-4 flex items-start gap-3 mt-4">
+                                <input
+                                    type="checkbox"
+                                    id="sound-mind"
+                                    checked={isSoundMind}
+                                    onChange={(e) => setIsSoundMind(e.target.checked)}
+                                    className="mt-1"
+                                />
+                                <label htmlFor="sound-mind" className="text-sm text-foreground leading-relaxed cursor-pointer">
+                                    <span className="font-semibold text-primary block mb-1">Sound Mind Declaration</span>
+                                    I declare that I am of sound mind, and I am making this Will voluntarily, without any coercion or undue influence.
+                                </label>
+                            </div>
+                        </>
+                    )}
+
+                    {step === 2 && (
+                        <div className="space-y-4">
+                            <div className="bg-[#fffbeb] border border-[#fef3c7] text-[#92400e] rounded-xl p-4 flex items-start gap-3">
+                                <InfoIcon className="w-5 h-5 shrink-0 mt-0.5" />
+                                <div className="text-sm leading-relaxed">
+                                    <p className="font-bold mb-1">Confirm Vault Configuration</p>
+                                    <p>Your Last Will & Testament will be generated based on your <strong>current Vault Assets</strong> and their <strong>Beneficiary Allocations</strong>.</p>
+                                </div>
+                            </div>
+
+                            <p className="text-sm text-foreground">
+                                If you need to make any changes to your assets or beneficiaries, please close this window and update your Vault first.
+                                Otherwise, click Generate to create the final, legally binding PDF document using AI.
+                            </p>
+
+                            {error && (
+                                <div className="flex items-start gap-2 bg-red-50 border border-red-100 text-red-600 rounded-lg px-3 py-2 text-sm mt-4">
+                                    <AlertTriangleIcon className="w-4 h-4 shrink-0 mt-0.5" />
+                                    {error}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2">
+                <div className="flex justify-end gap-2 pt-4 border-t border-border mt-2 shrink-0">
                     <DialogClose asChild>
                         <Button variant="outline" disabled={isGenerating} onClick={onClose}>Cancel</Button>
                     </DialogClose>
-                    <Button
-                        onClick={handleGenerate}
-                        disabled={isGenerating}
-                        className="bg-primary text-primary-foreground hover:bg-primary/90"
-                    >
-                        {isGenerating ? (
-                            <><Loader2Icon className="w-4 h-4 mr-2 animate-spin" />Generating…</>
-                        ) : (
-                            <><RefreshCwIcon className="w-4 h-4 mr-2" />Generate Will</>
-                        )}
-                    </Button>
+                    {step === 1 ? (
+                        <Button
+                            onClick={() => setStep(2)}
+                            disabled={!canProceedToStep2}
+                            className="bg-primary text-primary-foreground hover:bg-primary/90"
+                        >
+                            Next Step <ChevronRightIcon className="w-4 h-4 ml-1" />
+                        </Button>
+                    ) : (
+                        <Button
+                            onClick={handleGenerate}
+                            disabled={isGenerating}
+                            className="bg-primary text-primary-foreground hover:bg-primary/90"
+                        >
+                            {isGenerating ? (
+                                <><Loader2Icon className="w-4 h-4 mr-2 animate-spin" />Generating using AI…</>
+                            ) : (
+                                <><RefreshCwIcon className="w-4 h-4 mr-2" />Generate Will</>
+                            )}
+                        </Button>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>
@@ -431,18 +391,16 @@ function SigningChecklist({
                         <button
                             key={step.key}
                             onClick={() => toggle(step.key)}
-                            className={`w-full text-left flex items-start gap-4 p-4 rounded-xl border transition-all ${
-                                checked
-                                    ? "bg-emerald-50 border-emerald-200"
-                                    : "bg-background border-border hover:bg-muted/50"
-                            }`}
+                            className={`w-full text-left flex items-start gap-4 p-4 rounded-xl border transition-all ${checked
+                                ? "bg-emerald-50 border-emerald-200"
+                                : "bg-background border-border hover:bg-muted/50"
+                                }`}
                         >
                             <div
-                                className={`w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                                    checked
-                                        ? "bg-emerald-600 border-emerald-600 text-white"
-                                        : "border-border text-muted-foreground"
-                                }`}
+                                className={`w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${checked
+                                    ? "bg-emerald-600 border-emerald-600 text-white"
+                                    : "border-border text-muted-foreground"
+                                    }`}
                             >
                                 {checked ? (
                                     <CheckIcon className="w-4 h-4" />
@@ -491,10 +449,8 @@ function SigningChecklist({
 
 function WillVersionHistory({
     history,
-    onView,
 }: {
     history: HistoryRow[];
-    onView: (row: HistoryRow) => void;
 }) {
     if (history.length === 0) return null;
 
@@ -515,11 +471,10 @@ function WillVersionHistory({
                     >
                         <div className="flex items-start gap-3">
                             <div
-                                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                                    row.is_current
-                                        ? "bg-primary text-primary-foreground"
-                                        : "bg-muted text-muted-foreground"
-                                }`}
+                                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${row.is_current
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted text-muted-foreground"
+                                    }`}
                             >
                                 v{row.version}
                             </div>
@@ -545,56 +500,58 @@ function WillVersionHistory({
                                 </div>
                             </div>
                         </div>
-                        <button
-                            onClick={() => onView(row)}
-                            className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors border border-border hover:bg-muted px-3 py-1.5 rounded-lg"
-                        >
-                            <EyeIcon className="w-3.5 h-3.5" />
-                            View
-                        </button>
+                        <div className="flex items-center gap-2">
+                            {row.signed_url && (
+                                <a
+                                    href={row.signed_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors border border-border hover:bg-muted px-3 py-1.5 rounded-lg"
+                                >
+                                    <EyeIcon className="w-3.5 h-3.5" />
+                                    View
+                                </a>
+                            )}
+                            <button
+                                onClick={async () => {
+                                    if (!row.id) return;
+                                    try {
+                                        const token = localStorage.getItem("paradosis_access_token");
+                                        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+                                        const res = await fetch(`${apiUrl}/api/documents/will/${row.id}/download`, {
+                                            headers: { Authorization: `Bearer ${token}` },
+                                        });
+                                        if (!res.ok) throw new Error("Download failed");
+                                        const blob = await res.blob();
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement("a");
+                                        a.href = url;
+                                        a.download = `Will_v${row.version}.pdf`;
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        document.body.removeChild(a);
+                                        URL.revokeObjectURL(url);
+                                    } catch (e: any) {
+                                        if (row.signed_url) {
+                                            const a = document.createElement("a");
+                                            a.href = row.signed_url;
+                                            a.download = `Will_v${row.version}.pdf`;
+                                            document.body.appendChild(a);
+                                            a.click();
+                                            document.body.removeChild(a);
+                                        }
+                                    }
+                                }}
+                                className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors border border-border hover:bg-muted px-3 py-1.5 rounded-lg"
+                            >
+                                <DownloadIcon className="w-3.5 h-3.5" />
+                                Download
+                            </button>
+                        </div>
                     </div>
                 ))}
             </div>
         </div>
-    );
-}
-
-// ── PDF Viewer Modal ──────────────────────────────────────────────────────────
-
-function PdfViewerModal({ row, onClose }: { row: HistoryRow | null; onClose: () => void }) {
-    if (!row) return null;
-    return (
-        <Dialog open={!!row} onOpenChange={(o) => !o && onClose()}>
-            <DialogContent className="max-w-3xl h-[80vh] flex flex-col p-0 overflow-hidden">
-                <DialogHeader className="px-6 py-4 border-b border-border shrink-0">
-                    <div className="flex items-center justify-between">
-                        <DialogTitle className="text-base">Will — Version {row.version}</DialogTitle>
-                        <DialogClose asChild>
-                            <button
-                                onClick={onClose}
-                                className="p-1.5 rounded-lg hover:bg-muted transition-colors"
-                            >
-                                <XIcon className="w-4 h-4 text-muted-foreground" />
-                            </button>
-                        </DialogClose>
-                    </div>
-                    <DialogDescription className="text-xs">
-                        Generated {fmtDate(row.created_at)} · {triggerLabel(row.trigger_event)}
-                    </DialogDescription>
-                </DialogHeader>
-                {row.signed_url ? (
-                    <iframe
-                        src={row.signed_url}
-                        className="flex-1 w-full"
-                        title={`Will v${row.version}`}
-                    />
-                ) : (
-                    <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
-                        PDF URL not available.
-                    </div>
-                )}
-            </DialogContent>
-        </Dialog>
     );
 }
 
@@ -607,7 +564,6 @@ export default function WillPage() {
     const [error, setError] = useState<string | null>(null);
     const [showGenerate, setShowGenerate] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
-    const [viewRow, setViewRow] = useState<HistoryRow | null>(null);
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
@@ -660,15 +616,6 @@ export default function WillPage() {
         }
     };
 
-    const willData: WillData = {
-        testatorName: "",
-        address: "",
-        religion: "",
-        executorName: will?.executor_name ?? "",
-        specialInstructions: will?.special_instructions ?? "",
-        generatedDate: will?.created_at ?? "",
-        version: will?.version ?? 1,
-    };
 
     const hasWill = will?.will_id != null;
 
@@ -776,26 +723,9 @@ export default function WillPage() {
 
                     {/* Two-column layout */}
                     <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 items-start">
-                        {/* Left: Will Preview */}
+                        {/* Left: Version History */}
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
-                                    Document Preview
-                                </h2>
-                                {will?.signed_url && (
-                                    <a
-                                        href={will.signed_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                                    >
-                                        <EyeIcon className="w-3.5 h-3.5" />
-                                        Open PDF
-                                        <ChevronRightIcon className="w-3 h-3" />
-                                    </a>
-                                )}
-                            </div>
-                            <WillPreview data={willData} />
+                            <WillVersionHistory history={history} />
                         </div>
 
                         {/* Right: Signing Checklist + Legal notice */}
@@ -828,8 +758,6 @@ export default function WillPage() {
                         </div>
                     </div>
 
-                    {/* Version History */}
-                    <WillVersionHistory history={history} onView={setViewRow} />
                 </div>
             )}
 
@@ -841,7 +769,6 @@ export default function WillPage() {
                 onClose={() => setShowGenerate(false)}
                 onGenerated={handleGenerated}
             />
-            <PdfViewerModal row={viewRow} onClose={() => setViewRow(null)} />
         </div>
     );
 }

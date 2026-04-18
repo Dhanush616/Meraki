@@ -302,6 +302,8 @@ export default function BeneficiaryDashboard() {
                     </div>
                 </div>
             </main>
+
+
         </div>
     );
 }
