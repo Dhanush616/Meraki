@@ -1,44 +1,17 @@
 "use client";
 import Link from "next/link";
-import { ShieldCheckIcon, CalendarIcon, ArrowRightIcon } from "lucide-react";
-import { addDays, format, parseISO, isValid } from "date-fns";
+import { ShieldCheckIcon, CalendarIcon, ChevronRightIcon } from "lucide-react";
+import { addDays, format, parseISO } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 
-interface LevelInfo {
-    label: string;
-    badgeClass: string;
-    iconClass: string;
-}
-
-const LEVEL_INFO: Record<string, LevelInfo> = {
-    level_0_normal:             { label: "All Clear",          badgeClass: "bg-muted text-foreground border-border",  iconClass: "text-foreground" },
-    level_1_concern:            { label: "Concern",            badgeClass: "bg-muted text-foreground border-border",  iconClass: "text-foreground" },
-    level_2_alert:              { label: "Alert",              badgeClass: "bg-muted text-foreground border-border",  iconClass: "text-foreground" },
-    level_3_suspected_death:    { label: "Suspected Death",    badgeClass: "bg-muted text-foreground border-border",  iconClass: "text-foreground" },
-    level_4_death_claimed:      { label: "Death Claimed",      badgeClass: "bg-muted text-foreground border-border",  iconClass: "text-foreground" },
-    level_5_executed:           { label: "Vault Executed",     badgeClass: "bg-muted text-foreground border-border",  iconClass: "text-foreground" },
+const LEVEL_INFO: Record<string, string> = {
+    level_0_normal:             "Normal",
+    level_1_concern:            "Concern",
+    level_2_alert:              "Alert",
+    level_3_suspected_death:    "Verification",
+    level_4_death_claimed:      "Execution",
+    level_5_executed:           "Executed",
 };
-
-function formatDate(iso: string | null): string {
-    if (!iso) return "Never";
-    try {
-        const d = parseISO(iso);
-        return isValid(d) ? format(d, "d MMM yyyy") : "—";
-    } catch {
-        return "—";
-    }
-}
-
-function nextCheckInDate(lastCheckIn: string | null, frequencyDays: number): string {
-    if (!lastCheckIn) return "—";
-    try {
-        const base = parseISO(lastCheckIn);
-        if (!isValid(base)) return "—";
-        return format(addDays(base, frequencyDays), "d MMM yyyy");
-    } catch {
-        return "—";
-    }
-}
 
 interface Props {
     level: string;
@@ -48,49 +21,46 @@ interface Props {
 }
 
 export function EscalationStatus({ level, lastCheckIn, checkInFrequencyDays, isLoading }: Props) {
-    const info = LEVEL_INFO[level] ?? LEVEL_INFO.level_0_normal;
+    const label = LEVEL_INFO[level] ?? "Normal";
+
+    if (isLoading) return <Skeleton className="h-48 w-full rounded-xl" />;
 
     return (
-        <div className="bg-card rounded-2xl p-6 border border-border">
-            <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2 mb-5">
-                <ShieldCheckIcon className={`w-4 h-4 ${info.iconClass}`} /> Escalation Status
-            </h3>
+        <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground uppercase tracking-wider mb-6">
+                <ShieldCheckIcon className="w-4 h-4" />
+                Escalation Status
+            </div>
 
-            {isLoading ? (
-                <div className="space-y-3">
-                    <Skeleton className="h-14 rounded-xl" />
-                    <Skeleton className="h-4 w-48" />
-                    <Skeleton className="h-4 w-40" />
+            <div className="space-y-4">
+                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg border border-border">
+                    <span className="text-xs text-muted-foreground font-medium">Protection Level</span>
+                    <span className="text-sm font-bold text-foreground">{label}</span>
                 </div>
-            ) : (
-                <>
-                    <div className={`flex items-center justify-between p-4 rounded-xl border mb-4 ${info.badgeClass}`}>
-                        <div>
-                            <p className="text-xs opacity-70 uppercase tracking-wider font-semibold mb-1">Current State</p>
-                            <p className="text-lg font-sans font-bold">{info.label}</p>
-                        </div>
-                        <ShieldCheckIcon className={`w-8 h-8 opacity-40`} />
-                    </div>
 
-                    <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2 text-foreground">
-                            <CalendarIcon className="w-4 h-4 text-muted-foreground shrink-0" />
-                            <span>Last check-in: <strong className="font-medium">{formatDate(lastCheckIn)}</strong></span>
-                        </div>
-                        <div className="flex items-center gap-2 text-foreground">
-                            <CalendarIcon className="w-4 h-4 text-muted-foreground shrink-0" />
-                            <span>Next check-in: <strong className="font-medium">{nextCheckInDate(lastCheckIn, checkInFrequencyDays)}</strong></span>
-                        </div>
+                <div className="space-y-2">
+                    <div className="flex justify-between items-center text-xs">
+                        <span className="text-muted-foreground flex items-center gap-1.5">
+                            <CalendarIcon className="w-3 h-3" /> Last check-in
+                        </span>
+                        <span className="font-semibold text-foreground">
+                            {lastCheckIn ? format(parseISO(lastCheckIn), "MMM d, yyyy") : "Never"}
+                        </span>
                     </div>
+                    <div className="flex justify-between items-center text-xs">
+                        <span className="text-muted-foreground flex items-center gap-1.5">
+                            <CalendarIcon className="w-3 h-3" /> Next due
+                        </span>
+                        <span className="font-semibold text-foreground">
+                            {lastCheckIn ? format(addDays(parseISO(lastCheckIn), checkInFrequencyDays), "MMM d, yyyy") : "Pending"}
+                        </span>
+                    </div>
+                </div>
+            </div>
 
-                    <Link
-                        href="/dashboard/escalation"
-                        className="mt-5 flex items-center gap-1 text-xs text-foreground font-medium hover:underline"
-                    >
-                        Configure monitoring <ArrowRightIcon className="w-3 h-3" />
-                    </Link>
-                </>
-            )}
+            <Link href="/dashboard/escalation" className="mt-6 flex items-center text-xs font-semibold text-foreground hover:translate-x-1 transition-transform uppercase tracking-wider">
+                Configure Protocol <ChevronRightIcon className="w-3.5 h-3.5 ml-1" />
+            </Link>
         </div>
     );
 }

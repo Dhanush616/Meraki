@@ -40,6 +40,19 @@ class AssetResponse(AssetBase):
     created_at: datetime
     updated_at: datetime
 
+def log_activity(supabase, user_id: str, action: str, entity_type: str, entity_id: str, metadata: dict = None):
+    """Helper to log user actions."""
+    try:
+        supabase.table("activity_logs").insert({
+            "owner_id": user_id,
+            "action": action,
+            "entity_type": entity_type,
+            "entity_id": entity_id,
+            "metadata": metadata or {}
+        }).execute()
+    except Exception as e:
+        print(f"Failed to log activity: {e}")
+
 @router.get("", response_model=List[AssetResponse])
 def list_assets(user_id: str = Depends(get_current_user_id)):
     """List all assets for the current user."""
@@ -56,7 +69,11 @@ def create_asset(asset: AssetCreate, user_id: str = Depends(get_current_user_id)
     response = supabase.table("assets").insert(data).execute()
     if not response.data:
         raise HTTPException(status_code=400, detail="Failed to create asset")
-    return response.data[0]
+    
+    new_asset = response.data[0]
+    log_activity(supabase, user_id, "asset.created", "asset", new_asset["id"], {"nickname": new_asset["nickname"], "type": new_asset["asset_type"]})
+    
+    return new_asset
 
 @router.put("/{asset_id}", response_model=AssetResponse)
 def update_asset(asset_id: UUID, asset: AssetUpdate, user_id: str = Depends(get_current_user_id)):
@@ -66,7 +83,11 @@ def update_asset(asset_id: UUID, asset: AssetUpdate, user_id: str = Depends(get_
     response = supabase.table("assets").update(update_data).eq("id", str(asset_id)).eq("owner_id", user_id).execute()
     if not response.data:
         raise HTTPException(status_code=404, detail="Asset not found or not authorized")
-    return response.data[0]
+    
+    updated_asset = response.data[0]
+    log_activity(supabase, user_id, "asset.updated", "asset", updated_asset["id"], {"nickname": updated_asset["nickname"]})
+    
+    return updated_asset
 
 @router.delete("/{asset_id}")
 def delete_asset(asset_id: UUID, user_id: str = Depends(get_current_user_id)):
@@ -75,4 +96,7 @@ def delete_asset(asset_id: UUID, user_id: str = Depends(get_current_user_id)):
     response = supabase.table("assets").update({"status": "inactive"}).eq("id", str(asset_id)).eq("owner_id", user_id).execute()
     if not response.data:
         raise HTTPException(status_code=404, detail="Asset not found or not authorized")
+    
+    log_activity(supabase, user_id, "asset.deleted", "asset", str(asset_id))
+    
     return {"message": "Asset successfully deleted"}
