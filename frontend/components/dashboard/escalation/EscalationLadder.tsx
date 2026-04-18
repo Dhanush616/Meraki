@@ -23,14 +23,20 @@ const levels = [
     },
     {
         id: "level_3_suspected_death",
-        title: "Level 3: Verification",
+        title: "Level 3: Suspected",
         description: "Protocol initiated. Human verification in progress.",
         icon: ShieldAlert,
     },
     {
+        id: "level_4_death_claimed",
+        title: "Level 4: Claimed",
+        description: "Death certificate verified. Final liveness check active.",
+        icon: ShieldAlert,
+    },
+    {
         id: "level_5_executed",
-        title: "Level 4: Execution",
-        description: "Protocol finalized. Vault content distribution starting.",
+        title: "Level 5: Executed",
+        description: "Protocol finalized. Vault content distribution complete.",
         icon: Lock,
     },
 ];

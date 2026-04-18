@@ -11,10 +11,11 @@ MAX_SIZE_MB = 10
 
 
 @router.post("/submit")
+@router.post("/submit-death-cert")
 async def submit_death_certificate(
     file: UploadFile = File(...),
-    owner_id: str = Form(...),
-    beneficiary_id: str = Form(...),
+    owner_id: Optional[str] = Form(None),
+    beneficiary_id: Optional[str] = Form(None),
     user_id: str = Depends(get_current_user_id),
 ):
     """
@@ -31,12 +32,20 @@ async def submit_death_certificate(
     from services.verification_service import verify_death_certificate
     supabase = get_supabase_client()
 
+    # If IDs not provided, find them from user_id
+    if not beneficiary_id or not owner_id:
+        resp = supabase.table("beneficiaries").select("id, owner_id").eq("user_id", user_id).execute()
+        if not resp.data:
+            raise HTTPException(status_code=403, detail="User is not registered as a beneficiary")
+        beneficiary_id = resp.data[0]["id"]
+        owner_id = resp.data[0]["owner_id"]
+
     result = await verify_death_certificate(
         supabase=supabase,
         file_bytes=file_bytes,
         filename=file.filename or "certificate",
-        owner_id=owner_id,
-        beneficiary_id=beneficiary_id,
+        owner_id=str(owner_id),
+        beneficiary_id=str(beneficiary_id),
         submitted_by_user_id=user_id,
     )
     return result

@@ -1,174 +1,192 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { ShieldAlertIcon, CheckCircle2Icon, AlertTriangleIcon, ActivityIcon, UploadCloudIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ShieldAlertIcon, CheckCircle2Icon, ActivityIcon, UploadCloudIcon, LoaderIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+
+import { EscalationLadder } from "@/components/dashboard/escalation/EscalationLadder";
+import { toast } from "sonner";
 
 export default function GuardianPortalPage() {
-    const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
-    const [reportStep, setReportStep] = useState(1);
-    const [dragOver, setDragOver] = useState(false);
-    const [file, setFile] = useState<File | null>(null);
+    const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [escalationLevel, setEscalationLevel] = useState(0); // 0 = Normal, 3 = Escalated
+    const [escalationLevel, setEscalationLevel] = useState("level_0_normal");
+    const [guardianData, setGuardianData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [reason, setReason] = useState("");
 
-    const handleReport = async () => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("guardian_token") : null;
+    const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+    const fetchData = async () => {
+        try {
+            const res = await fetch(`${API}/api/guardian/me`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error("Failed to fetch");
+            const data = await res.json();
+            setGuardianData(data);
+            setEscalationLevel(data.escalation_level);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    React.useEffect(() => {
+        if (!token) {
+            router.push("/auth/signin?role=guardian");
+            return;
+        }
+        fetchData();
+    }, [token, router, API]);
+
+    const handleProvideReason = async () => {
+        if (!reason.trim()) {
+            toast.error("Please provide a reason.");
+            return;
+        }
         setIsSubmitting(true);
-        setTimeout(() => {
+        try {
+            const res = await fetch(`${API}/api/guardian/provide-reason`, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}` 
+                },
+                body: JSON.stringify({ reason })
+            });
+            if (!res.ok) throw new Error("Update failed");
+            toast.success("Reason recorded. Escalation level reset to Level 0.");
+            setReason("");
+            fetchData(); // Refresh ladder
+        } catch (err: any) {
+            toast.error(err.message);
+        } finally {
             setIsSubmitting(false);
-            setReportStep(3); // Next step: upload certificate
-        }, 1000);
+        }
     };
 
-    const handleFile = (f: File) => {
-        if (!["application/pdf", "image/jpeg", "image/png"].includes(f.type)) { alert("Invalid type"); return; }
-        setFile(f);
-    };
+    if (loading) return <div className="min-h-screen flex items-center justify-center"><LoaderIcon className="w-8 h-8 animate-spin text-primary" /></div>;
 
-    const handleUpload = () => {
-        setIsSubmitting(true);
-        setTimeout(() => {
-            setIsSubmitting(false);
-            setEscalationLevel(3);
-            setReportStep(4); // Success step
-        }, 2000);
-    };
+    const isExecuted = escalationLevel === "level_5_executed";
+    const isClaimed = escalationLevel === "level_4_death_claimed";
+    const canProvideReason = ["level_1_concern", "level_2_alert", "level_3_suspected_death"].includes(escalationLevel);
 
     return (
         <div className="min-h-screen bg-background flex flex-col p-4 md:p-8">
-            <header className="w-full max-w-4xl mx-auto flex items-center justify-between mb-12">
+            <header className="w-full max-w-5xl mx-auto flex items-center justify-between mb-12">
                 <Link href="/" className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg">
                         <span className="w-2.5 h-2.5 bg-card rounded-full"></span>
                     </div>
                     <span className="font-sans text-xl font-bold text-foreground">Paradosis</span>
                 </Link>
-                <div className="text-sm font-medium text-muted-foreground bg-white px-4 py-2 rounded-full border border-border shadow-sm">
-                    Guardian Portal
+                <div className="flex items-center gap-4">
+                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground bg-white px-4 py-2 rounded-full border border-border shadow-sm">
+                        Guardian Portal
+                    </span>
+                    <Button variant="ghost" size="sm" onClick={() => {
+                        localStorage.removeItem("guardian_token");
+                        localStorage.removeItem("beneficiary_token");
+                        localStorage.removeItem("beneficiary_id");
+                        localStorage.removeItem("paradosis_access_token");
+                        router.push("/auth/signin?role=guardian");
+                    }}>Logout</Button>
                 </div>
             </header>
 
-            <main className="w-full max-w-4xl mx-auto flex-1 flex flex-col items-center justify-center text-center -mt-20">
-                <div className="bg-card border border-border rounded-3xl p-8 md:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-2xl">
-                    <ShieldAlertIcon className="w-12 h-12 text-primary mx-auto mb-6 opacity-90" />
-                    <h1 className="text-3xl font-sans text-foreground mb-4">
-                        You are a guardian for <span className="font-bold underline decoration-primary/30 underline-offset-4">Arjun</span> Kumar.
-                    </h1>
-                    <p className="text-muted-foreground font-sans mb-8 max-w-md mx-auto leading-relaxed">
-                        Your role is to notify us only if you suspect Arjun has passed away. You do not have access to view their assets or beneficiaries.
-                    </p>
-
-                    <div className="bg-background border border-border rounded-xl p-6 mb-10 flex flex-col sm:flex-row items-center justify-between text-left gap-4">
-                        <div className="flex items-center gap-4">
-                            {escalationLevel === 0 ? (
-                                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                                    <ActivityIcon className="w-6 h-6 text-green-700" />
-                                </div>
-                            ) : (
-                                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                                    <AlertTriangleIcon className="w-6 h-6 text-red-600" />
-                                </div>
-                            )}
-                            <div>
-                                <h3 className="font-sans font-medium text-foreground flex items-center gap-2">
-                                    Current Status
-                                    {escalationLevel === 0 ? (
-                                        <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full font-bold tracking-wide uppercase">Level 0: Normal</span>
-                                    ) : (
-                                        <span className="bg-red-100 text-red-800 text-xs px-2 py-0.5 rounded-full font-bold tracking-wide uppercase">Level 3: Suspected Death</span>
-                                    )}
-                                </h3>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                    {escalationLevel === 0
-                                        ? "The vault is safely secured. Arjun's normal check-in schedule is active."
-                                        : "You have reported a suspected death. The verification liveness window has started."}
-                                </p>
-                            </div>
-                        </div>
+            <main className="w-full max-w-5xl mx-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pb-20">
+                {/* Left: System Progression */}
+                <div className="lg:col-span-7 space-y-6">
+                    <div className="bg-card border border-border rounded-3xl p-8 md:p-10 shadow-sm">
+                        <h2 className="text-lg font-bold text-foreground mb-8 flex items-center gap-2">
+                            <ActivityIcon className="w-5 h-5 text-primary" />
+                            System Progression
+                        </h2>
+                        <EscalationLadder currentLevel={escalationLevel} />
                     </div>
 
-                    <Button
-                        onClick={() => setIsReportDialogOpen(true)}
-                        disabled={escalationLevel > 0}
-                        className={`w-full sm:w-auto px-8 py-6 rounded-full text-base font-medium transition-all ${escalationLevel > 0 ? "bg-gray-200 text-gray-400" : "bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-600/20"}`}
-                    >
-                        Report Suspected Death
-                    </Button>
+                    {/* Death Certificate Section - Bottom */}
+                    {!isExecuted && !isClaimed && (
+                        <div className="bg-primary/5 border border-primary/20 rounded-3xl p-8 md:p-10">
+                            <div className="flex items-start gap-4 mb-6">
+                                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                                    <UploadCloudIcon className="w-6 h-6 text-primary" />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-foreground">Initiate Level 4 Activation</h2>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                        Upload an official death certificate to immediately verify the claim and notify beneficiaries.
+                                    </p>
+                                </div>
+                            </div>
+                            <Button
+                                onClick={() => router.push(`/guardian/verify?ownerId=${guardianData?.owner_id || ""}`)}
+                                className="w-full py-6 rounded-2xl text-base font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20"
+                            >
+                                <UploadCloudIcon className="w-5 h-5 mr-2" />
+                                Upload Death Certificate
+                            </Button>
+                        </div>
+                    )}
+
+                    {(isExecuted || isClaimed) && (
+                        <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-3xl p-10 text-center">
+                            <CheckCircle2Icon className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
+                            <h2 className="text-2xl font-bold text-foreground">
+                                {isClaimed ? "Level 4 Activated" : "Level 5 Activated"}
+                            </h2>
+                            <p className="text-muted-foreground mt-2 max-w-md mx-auto font-medium">
+                                All mails to beneficiaries initiated.
+                            </p>
+                            <p className="text-sm text-muted-foreground mt-4 max-w-md mx-auto leading-relaxed">
+                                {isClaimed 
+                                    ? "The certificate has been analyzed. Beneficiaries have been notified and the final claim record is active."
+                                    : "The vault has been fully executed. Access has been granted to all verified beneficiaries."}
+                            </p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Right: Context & Actions */}
+                <div className="lg:col-span-5 space-y-6">
+                    <div className="bg-card border border-border rounded-3xl p-8 shadow-sm">
+                        <ShieldAlertIcon className="w-10 h-10 text-primary mb-6 opacity-90" />
+                        <h1 className="text-2xl font-sans text-foreground mb-4">
+                            Guardian for <span className="font-bold">{guardianData?.owner_first_name} {guardianData?.owner_last_name}</span>
+                        </h1>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                            You are the primary emergency point. Your role is to notify us if you suspect the owner has passed away or to provide updates if they are temporarily unreachable.
+                        </p>
+                    </div>
+
+                    {/* Reason/Reset Logic */}
+                    {canProvideReason && (
+                        <div className="bg-card border border-border rounded-3xl p-8 shadow-sm space-y-4">
+                            <h3 className="font-bold text-foreground">Provide Update / Reason</h3>
+                            <p className="text-xs text-muted-foreground">
+                                If you have spoken to the owner or have a reason for their inactivity (e.g., travel, hospitalization), providing a reason will reset the system to Level 0.
+                            </p>
+                            <textarea
+                                value={reason}
+                                onChange={(e) => setReason(e.target.value)}
+                                placeholder="Enter reason for reset..."
+                                className="w-full min-h-[100px] bg-background border border-border rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
+                            <Button 
+                                onClick={handleProvideReason}
+                                disabled={isSubmitting}
+                                className="w-full bg-black text-white hover:bg-zinc-800 rounded-xl py-4"
+                            >
+                                {isSubmitting ? "Updating..." : "Reset to Level 0 (Normal)"}
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </main>
-
-            <Dialog open={isReportDialogOpen} onOpenChange={(open) => {
-                if (!isSubmitting) {
-                    setIsReportDialogOpen(open);
-                    if (!open) setTimeout(() => setReportStep(1), 300);
-                }
-            }}>
-                <DialogContent className="sm:max-w-[450px] p-0 overflow-hidden bg-card border-none shadow-2xl">
-                    <div className="p-8">
-                        <DialogHeader className="mb-6">
-                            <div className="mx-auto w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
-                                <AlertTriangleIcon className="w-6 h-6 text-red-600" />
-                            </div>
-                            <DialogTitle className="text-center font-sans text-2xl text-foreground">
-                                {reportStep === 1 ? "Are you sure?" : "Final Confirmation"}
-                            </DialogTitle>
-                            <DialogDescription className="text-center text-muted-foreground font-sans pt-2">
-                                {reportStep === 1
-                                    ? "This begins the formal death verification process. An automated liveness check will be sent to the owner."
-                                    : "Have you been unable to reach Arjun for an extended period?"}
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        {reportStep === 1 ? (
-                            <div className="flex flex-col gap-3 mt-8">
-                                <Button
-                                    onClick={() => setReportStep(2)}
-                                    className="w-full bg-red-600 hover:bg-red-700 text-white rounded-lg py-6"
-                                >
-                                    Yes, I want to proceed
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    onClick={() => setIsReportDialogOpen(false)}
-                                    className="w-full text-muted-foreground hover:text-foreground"
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
-                        ) : (
-                            <div className="flex flex-col gap-3 mt-8">
-                                <Button
-                                    onClick={handleReport}
-                                    disabled={isSubmitting}
-                                    className="w-full bg-red-600 hover:bg-red-700 text-white rounded-lg py-6 flex items-center justify-center gap-2"
-                                >
-                                    {isSubmitting ? "Processing..." : (
-                                        <>
-                                            <CheckCircle2Icon className="w-4 h-4" />
-                                            Confirm Suspected Death
-                                        </>
-                                    )}
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    onClick={() => setReportStep(1)}
-                                    disabled={isSubmitting}
-                                    className="w-full text-muted-foreground hover:text-foreground"
-                                >
-                                    Go Back
-                                </Button>
-                            </div>
-                        )}
-                    </div>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 }

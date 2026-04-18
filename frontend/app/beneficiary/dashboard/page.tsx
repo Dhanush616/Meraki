@@ -44,6 +44,8 @@ export default function BeneficiaryDashboard() {
     function signOut() {
         localStorage.removeItem("beneficiary_token");
         localStorage.removeItem("beneficiary_id");
+        localStorage.removeItem("paradosis_access_token");
+        localStorage.removeItem("guardian_token");
         router.push("/auth/signin");
     }
 

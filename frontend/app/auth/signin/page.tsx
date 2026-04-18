@@ -1,32 +1,60 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon, ShieldIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function SignInPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const role = searchParams.get("role");
+    
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [loginType, setLoginType] = useState<"owner" | "guardian" | "beneficiary">("owner");
+    const [loginType, setLoginType] = useState<"owner" | "guardian" | "beneficiary">(
+        role === "guardian" ? "guardian" : "owner"
+    );
+
+    const clearAllTokens = () => {
+        localStorage.removeItem("beneficiary_token");
+        localStorage.removeItem("beneficiary_id");
+        localStorage.removeItem("paradosis_access_token");
+        localStorage.removeItem("guardian_token");
+    };
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         setLoading(true);
+        clearAllTokens(); // Ensure clean state before storing new token
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
         if (loginType === "guardian") {
-            // Mock guardian login
-            setTimeout(() => {
-                setLoading(false);
+            try {
+                const res = await fetch(`${apiUrl}/api/guardian/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.detail || "Guardian login failed");
+                }
+
+                localStorage.setItem("guardian_token", data.token);
                 router.push("/guardian/portal");
-            }, 800);
+            } catch (err: any) {
+                setError(err.message || "Invalid guardian email");
+            } finally {
+                setLoading(false);
+            }
             return;
         }
 
@@ -173,7 +201,7 @@ export default function SignInPage() {
                 </div>
 
                 <p className="text-center mt-8 text-muted-foreground font-sans text-sm">
-                    Don't have a vault yet? <Link href="/auth/signup" className="text-primary font-medium hover:underline">Get started securely</Link>
+                    Don't have a vault yet? <Link href={role === "guardian" ? "/auth/signup?role=guardian" : "/auth/signup"} className="text-primary font-medium hover:underline">Get started securely</Link>
                 </p>
             </motion.div>
         </div>

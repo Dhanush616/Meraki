@@ -116,13 +116,34 @@ async def update_emergency_contact(
     data = body.model_dump()
     data["owner_id"] = user_id
 
+    # 1. Update/Insert in emergency_contacts
     existing = supabase.table("emergency_contacts").select("id").eq("owner_id", user_id).execute()
     if existing.data:
         supabase.table("emergency_contacts").update(data).eq("owner_id", user_id).execute()
     else:
         supabase.table("emergency_contacts").insert(data).execute()
 
-    return {"message": "Emergency contact updated"}
+    # 2. Sync to guardians table so they can log in
+    # We use email as the unique identifier for a guardian per owner
+    guardian_data = {
+        "owner_id": user_id,
+        "full_name": body.full_name,
+        "email": body.email,
+        "phone_number": body.phone_number,
+        "status": "active" # Set to active so they can log in immediately
+    }
+    
+    # Check if a guardian with this email already exists for this owner
+    existing_guardian = supabase.table("guardians").select("id").eq("owner_id", user_id).eq("email", body.email).execute()
+    
+    if existing_guardian.data:
+        supabase.table("guardians").update(guardian_data).eq("id", existing_guardian.data[0]["id"]).execute()
+    else:
+        # If the owner changed the email, we might want to deactivate the old one, 
+        # but for now we just insert the new one.
+        supabase.table("guardians").insert(guardian_data).execute()
+
+    return {"message": "Emergency contact and guardian record updated"}
 
 
 @router.get("/beneficiary-order")
