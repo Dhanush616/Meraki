@@ -8,6 +8,7 @@ import {
     ShieldCheckIcon, BuildingIcon, WalletIcon, LandmarkIcon, CreditCardIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+<<<<<<< Updated upstream
 
 const MOCK_ASSETS = [
     { 
@@ -30,6 +31,13 @@ const MOCK_ASSETS = [
         asset_type: "crypto_wallet",
         percentage: 100, 
         details: { wallet_type: "Hardware (Ledger)", location: "Left drawer of the study desk", instructions: "PIN is same as my secondary phone" }
+=======
+import { Logo } from "@/components/shared/Logo";
+
+const AssetDetailsCard = ({ type, details }: { type: string, details: any }) => {
+    if (!details || Object.keys(details).length === 0) {
+        return <p className="text-sm text-muted-foreground">No additional details available.</p>;
+>>>>>>> Stashed changes
     }
 ];
 
@@ -67,12 +75,7 @@ export default function BeneficiaryDashboard() {
     return (
         <div className="min-h-screen bg-background flex flex-col px-4 py-8 pb-24 font-sans">
             <header className="w-full max-w-5xl mx-auto flex items-center justify-between mb-12">
-                <Link href="/" className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg">
-                        <span className="w-2.5 h-2.5 bg-card rounded-full"></span>
-                    </div>
-                    <span className="text-xl font-bold text-foreground">Paradosis</span>
-                </Link>
+                <Logo />
                 <div className="flex items-center gap-4">
                     <div className="hidden sm:flex px-3 py-1.5 bg-green-50/50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-500/20 rounded-full text-xs font-bold uppercase tracking-wider items-center gap-1.5">
                         <ShieldCheckIcon className="w-3.5 h-3.5" /> Vault Unlocked

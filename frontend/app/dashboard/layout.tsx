@@ -7,6 +7,8 @@ import {
     VideoIcon, FileTextIcon, AlertTriangleIcon,
     ActivityIcon, SettingsIcon, LogOutIcon, WalletIcon, UsersIcon
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Logo } from "@/components/shared/Logo";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -32,12 +34,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="min-h-screen bg-background flex">
             {/* Sidebar Desktop */}
             <aside className="hidden md:flex w-64 flex-col bg-card border-r border-border pt-6">
-                <Link href="/dashboard" className="px-6 mb-8 block">
-                    <span className="font-sans text-2xl font-bold text-foreground flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full bg-primary"></span>
-                        Paradosis
-                    </span>
-                </Link>
+                <div className="px-6 mb-8 block">
+                    <Logo href="/dashboard" />
+                </div>
                 <nav className="flex-1 px-4 space-y-1">
                     {navLinks.map((link) => {
                         const isActive = pathname === link.href;
@@ -68,10 +67,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col min-h-screen max-h-screen overflow-hidden">
                 <header className="md:hidden bg-card border-b border-border px-4 py-4 flex items-center justify-between shadow-sm z-10">
-                    <span className="font-sans text-xl font-bold text-foreground flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-primary"></span>
-                        Paradosis
-                    </span>
+                    <Logo href="/dashboard" />
                 </header>
                 <main className="flex-1 overflow-auto p-4 md:p-8 bg-background relative z-0">
                     {children}
