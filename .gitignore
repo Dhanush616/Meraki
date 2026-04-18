@@ -7,6 +7,10 @@ node_modules/
 .next/
 out/
 build/
+.github/get-shit-done
+.github/agents
+.github/skills
+.github/
 
 # Python / FastAPI
 __pycache__/
