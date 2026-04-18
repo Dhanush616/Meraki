@@ -9,18 +9,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { AssetTypeSummary } from "@/hooks/useVaultSummary";
 
 const ASSET_META: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
-    bank_account:       { label: "Bank Account",     icon: <LandmarkIcon className="w-4 h-4" />,   color: "text-blue-600 bg-blue-50" },
-    fixed_deposit:      { label: "Fixed Deposit",    icon: <BuildingIcon className="w-4 h-4" />,   color: "text-indigo-600 bg-indigo-50" },
-    property:           { label: "Property",         icon: <BuildingIcon className="w-4 h-4" />,   color: "text-orange-600 bg-orange-50" },
-    insurance:          { label: "Insurance",        icon: <ShieldIcon className="w-4 h-4" />,     color: "text-emerald-600 bg-emerald-50" },
-    mutual_fund:        { label: "Mutual Fund",      icon: <TrendingUpIcon className="w-4 h-4" />, color: "text-violet-600 bg-violet-50" },
-    stocks_demat:       { label: "Stocks / Demat",   icon: <BarChart2Icon className="w-4 h-4" />,  color: "text-sky-600 bg-sky-50" },
-    crypto_wallet:      { label: "Crypto Wallet",    icon: <BitcoinIcon className="w-4 h-4" />,    color: "text-amber-600 bg-amber-50" },
-    vehicle:            { label: "Vehicle",          icon: <CarIcon className="w-4 h-4" />,        color: "text-rose-600 bg-rose-50" },
-    ppf_epf:            { label: "PPF / EPF",        icon: <PiggyBankIcon className="w-4 h-4" />,  color: "text-teal-600 bg-teal-50" },
-    gold_jewellery:     { label: "Gold & Jewellery", icon: <GemIcon className="w-4 h-4" />,        color: "text-yellow-600 bg-yellow-50" },
-    business_ownership: { label: "Business",         icon: <BriefcaseIcon className="w-4 h-4" />,  color: "text-slate-600 bg-slate-50" },
-    other:              { label: "Other",            icon: <PackageIcon className="w-4 h-4" />,    color: "text-gray-600 bg-gray-50" },
+    bank_account:       { label: "Bank Account",     icon: <LandmarkIcon className="w-4 h-4" />,   color: "text-foreground bg-muted" },
+    fixed_deposit:      { label: "Fixed Deposit",    icon: <BuildingIcon className="w-4 h-4" />,   color: "text-foreground bg-muted" },
+    property:           { label: "Property",         icon: <BuildingIcon className="w-4 h-4" />,   color: "text-foreground bg-muted" },
+    insurance:          { label: "Insurance",        icon: <ShieldIcon className="w-4 h-4" />,     color: "text-foreground bg-muted" },
+    mutual_fund:        { label: "Mutual Fund",      icon: <TrendingUpIcon className="w-4 h-4" />, color: "text-foreground bg-muted" },
+    stocks_demat:       { label: "Stocks / Demat",   icon: <BarChart2Icon className="w-4 h-4" />,  color: "text-foreground bg-muted" },
+    crypto_wallet:      { label: "Crypto Wallet",    icon: <BitcoinIcon className="w-4 h-4" />,    color: "text-foreground bg-muted" },
+    vehicle:            { label: "Vehicle",          icon: <CarIcon className="w-4 h-4" />,        color: "text-foreground bg-muted" },
+    ppf_epf:            { label: "PPF / EPF",        icon: <PiggyBankIcon className="w-4 h-4" />,  color: "text-foreground bg-muted" },
+    gold_jewellery:     { label: "Gold & Jewellery", icon: <GemIcon className="w-4 h-4" />,        color: "text-foreground bg-muted" },
+    business_ownership: { label: "Business",         icon: <BriefcaseIcon className="w-4 h-4" />,  color: "text-foreground bg-muted" },
+    other:              { label: "Other",            icon: <PackageIcon className="w-4 h-4" />,    color: "text-foreground bg-muted" },
 };
 
 function formatINR(v: number) {
@@ -42,9 +42,9 @@ export function AssetSummaryCards({ assetsByType, isLoading }: Props) {
     }
     if (assetsByType.length === 0) {
         return (
-            <Link href="/dashboard/vault/add" className="col-span-2 bg-card rounded-2xl p-6 border border-dashed border-oat-border flex flex-col items-center justify-center gap-2 hover:border-ring/40 hover:bg-primary/5 transition-all group">
-                <PlusCircleIcon className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
-                <span className="text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">Add your first asset</span>
+            <Link href="/dashboard/vault/add" className="col-span-2 bg-card rounded-2xl p-6 border border-border flex flex-col items-center justify-center gap-2 hover:bg-muted/50 transition-all group">
+                <PlusCircleIcon className="w-8 h-8 text-muted-foreground group-hover:text-foreground transition-colors" />
+                <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Add your first asset</span>
             </Link>
         );
     }
@@ -53,7 +53,7 @@ export function AssetSummaryCards({ assetsByType, isLoading }: Props) {
             {assetsByType.map((item) => {
                 const meta = ASSET_META[item.asset_type] ?? ASSET_META.other;
                 return (
-                    <Link key={item.asset_type} href={`/dashboard/vault?type=${item.asset_type}`} className="bg-card rounded-2xl p-4 border border-oat-border hover:border-primary/30 hover:shadow-sm transition-all">
+                    <Link key={item.asset_type} href={`/dashboard/vault?type=${item.asset_type}`} className="bg-card rounded-2xl p-4 border border-border hover:bg-muted/50 transition-all">
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 ${meta.color}`}>{meta.icon}</div>
                         <p className="text-xs text-muted-foreground font-medium truncate">{meta.label}</p>
                         <p className="text-xl font-bold text-foreground font-sans">{item.count}</p>
