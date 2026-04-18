@@ -18,12 +18,12 @@ import {
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const LEVEL_INFO: Record<string, { label: string; badgeColor: string; description: string }> = {
-    level_0_normal:          { label: "Level 0: Normal",          badgeColor: "bg-green-100 text-green-800",  description: "The vault is safely secured. Their normal check-in schedule is active." },
-    level_1_concern:         { label: "Level 1: Concern",         badgeColor: "bg-amber-100 text-amber-800",  description: "The vault owner has not checked in for longer than usual." },
-    level_2_alert:           { label: "Level 2: Alert",           badgeColor: "bg-amber-100 text-amber-800",  description: "The owner has missed multiple check-ins. Monitoring is active." },
-    level_3_suspected_death: { label: "Level 3: Suspected Death", badgeColor: "bg-red-100 text-red-800",      description: "A guardian has reported a suspected death. Verification is in progress." },
-    level_4_death_claimed:   { label: "Level 4: Death Claimed",   badgeColor: "bg-red-100 text-red-800",      description: "A death certificate has been submitted. The liveness window is open." },
-    level_5_executed:        { label: "Level 5: Vault Executed",  badgeColor: "bg-gray-100 text-gray-600",    description: "The vault has been executed and packages delivered to beneficiaries." },
+    level_0_normal: { label: "Level 0: Normal", badgeColor: "bg-green-100 text-green-800", description: "The vault is safely secured. Their normal check-in schedule is active." },
+    level_1_concern: { label: "Level 1: Concern", badgeColor: "bg-amber-100 text-amber-800", description: "The vault owner has not checked in for longer than usual." },
+    level_2_alert: { label: "Level 2: Alert", badgeColor: "bg-amber-100 text-amber-800", description: "The owner has missed multiple check-ins. Monitoring is active." },
+    level_3_suspected_death: { label: "Level 3: Suspected Death", badgeColor: "bg-red-100 text-red-800", description: "A guardian has reported a suspected death. Verification is in progress." },
+    level_4_death_claimed: { label: "Level 4: Death Claimed", badgeColor: "bg-red-100 text-red-800", description: "A death certificate has been submitted. The liveness window is open." },
+    level_5_executed: { label: "Level 5: Vault Executed", badgeColor: "bg-gray-100 text-gray-600", description: "The vault has been executed and packages delivered to beneficiaries." },
 };
 
 interface GuardianContext {
@@ -193,7 +193,7 @@ export default function GuardianPortalPage() {
                 </div>
             </main>
 
-            <Dialog open={isReportDialogOpen} onOpenChange={(open) => {
+            <Dialog open={isReportDialogOpen} onOpenChange={(open: boolean) => {
                 if (!isSubmitting) {
                     setIsReportDialogOpen(open);
                     if (!open) setTimeout(() => setReportStep(1), 300);
