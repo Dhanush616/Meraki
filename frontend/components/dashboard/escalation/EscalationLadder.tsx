@@ -135,27 +135,27 @@ export function EscalationLadder({ currentLevel }: EscalationLadderProps) {
                         const Icon = level.icon;
 
                         return (
-                            <div key={level.id} className="relative flex gap-4">
+                            <div key={level.id} className="relative flex gap-3">
                                 {/* Vertical line + dot */}
                                 <div className="flex flex-col items-center">
                                     <div
-                                        className={`relative z-10 w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-500 ${
+                                        className={`relative z-10 w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all duration-500 ${
                                             isActive
-                                                ? `${colors.dot} ring-4 ring-current/10 shadow-lg`
+                                                ? `${colors.dot} ring-[3px] ring-current/10 shadow-md`
                                                 : isPast
                                                 ? colors.dot
                                                 : "bg-muted border-2 border-border"
                                         }`}
                                     >
                                         <Icon
-                                            className={`w-4 h-4 ${
+                                            className={`w-3.5 h-3.5 ${
                                                 isActive || isPast ? "text-white" : colors.icon
                                             }`}
                                         />
                                     </div>
                                     {!isLast && (
                                         <div
-                                            className={`w-0.5 flex-1 min-h-[2rem] transition-colors duration-500 ${
+                                            className={`w-0.5 flex-1 min-h-[0.5rem] transition-colors duration-500 ${
                                                 isPast ? colors.line : "bg-border"
                                             }`}
                                         />
@@ -164,18 +164,18 @@ export function EscalationLadder({ currentLevel }: EscalationLadderProps) {
 
                                 {/* Content */}
                                 <div
-                                    className={`flex-1 pb-6 ${isLast ? "pb-0" : ""}`}
+                                    className={`flex-1 ${isLast ? "pb-0" : "pb-2"}`}
                                 >
                                     <div
-                                        className={`rounded-xl p-3.5 transition-all duration-500 ${
+                                        className={`rounded-lg p-2.5 transition-all duration-500 ${
                                             isActive
                                                 ? `${colors.bg} border border-current/10`
                                                 : ""
                                         }`}
                                     >
-                                        <div className="flex items-center gap-2 mb-1">
+                                        <div className="flex items-center gap-1.5 mb-0.5">
                                             <h4
-                                                className={`text-sm font-semibold ${
+                                                className={`text-xs font-semibold ${
                                                     isActive
                                                         ? colors.text
                                                         : isPast
@@ -186,15 +186,15 @@ export function EscalationLadder({ currentLevel }: EscalationLadderProps) {
                                                 {level.label}
                                             </h4>
                                             {isActive && (
-                                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${colors.dot} text-white`}>
+                                                <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-px rounded-full ${colors.dot} text-white`}>
                                                     Current
                                                 </span>
                                             )}
                                         </div>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-[11px] leading-tight text-muted-foreground">
                                             <span className="font-medium">Trigger:</span> {level.trigger}
                                         </p>
-                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                        <p className="text-[11px] leading-tight text-muted-foreground mt-px">
                                             <span className="font-medium">Action:</span> {level.action}
                                         </p>
                                     </div>
