@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowRightIcon, ShieldIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/shared/Logo";
 
 export default function SignInPage() {
     const router = useRouter();
@@ -122,13 +123,8 @@ export default function SignInPage() {
                 className="w-full max-w-[420px]"
             >
                 <div className="flex flex-col items-center mb-8">
-                    <Link href="/" className="flex flex-col items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-lg">
-                            <span className="w-4 h-4 bg-card rounded-full"></span>
-                        </div>
-                        <span className="font-sans text-3xl font-bold text-foreground">Paradosis</span>
-                    </Link>
-                    <h1 className="mt-6 text-2xl font-sans text-foreground">Welcome back</h1>
+                    <Logo className="flex-col gap-4" iconClassName="w-14 h-14" textClassName="text-3xl" />
+                    <h1 className="mt-8 text-2xl font-sans text-foreground">Welcome back</h1>
                     <p className="text-muted-foreground font-sans mt-2">Enter your credentials to access your vault</p>
                 </div>
 
@@ -193,7 +189,7 @@ export default function SignInPage() {
                             </div>
                         )}
 
-                        <Button type="submit" disabled={loading} className="w-full bg-primary text-primary-foreground hover:bg-[#b05637] transition-all rounded-lg py-6 mt-4 group">
+                        <Button type="submit" disabled={loading} className="w-full bg-primary text-primary-foreground hover:bg-zinc-800 transition-all rounded-lg py-6 mt-4 group">
                             <span className="font-medium text-base">{loading ? "Signing in..." : "Sign In"}</span>
                             {!loading && <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />}
                         </Button>
@@ -201,7 +197,7 @@ export default function SignInPage() {
                 </div>
 
                 <p className="text-center mt-8 text-muted-foreground font-sans text-sm">
-                    Don't have a vault yet? <Link href={role === "guardian" ? "/auth/signup?role=guardian" : "/auth/signup"} className="text-primary font-medium hover:underline">Get started securely</Link>
+                    Don't have a vault yet? <Link href={role === "guardian" ? "/auth/signup?role=guardian" : "/auth/signup"} className="text-zinc-600 font-medium hover:underline">Get started securely</Link>
                 </p>
             </motion.div>
         </div>

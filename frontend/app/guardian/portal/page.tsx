@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ShieldAlertIcon, CheckCircle2Icon, ActivityIcon, UploadCloudIcon, LoaderIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/shared/Logo";
 
 import { EscalationLadder } from "@/components/dashboard/escalation/EscalationLadder";
 import { toast } from "sonner";
@@ -78,12 +79,7 @@ export default function GuardianPortalPage() {
     return (
         <div className="min-h-screen bg-background flex flex-col p-4 md:p-8">
             <header className="w-full max-w-5xl mx-auto flex items-center justify-between mb-12">
-                <Link href="/" className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg">
-                        <span className="w-2.5 h-2.5 bg-card rounded-full"></span>
-                    </div>
-                    <span className="font-sans text-xl font-bold text-foreground">Paradosis</span>
-                </Link>
+                <Logo />
                 <div className="flex items-center gap-4">
                     <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground bg-white px-4 py-2 rounded-full border border-border shadow-sm">
                         Guardian Portal
