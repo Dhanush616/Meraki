@@ -20,13 +20,13 @@ export function HeroGemini() {
 
     return (
         <div
-            className="h-[200vh] w-full relative pt-6 overflow-clip"
+            className="h-[200vh] w-full relative pt-0 overflow-clip"
             ref={ref}
         >
             <GoogleGeminiEffect
                 pathLengths={pathLengths}
-                title="Everything you built,\nin the right hands."
-                description="Paradosis helps you organise every asset you own — bank accounts, property, insurance, and crypto — and ensures your family receives it all without the paperwork nightmare."
+                title="Secure your legacy. Simplified."
+                description="Organize your bank accounts, properties, and digital assets into a single encrypted vault. Ensure seamless transfer without the paperwork nightmare."
             />
         </div>
     );

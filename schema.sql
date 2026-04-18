@@ -1324,6 +1324,32 @@ GROUP BY a.id, a.owner_id, a.nickname, a.asset_type, a.status;
 
 
 -- ============================================================
+-- SECTION 16.3: GRANTS
+-- Supabase's automatic default grants only apply when tables
+-- are created via the dashboard. Schema-created tables and all
+-- views require explicit grants.
+-- Run this entire section whenever new tables/views are added.
+-- ============================================================
+
+-- Tables: full access for service_role (backend), row-filtered by RLS for authenticated
+GRANT ALL ON ALL TABLES    IN SCHEMA public TO service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES    IN SCHEMA public TO authenticated;
+GRANT USAGE, SELECT                  ON ALL SEQUENCES IN SCHEMA public TO authenticated;
+
+-- Ensure future tables/sequences also get these grants automatically
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT ALL ON TABLES    TO service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT ALL ON SEQUENCES TO service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES    TO authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT USAGE, SELECT                  ON SEQUENCES TO authenticated;
+
+
+-- ============================================================
 -- SECTION 17: SEED DATA FOR DEMO
 -- Populate "Ramesh Iyer" demo account for the hackathon demo.
 -- Replace the UUID below with the actual Supabase auth UID
