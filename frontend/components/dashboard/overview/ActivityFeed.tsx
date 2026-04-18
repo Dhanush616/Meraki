@@ -18,12 +18,12 @@ interface Props { activities: ActivityLog[]; isLoading: boolean; }
 
 export function ActivityFeed({ activities, isLoading }: Props) {
     return (
-        <div className="bg-card rounded-2xl p-5 border border-oat-border">
+        <div className="bg-card rounded-2xl p-5 border border-border">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                     <ActivityIcon className="w-4 h-4" /> Recent Activity
                 </h3>
-                <Link href="/dashboard/activity" className="text-xs text-primary hover:underline font-medium">View all</Link>
+                <Link href="/dashboard/activity" className="text-xs text-foreground hover:underline font-medium">View all</Link>
             </div>
             {isLoading ? (
                 <div className="space-y-3">
@@ -41,7 +41,7 @@ export function ActivityFeed({ activities, isLoading }: Props) {
                 <div className="space-y-3">
                     {activities.map((log) => (
                         <div key={log.id} className="flex gap-3 text-sm">
-                            <div className="w-2 h-2 mt-1.5 rounded-full bg-oat-border shrink-0" />
+                            <div className="w-2 h-2 mt-1.5 rounded-full bg-border shrink-0" />
                             <div>
                                 <p className="text-foreground font-medium">{formatAction(log.action)}</p>
                                 <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(log.created_at)}</p>
@@ -50,7 +50,7 @@ export function ActivityFeed({ activities, isLoading }: Props) {
                     ))}
                 </div>
             ) : (
-                <p className="text-sm text-muted-foreground py-4 text-center bg-background rounded-lg border border-dashed border-oat-border">
+                <p className="text-sm text-muted-foreground py-4 text-center bg-background rounded-lg border border-border">
                     No activity yet.
                 </p>
             )}

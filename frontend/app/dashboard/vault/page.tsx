@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose
 } from "@/components/ui/dialog";
+import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer } from "recharts";
 
 interface Asset {
     id: string;
@@ -48,11 +49,15 @@ function getConfig(type: string) {
 }
 
 function statusDot(asset: Asset) {
-    if (asset.primary_total_pct === 100 && asset.backup_beneficiary_count > 0)
-        return "bg-emerald-50 text-emerald-600";
-    if (asset.primary_total_pct === 100)
-        return "bg-amber-50 text-amber-600";
-    return "bg-red-50 text-red-600";
+    if (asset.primary_total_pct !== 100)
+        return "bg-foreground text-background";
+    return "bg-muted text-foreground";
+}
+
+function getCategory(type: string) {
+    if (["crypto_wallet", "other"].includes(type)) return "Digital";
+    if (["property", "vehicle", "gold_jewellery"].includes(type)) return "Physical";
+    return "Finance";
 }
 
 // ── View Modal ──────────────────────────────────────────────────────────────
@@ -202,7 +207,7 @@ function EditModal({ asset, onClose, onSaved }: { asset: Asset | null; onClose: 
                     </div>
 
                     {saveError && (
-                        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{saveError}</p>
+                        <p className="text-sm text-foreground bg-muted border border-border rounded-lg px-3 py-2">{saveError}</p>
                     )}
                 </div>
 
@@ -239,8 +244,8 @@ function DeleteDialog({ asset, onClose, onConfirm, isDeleting }: {
             <DialogContent className="max-w-md">
                 <DialogHeader>
                     <div className="flex items-center gap-3 mb-1">
-                        <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
-                            <Trash2Icon className="w-5 h-5 text-red-500" />
+                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                            <Trash2Icon className="w-5 h-5 text-foreground" />
                         </div>
                         <DialogTitle className="text-foreground">Delete Asset?</DialogTitle>
                     </div>
@@ -256,7 +261,7 @@ function DeleteDialog({ asset, onClose, onConfirm, isDeleting }: {
                     <Button
                         onClick={onConfirm}
                         disabled={isDeleting}
-                        className="bg-red-600 text-white hover:bg-red-700"
+                        className="bg-foreground text-background hover:bg-foreground/90"
                     >
                         {isDeleting ? (
                             <><Loader2Icon className="w-4 h-4 mr-2 animate-spin" /> Deleting…</>
@@ -276,6 +281,7 @@ export default function MyVaultPage() {
     const [isLoading, setIsLoading]     = useState(true);
     const [error, setError]             = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
     // Modal state
     const [viewAsset, setViewAsset]     = useState<Asset | null>(null);
@@ -317,10 +323,12 @@ export default function MyVaultPage() {
 
     // Derived State
     const activeAssets    = assets.filter(a => a.status === "active");
-    const filteredAssets  = activeAssets.filter(a =>
-        a.nickname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.asset_type.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredAssets  = activeAssets.filter(a => {
+        const matchesSearch = a.nickname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                              a.asset_type.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory = selectedCategory === "All" || getCategory(a.asset_type) === selectedCategory;
+        return matchesSearch && matchesCategory;
+    });
     const hasAllocationWarning = activeAssets.some(a => a.primary_total_pct !== 100);
 
     // Grouping
@@ -329,6 +337,22 @@ export default function MyVaultPage() {
         acc[asset.asset_type].push(asset);
         return acc;
     }, {} as Record<string, Asset[]>);
+
+    const pieDataMap = activeAssets.reduce((acc, a) => {
+        const cat = getCategory(a.asset_type);
+        acc[cat] = (acc[cat] || 0) + (a.estimated_value_inr || 0);
+        return acc;
+    }, {} as Record<string, number>);
+
+    const allZeroValue = Object.values(pieDataMap).every(v => v === 0);
+    const pieData = ["Finance", "Physical", "Digital"].map(cat => {
+        let val = allZeroValue ? activeAssets.filter(a => getCategory(a.asset_type) === cat).length : (pieDataMap[cat] || 0);
+        return { name: cat, value: val };
+    }).filter(d => d.value > 0);
+
+    const totalValue = pieData.reduce((sum, d) => sum + d.value, 0);
+
+    const COLORS = ["#171717", "#737373", "#d4d4d4"];
 
     // Handlers
     const handleConfirmDelete = async () => {
@@ -434,19 +458,73 @@ export default function MyVaultPage() {
                 </div>
             </header>
 
+            {pieData.length > 0 && (
+                <div className="bg-card border border-border rounded-2xl p-4 mb-6 flex items-center justify-between gap-4 max-w-2xl mx-auto">
+                    <div className="w-32 h-32 shrink-0">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={pieData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={35}
+                                    outerRadius={55}
+                                    paddingAngle={3}
+                                    dataKey="value"
+                                    stroke="none"
+                                >
+                                    {pieData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <RechartsTooltip 
+                                    formatter={(value: number) => {
+                                        const pct = totalValue > 0 ? ((value / totalValue) * 100).toFixed(1) + "%" : "0%";
+                                        return allZeroValue 
+                                            ? [`${value} (${pct})`, "Assets"] 
+                                            : [`${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value)} (${pct})`, "Value"];
+                                    }}
+                                    allowEscapeViewBox={{ x: true, y: true }}
+                                    wrapperStyle={{ zIndex: 100 }}
+                                    offset={25}
+                                    contentStyle={{ backgroundColor: '#171717', borderColor: '#171717', color: '#ffffff', borderRadius: '8px', fontSize: '12px', padding: '6px 10px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.5)' }}
+                                    itemStyle={{ color: '#ffffff' }}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="flex-1">
+                        <h2 className="text-sm font-semibold text-foreground mb-3">Asset Distribution</h2>
+                        <div className="space-y-2">
+                            {pieData.map((entry, i) => (
+                                <div key={entry.name} className="flex items-center justify-between text-xs">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                                        <span className="text-muted-foreground font-medium">{entry.name}</span>
+                                    </div>
+                                    <span className="font-semibold text-foreground">
+                                        {allZeroValue ? entry.value : new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumSignificantDigits: 3 }).format(entry.value)}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {hasAllocationWarning && (
-                <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-start gap-3">
-                    <AlertTriangleIcon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="bg-muted border border-border p-4 rounded-xl flex items-start gap-3">
+                    <AlertTriangleIcon className="w-5 h-5 text-foreground flex-shrink-0 mt-0.5" />
                     <div>
-                        <h3 className="font-semibold text-amber-800">Action Required: Unassigned Assets</h3>
-                        <p className="text-amber-700 text-sm mt-1 mb-2">Some of your assets do not have 100% primary beneficiary allocation. Unassigned portions will trigger default residual routing.</p>
-                        <Button variant="outline" size="sm" className="bg-white border-amber-200 text-amber-800 hover:bg-amber-100">Review Allocations</Button>
+                        <h3 className="font-semibold text-foreground">Action Required: Unassigned Assets</h3>
+                        <p className="text-muted-foreground text-sm mt-1 mb-2">Some of your assets do not have 100% primary beneficiary allocation. Unassigned portions will trigger default residual routing.</p>
+                        <Button variant="outline" size="sm" className="bg-background border-border text-foreground hover:bg-muted">Review Allocations</Button>
                     </div>
                 </div>
             )}
 
             {/* Toolbar */}
-            <div className="bg-card border border-border rounded-xl p-3 flex items-center justify-between shadow-sm">
+            <div className="bg-card border border-border rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm mb-6">
                 <div className="relative w-full max-w-md">
                     <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
@@ -454,8 +532,19 @@ export default function MyVaultPage() {
                         placeholder="Search assets..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg text-sm text-foreground outline-none focus:ring-2 focus:ring-ring/20 transition-all focus:border-ring/40"
+                        className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg text-sm text-foreground outline-none focus:ring-2 focus:ring-foreground/20 transition-all focus:border-foreground/40"
                     />
+                </div>
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
+                    {["All", "Finance", "Physical", "Digital"].map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => setSelectedCategory(cat)}
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border ${selectedCategory === cat ? "bg-foreground text-background border-foreground" : "bg-background text-muted-foreground border-border hover:bg-muted"}`}
+                        >
+                            {cat}
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -465,9 +554,9 @@ export default function MyVaultPage() {
                     <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                 </div>
             ) : error ? (
-                <div className="p-4 text-red-600 bg-red-50 rounded-xl">{error}</div>
+                <div className="p-4 text-foreground bg-muted border border-border rounded-xl">{error}</div>
             ) : Object.keys(groupedAssets).length === 0 ? (
-                <div className="text-center py-16 bg-card rounded-2xl border border-dashed border-border">
+                <div className="text-center py-16 bg-card rounded-2xl border border-border">
                     <WalletIcon className="w-12 h-12 text-muted-foreground opacity-50 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-foreground">No assets found</h3>
                     <p className="text-muted-foreground text-sm mt-1 mb-6">You haven't added any assets to your vault yet.</p>
@@ -490,7 +579,7 @@ export default function MyVaultPage() {
                                 {groupAssets.map(asset => (
                                     <div
                                         key={asset.id}
-                                        className="group border border-border rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-primary/30 hover:shadow-sm transition-all bg-white"
+                                        className="group border border-border rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-muted/50 transition-all bg-card"
                                     >
                                         {/* Left: icon + name */}
                                         <div className="flex items-start gap-4">
@@ -524,7 +613,7 @@ export default function MyVaultPage() {
                                                 <button
                                                     onClick={() => setViewAsset(asset)}
                                                     title="View details"
-                                                    className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors"
+                                                    className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                                                 >
                                                     <EyeIcon className="w-4 h-4" />
                                                 </button>
@@ -532,7 +621,7 @@ export default function MyVaultPage() {
                                                 <button
                                                     onClick={() => setEditAsset(asset)}
                                                     title="Edit asset"
-                                                    className="p-2 rounded-lg text-muted-foreground hover:text-amber-600 hover:bg-amber-50 transition-colors"
+                                                    className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                                                 >
                                                     <PencilIcon className="w-4 h-4" />
                                                 </button>
@@ -540,7 +629,7 @@ export default function MyVaultPage() {
                                                 <button
                                                     onClick={() => setDeleteAsset(asset)}
                                                     title="Delete asset"
-                                                    className="p-2 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-colors"
+                                                    className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                                                 >
                                                     <Trash2Icon className="w-4 h-4" />
                                                 </button>

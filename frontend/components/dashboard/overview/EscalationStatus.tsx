@@ -11,12 +11,12 @@ interface LevelInfo {
 }
 
 const LEVEL_INFO: Record<string, LevelInfo> = {
-    level_0_normal:             { label: "All Clear",          badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",  iconClass: "text-emerald-500" },
-    level_1_concern:            { label: "Concern",            badgeClass: "bg-amber-50 text-amber-700 border-amber-200",        iconClass: "text-amber-500" },
-    level_2_alert:              { label: "Alert",              badgeClass: "bg-amber-50 text-amber-700 border-amber-200",        iconClass: "text-amber-500" },
-    level_3_suspected_death:    { label: "Suspected Death",    badgeClass: "bg-rose-50 text-rose-700 border-rose-200",           iconClass: "text-rose-500" },
-    level_4_death_claimed:      { label: "Death Claimed",      badgeClass: "bg-rose-50 text-rose-700 border-rose-200",           iconClass: "text-rose-500" },
-    level_5_executed:           { label: "Vault Executed",     badgeClass: "bg-gray-100 text-gray-700 border-gray-200",          iconClass: "text-gray-500" },
+    level_0_normal:             { label: "All Clear",          badgeClass: "bg-muted text-foreground border-border",  iconClass: "text-foreground" },
+    level_1_concern:            { label: "Concern",            badgeClass: "bg-muted text-foreground border-border",  iconClass: "text-foreground" },
+    level_2_alert:              { label: "Alert",              badgeClass: "bg-muted text-foreground border-border",  iconClass: "text-foreground" },
+    level_3_suspected_death:    { label: "Suspected Death",    badgeClass: "bg-muted text-foreground border-border",  iconClass: "text-foreground" },
+    level_4_death_claimed:      { label: "Death Claimed",      badgeClass: "bg-muted text-foreground border-border",  iconClass: "text-foreground" },
+    level_5_executed:           { label: "Vault Executed",     badgeClass: "bg-muted text-foreground border-border",  iconClass: "text-foreground" },
 };
 
 function formatDate(iso: string | null): string {
@@ -51,7 +51,7 @@ export function EscalationStatus({ level, lastCheckIn, checkInFrequencyDays, isL
     const info = LEVEL_INFO[level] ?? LEVEL_INFO.level_0_normal;
 
     return (
-        <div className="bg-card rounded-2xl p-6 border border-oat-border shadow-sm">
+        <div className="bg-card rounded-2xl p-6 border border-border">
             <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2 mb-5">
                 <ShieldCheckIcon className={`w-4 h-4 ${info.iconClass}`} /> Escalation Status
             </h3>
@@ -85,7 +85,7 @@ export function EscalationStatus({ level, lastCheckIn, checkInFrequencyDays, isL
 
                     <Link
                         href="/dashboard/escalation"
-                        className="mt-5 flex items-center gap-1 text-xs text-primary font-medium hover:underline"
+                        className="mt-5 flex items-center gap-1 text-xs text-foreground font-medium hover:underline"
                     >
                         Configure monitoring <ArrowRightIcon className="w-3 h-3" />
                     </Link>
