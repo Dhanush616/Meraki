@@ -23,7 +23,7 @@ def get_beneficiary_dashboard(user_id: str = Depends(get_current_user_id)):
     owner_id = role_res.data[0]["linked_owner_id"]
     
     # 2. Get beneficiary_id for this user
-    bene_res = supabase.table("beneficiaries").select("id, full_name").eq("user_id", user_id).eq("owner_id", owner_id).execute()
+    bene_res = supabase.table("beneficiaries").select("id, full_name, relationship").eq("user_id", user_id).eq("owner_id", owner_id).execute()
     if not bene_res.data:
         raise HTTPException(status_code=404, detail="Beneficiary record not found")
     beneficiary = bene_res.data[0]
@@ -96,13 +96,18 @@ def get_beneficiary_dashboard(user_id: str = Depends(get_current_user_id)):
     msg_res = supabase.table("personal_messages").select("*").eq("beneficiary_id", beneficiary_id).execute()
     personal_message = msg_res.data[0] if msg_res.data else None
     
-    # 6. Get owner name
-    owner_res = supabase.table("profiles").select("full_name").eq("id", owner_id).execute()
-    owner_name = owner_res.data[0]["full_name"] if owner_res.data else "Vault Owner"
+    # 6. Get owner details (for inheritance guide)
+    owner_res = supabase.table("profiles").select("full_name, religion, state, city").eq("id", owner_id).execute()
+    owner_profile = owner_res.data[0] if owner_res.data else {}
+    owner_name = owner_profile.get("full_name", "Vault Owner")
     
     return {
         "owner_name": owner_name,
-        "beneficiary_name": beneficiary["full_name"],
+        "owner_religion": owner_profile.get("religion"),
+        "owner_state": owner_profile.get("state"),
+        "owner_city": owner_profile.get("city"),
+        "beneficiary_name": beneficiary.get("full_name"),
+        "beneficiary_relationship": beneficiary.get("relationship", ""),
         "allocated_assets": allocated_assets,
         "other_assets": other_assets,
         "will_document": will_document,

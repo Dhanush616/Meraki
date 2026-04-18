@@ -77,7 +77,7 @@ export default function AddAssetWizard() {
     const [accountIdentifier, setAccountIdentifier] = useState("");
     const [estimatedValue, setEstimatedValue] = useState("");
     const [customFields, setCustomFields] = useState<Record<string, string>>({});
-    
+
     // Allocation State
     const [allocations, setAllocations] = useState<{ beneficiary_id: string; percentage: number }[]>([]);
 
@@ -125,7 +125,7 @@ export default function AddAssetWizard() {
         try {
             const token = localStorage.getItem("paradosis_access_token");
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-            
+
             const totalPct = allocations.reduce((sum, a) => sum + a.percentage, 0);
 
             const newAsset = {
@@ -155,16 +155,16 @@ export default function AddAssetWizard() {
                 const errorData = await res.json();
                 throw new Error(errorData.detail || "Failed to save asset to database");
             }
-            
+
             const createdAsset = await res.json();
 
             // Save mappings if any
             if (allocations.length > 0) {
                 const mappingsRes = await fetch(`${apiUrl}/api/assets/${createdAsset.id}/mappings`, {
                     method: "PUT",
-                    headers: { 
+                    headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}` 
+                        "Authorization": `Bearer ${token}`
                     },
                     body: JSON.stringify(allocations.map(a => ({
                         beneficiary_id: a.beneficiary_id,
@@ -173,12 +173,12 @@ export default function AddAssetWizard() {
                         priority_order: 1
                     })))
                 });
-                
+
                 if (!mappingsRes.ok) {
                     console.error("Failed to save mappings, but asset was created.");
                 }
             }
-            
+
             router.push("/dashboard/vault");
         } catch (err: any) {
             alert(err.message);
@@ -304,7 +304,7 @@ export default function AddAssetWizard() {
 
                     {step === 3 && (
                         <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                            <AssetAllocation 
+                            <AssetAllocation
                                 assetNickname={nickname || "New Asset"}
                                 beneficiaries={beneficiaries}
                                 onSave={handleAllocationSave}
@@ -366,16 +366,16 @@ export default function AddAssetWizard() {
             {/* Footer Navigation */}
             <div className="flex justify-end mt-8">
                 {step < 3 ? (
-                    <Button 
-                        onClick={handleNext} 
+                    <Button
+                        onClick={handleNext}
                         disabled={(step === 1 && !assetType) || (step === 2 && !nickname)}
                         className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-6 rounded-full"
                     >
                         Continue <ChevronRightIcon className="w-4 h-4 ml-2" />
                     </Button>
                 ) : step === 4 ? (
-                    <Button 
-                        onClick={handleSubmit} 
+                    <Button
+                        onClick={handleSubmit}
                         disabled={isSubmitting}
                         className="bg-emerald-600 text-white hover:bg-emerald-700 px-8 py-6 rounded-full shadow-lg shadow-emerald-500/20"
                     >

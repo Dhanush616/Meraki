@@ -31,6 +31,7 @@ class BeneficiaryAllocation(BaseModel):
 class AssetCreate(AssetBase):
     primary_total_pct: Optional[float] = 0
     primary_beneficiary_count: Optional[int] = 0
+    allocations: Optional[List[BeneficiaryAllocation]] = None
 
 class MappingBase(BaseModel):
     beneficiary_id: UUID

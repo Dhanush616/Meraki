@@ -8,14 +8,20 @@ import {
     ShieldCheckIcon, BuildingIcon, WalletIcon, LandmarkIcon, CreditCardIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-
+import { InheritanceGuideModal } from "./InheritanceGuideModal";
 
 export default function BeneficiaryDashboard() {
     const router = useRouter();
     const [data, setData] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [selectedAssetForGuide, setSelectedAssetForGuide] = useState<any>(null);
+    const [isGuideOpen, setIsGuideOpen] = useState(false);
+
+    const openGuide = (asset: any) => {
+        setSelectedAssetForGuide(asset);
+        setIsGuideOpen(true);
+    };
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -142,6 +148,16 @@ export default function BeneficiaryDashboard() {
                                             )}
                                         </div>
 
+                                        <div className="mt-4 pt-4 border-t border-border flex justify-end">
+                                            <Button 
+                                                variant="outline" 
+                                                className="border-primary/20 hover:bg-primary/5 text-primary text-xs h-8"
+                                                onClick={() => openGuide(asset)}
+                                            >
+                                                Inheritance Guide
+                                            </Button>
+                                        </div>
+
                                         {asset.other_beneficiaries && asset.other_beneficiaries.length > 0 && (
                                             <div className="mt-4 border-t border-border pt-4">
                                                 <p className="text-xs text-muted-foreground">Also shared with: {asset.other_beneficiaries.map((b: any) => `${b.name} (${b.percentage}%)`).join(", ")}</p>
@@ -224,6 +240,14 @@ export default function BeneficiaryDashboard() {
                     </div>
                 </div>
             </main>
+            
+            <InheritanceGuideModal 
+                isOpen={isGuideOpen}
+                onClose={() => setIsGuideOpen(false)}
+                asset={selectedAssetForGuide}
+                owner={data}
+                beneficiary={data}
+            />
         </div>
     );
 }

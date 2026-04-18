@@ -376,7 +376,7 @@ export default function MyVaultPage() {
 
     const pieDataMap = activeAssets.reduce((acc, a) => {
         const cat = getCategory(a.asset_type);
-        acc[cat] = (acc[cat] || 0) + (a.estimated_value_inr || 0);
+        acc[cat] = (acc[cat] || 0) + Number(a.estimated_value_inr || 0);
         return acc;
     }, {} as Record<string, number>);
 
