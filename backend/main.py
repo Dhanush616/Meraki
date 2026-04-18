@@ -4,7 +4,7 @@ from core.config import settings
 from routers import (
     health, assets, beneficiaries, intent,
     documents, escalation, verification, execution,
-    auth, vault
+    auth, vault, security, activity, guardian, internal
 )
 
 app = FastAPI(
@@ -37,5 +37,9 @@ app.include_router(verification.router, prefix="/api/verification", tags=["Verif
 app.include_router(execution.router, prefix="/api/execution", tags=["Execution"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(vault.router, prefix="/api/vault", tags=["Vault"])
+app.include_router(security.router, prefix="/api/security", tags=["Security"])
+app.include_router(activity.router, prefix="/api/activity", tags=["Activity"])
+app.include_router(guardian.router, prefix="/api/guardian", tags=["Guardian"])
+app.include_router(internal.router, prefix="/api/internal", tags=["Internal"])
 
 # Trigger reload
