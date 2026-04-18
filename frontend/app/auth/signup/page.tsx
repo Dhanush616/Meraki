@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRightIcon, ShieldCheckIcon, KeySquareIcon, EyeOffIcon } from "lucide-react";
+import { ArrowRightIcon, ShieldCheckIcon, KeySquareIcon, EyeOffIcon, ShieldIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const steps = [
@@ -19,6 +19,10 @@ const steps = [
 
 export default function SignUpPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const role = searchParams.get("role");
+    const isGuardian = role === "guardian";
+
     const [step, setStep] = useState(0);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -28,6 +32,33 @@ export default function SignUpPage() {
     const handleNext = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+
+        if (isGuardian) {
+            setLoading(true);
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+                // For guardians, "Signup" is essentially "Activation" which works like a passwordless login
+                const res = await fetch(`${apiUrl}/api/guardian/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.detail || "This email is not registered as a guardian for any vault.");
+                }
+
+                localStorage.setItem("guardian_token", data.token);
+                router.push("/guardian/portal");
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+            return;
+        }
 
         if (step === 0 && email) {
             setStep(1);
@@ -79,8 +110,19 @@ export default function SignUpPage() {
                     </Link>
 
                     <div className="mb-8">
-                        <h1 className="text-3xl font-sans text-foreground mb-2">Build your vault</h1>
-                        <p className="text-muted-foreground font-sans">Step {step + 1} of 2: {steps[step].title}</p>
+                        <h1 className="text-3xl font-sans text-foreground mb-2">
+                            {isGuardian ? "Guardian Activation" : "Build your vault"}
+                        </h1>
+                        <p className="text-muted-foreground font-sans">
+                            {isGuardian 
+                                ? "Activate your guardian access to protect a loved one's vault." 
+                                : `Step ${step + 1} of 2: ${steps[step].title}`}
+                        </p>
+                        {isGuardian && (
+                            <div className="mt-4 flex items-center gap-2 text-primary font-medium text-sm bg-primary/5 px-3 py-2 rounded-lg border border-primary/10">
+                                <ShieldIcon className="w-4 h-4" /> Authorized Guardian Mode
+                            </div>
+                        )}
                     </div>
 
                     {error && (
@@ -147,7 +189,7 @@ export default function SignUpPage() {
                                 <div />
                             )}
                             <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground hover:bg-[#b05637] transition-all rounded-full py-6 px-8 group self-end ml-auto">
-                                <span className="font-medium text-base ml-2">{loading ? "Wait..." : (step === 0 ? "Continue" : "Create Vault")}</span>
+                                <span className="font-medium text-base ml-2">{loading ? "Wait..." : (step === 0 || isGuardian ? "Continue" : "Create Vault")}</span>
                                 {!loading && <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />}
                             </Button>
                         </div>
@@ -179,7 +221,7 @@ export default function SignUpPage() {
             </motion.div>
 
             <p className="text-center mt-8 text-muted-foreground font-sans text-sm">
-                Already have a vault? <Link href="/auth/signin" className="text-primary font-medium hover:underline">Sign into Paradosis</Link>
+                Already have a vault? <Link href={isGuardian ? "/auth/signin?role=guardian" : "/auth/signin"} className="text-primary font-medium hover:underline">Sign into Paradosis</Link>
             </p>
         </div>
     );

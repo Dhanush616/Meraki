@@ -428,13 +428,16 @@ export default function LandingPage() {
                                 <ArrowRightIcon className="w-4 h-4" />
                             </motion.button>
                         </Link>
-                        <motion.button
-                            whileHover={{ scale: 1.03 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="bg-transparent border border-white/20 text-white px-6 py-2.5 rounded-full font-sans font-medium hover:bg-white/10 transition-colors w-full sm:w-auto text-base flex items-center justify-center"
-                        >
-                            View Example Vault
-                        </motion.button>
+                        <Link href="/auth/signin?role=guardian">
+                            <motion.button
+                                whileHover={{ scale: 1.03 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="bg-transparent border border-white/20 text-white px-6 py-2.5 rounded-full font-sans font-medium hover:bg-white/10 transition-colors w-full sm:w-auto text-base flex items-center justify-center gap-2"
+                            >
+                                <ShieldIcon className="w-4 h-4" />
+                                Guardian Access
+                            </motion.button>
+                        </Link>
                     </div>
                 </motion.div>
             </section>

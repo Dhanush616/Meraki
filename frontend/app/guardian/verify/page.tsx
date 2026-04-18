@@ -1,10 +1,11 @@
-﻿"use client";
-import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+"use client";
+import { useState, useRef, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
     UploadCloudIcon, FileTextIcon, CheckCircle2Icon,
     XCircleIcon, ArrowLeftIcon, LoaderIcon, ArrowRightIcon,
+    ShieldIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -14,22 +15,44 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 type Step = "instructions" | "upload" | "processing" | "result";
 
 interface VerificationResult {
-    status: "verified" | "rejected";
+    status: "verified" | "executed" | "rejected";
+    message?: string;
     rejection_reason?: string;
     liveness_window_days?: number;
     submission_id?: string;
 }
 
-export default function BeneficiaryVerifyPage() {
+export default function GuardianVerifyPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const queryOwnerId = searchParams.get("ownerId");
+    
     const fileRef = useRef<HTMLInputElement>(null);
     const [step, setStep] = useState<Step>("instructions");
     const [dragOver, setDragOver] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [result, setResult] = useState<VerificationResult | null>(null);
+    const [ownerId, setOwnerId] = useState(queryOwnerId || "");
+    const [guardianName, setGuardianName] = useState("");
 
-    const token = typeof window !== "undefined" ? localStorage.getItem("beneficiary_token") || localStorage.getItem("paradosis_access_token") : null;
-    const beneficiaryId = typeof window !== "undefined" ? localStorage.getItem("beneficiary_id") || "" : "";
+    const token = typeof window !== "undefined" ? localStorage.getItem("guardian_token") : null;
+
+    useEffect(() => {
+        if (!token) {
+            router.push("/guardian/login");
+            return;
+        }
+
+        // Fetch guardian context
+        fetch(`${API}/api/guardian/me`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+            setGuardianName(data.guardian_name);
+        })
+        .catch(err => console.error(err));
+    }, [token, router]);
 
     function handleFile(f: File) {
         const allowed = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
@@ -62,7 +85,7 @@ export default function BeneficiaryVerifyPage() {
 
         const startTime = Date.now();
 
-        // Visual simulation of analysis steps (200ms per step)
+        // Visual simulation of analysis steps (5 steps * 200ms = 1s)
         const timer = setInterval(() => {
             setAnalysisStep(prev => (prev < analysisLabels.length - 1 ? prev + 1 : prev));
         }, 200);
@@ -70,10 +93,9 @@ export default function BeneficiaryVerifyPage() {
         try {
             const formData = new FormData();
             formData.append("file", file);
-            // The backend for beneficiary/submit-death-cert already handles finding the owner 
-            // from the beneficiary_id / token context.
+            // No longer passing owner_id, backend gets it from token
 
-            const res = await fetch(`${API}/api/verification/submit-death-cert`, {
+            const res = await fetch(`${API}/api/guardian/verify`, {
                 method: "POST",
                 headers: { 
                     Authorization: `Bearer ${token}` 
@@ -88,14 +110,14 @@ export default function BeneficiaryVerifyPage() {
 
             const data = await res.json();
             
-            // Wait at least 1s for simulation
+            // Ensure we wait at least 1 second total for the simulation to finish
             const elapsed = Date.now() - startTime;
             const remaining = Math.max(0, 1000 - elapsed);
 
             setTimeout(() => {
                 clearInterval(timer);
-                toast.success("Certificate analyzed. Process initiated.");
-                router.push("/beneficiary/dashboard");
+                toast.success("Certificate analyzed successfully. Portal updated.");
+                router.push("/guardian/portal");
             }, remaining);
 
         } catch (err: any) {
@@ -116,13 +138,13 @@ export default function BeneficiaryVerifyPage() {
                 </Link>
                 <div className="flex items-center gap-4">
                     <button
-                        onClick={() => step === "instructions" ? router.back() : setStep("instructions")}
+                        onClick={() => step === "instructions" ? router.push("/guardian/portal") : setStep("instructions")}
                         className="text-muted-foreground hover:text-foreground transition-colors p-2"
                     >
                         <ArrowLeftIcon className="w-5 h-5" />
                     </button>
-                    <div className="text-sm font-medium text-muted-foreground bg-white px-4 py-2 rounded-full border border-border shadow-sm">
-                        Verification
+                    <div className="flex items-center gap-2 text-sm font-medium text-primary bg-primary/10 px-4 py-2 rounded-full border border-primary/20 shadow-sm">
+                        <ShieldIcon className="w-4 h-4" /> Guardian Verification
                     </div>
                 </div>
             </header>
@@ -137,18 +159,14 @@ export default function BeneficiaryVerifyPage() {
                                 <FileTextIcon className="w-8 h-8 text-primary" />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-sans font-bold text-foreground mb-3">Upload the Death Certificate</h1>
+                                <h1 className="text-2xl font-sans font-bold text-foreground mb-3">Death Certificate Verification</h1>
                                 <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
-                                    Please obtain the official death certificate. If you have a digital copy,
-                                    you can download it from{" "}
-                                    <a href="https://digilocker.gov.in" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                        DigiLocker
-                                    </a>
-                                    {" "}or your local Municipal Corporation portal.
+                                    Hello {guardianName || "Guardian"}. To proceed with the claim process for the vault you protect, 
+                                    we require an official death certificate for the owner.
                                 </p>
                             </div>
                             <div className="bg-background rounded-xl border border-border p-5 text-left space-y-3 max-w-md mx-auto">
-                                {["PDF, JPG, or PNG format", "Under 10 MB", "Clear, readable scan or digital copy", "Must show name, date, and issuing authority"].map(t => (
+                                {["Official Government Death Certificate", "PDF, JPG, or PNG format", "Under 10 MB", "Must be clear and readable"].map(t => (
                                     <div key={t} className="flex items-center gap-3 text-sm text-muted-foreground font-medium">
                                         <CheckCircle2Icon className="w-4 h-4 text-green-500 shrink-0" />
                                         {t}
@@ -159,7 +177,7 @@ export default function BeneficiaryVerifyPage() {
                                 onClick={() => setStep("upload")}
                                 className="w-full sm:w-auto px-8 py-6 rounded-full text-base font-medium shadow-lg mt-4"
                             >
-                                Continue <ArrowRightIcon className="w-4 h-4 ml-2" />
+                                Continue to Upload <ArrowRightIcon className="w-4 h-4 ml-2" />
                             </Button>
                         </div>
                     )}
@@ -170,8 +188,8 @@ export default function BeneficiaryVerifyPage() {
                             <h2 className="text-2xl font-sans font-bold text-foreground text-center">Upload Certificate</h2>
 
                             <p className="text-sm text-muted-foreground text-center mb-4">
-                                Please upload the official government death certificate for the vault owner.
-                                Analysis will begin automatically.
+                                Please upload the official government death certificate. 
+                                Secure analysis will begin immediately.
                             </p>
 
                             {/* Drop zone */}
@@ -233,29 +251,39 @@ export default function BeneficiaryVerifyPage() {
                     {/* Step 4 — Result */}
                     {step === "result" && result && (
                         <div className="text-center space-y-6 py-6 max-w-md mx-auto">
-                            {result.status === "verified" ? (
+                            {(result.status === "verified" || result.status === "executed") ? (
                                 <>
                                     <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
                                         <CheckCircle2Icon className="w-8 h-8 text-green-600" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-sans font-bold text-foreground mb-3">Certificate Verified</h2>
+                                        <h2 className="text-2xl font-sans font-bold text-foreground mb-3">
+                                            {result.status === "executed" ? "Level 5 Activated" : "Thank You, Guardian"}
+                                        </h2>
                                         <div className="bg-background rounded-xl border border-border p-5 text-left mb-6">
                                             <p className="text-muted-foreground text-sm leading-relaxed">
-                                                The death certificate has been verified. The vault owner will have{" "}
-                                                <strong className="text-foreground">{result.liveness_window_days ?? 15} days</strong>{" "}
-                                                to confirm they are alive.
+                                                {result.message || "The death certificate has been successfully verified."}
                                             </p>
-                                            <p className="text-muted-foreground text-sm mt-3 pt-3 border-t border-border">
-                                                If there is no response, the vault will be unlocked and you will be notified.
-                                            </p>
+                                            {result.status !== "executed" && (
+                                                <p className="text-muted-foreground text-sm mt-3 pt-3 border-t border-border">
+                                                    If the owner does not respond within the next <strong className="text-foreground">{result.liveness_window_days ?? 15} days</strong>, 
+                                                    the vault will be automatically executed and beneficiaries will be notified.
+                                                </p>
+                                            )}
+                                            {result.status === "executed" && (
+                                                <p className="text-muted-foreground text-sm mt-3 pt-3 border-t border-border">
+                                                    Beneficiaries have been granted access to their inheritance packages and 
+                                                    automated asset distribution (including crypto routing) has begun.
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
-                                    <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-left">
-                                        <p className="text-primary text-sm font-medium flex items-center gap-2">
-                                            <CheckCircle2Icon className="w-4 h-4" /> You will receive an email once the process is complete.
-                                        </p>
-                                    </div>
+                                    <Button
+                                        onClick={() => router.push("/guardian/portal")}
+                                        className="w-full py-4 rounded-xl shadow-lg"
+                                    >
+                                        Back to Portal
+                                    </Button>
                                 </>
                             ) : (
                                 <>

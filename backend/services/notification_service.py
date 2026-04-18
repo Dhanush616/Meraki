@@ -76,3 +76,22 @@ async def send_execution_package_email(
             "<p>This link expires in 30 days.</p>"
         ),
     )
+
+
+async def send_guardian_confirmation(guardian_email: str, guardian_name: str, owner_first_name: str, liveness_days: int):
+    await send_email(
+        to=guardian_email,
+        subject="Death Certificate Verified — Liveness Window Started",
+        text=(
+            f"Dear {guardian_name},\n\n"
+            f"The death certificate you submitted for {owner_first_name} has been verified.\n"
+            f"We have sent a liveness challenge to the owner. They have {liveness_days} days to respond.\n\n"
+            "We will notify you of any further developments."
+        ),
+        html=(
+            f"<p>Dear <strong>{guardian_name}</strong>,</p>"
+            f"<p>The death certificate you submitted for <strong>{owner_first_name}</strong> has been verified.</p>"
+            f"<p>We have sent a final liveness challenge to the owner. They have <strong>{liveness_days} days</strong> to respond.</p>"
+            "<p>We will notify you of any further developments.</p>"
+        ),
+    )
