@@ -45,6 +45,7 @@
         "react-hook-form": "^7.x",
         "recharts": "^2.x",
         "sonner": "^1.x",
+        "swr": "^2.4.1",
         "tailwind-merge": "^2.6.1",
         "tailwindcss": "^3.x",
         "tailwindcss-animate": "^1.x",
