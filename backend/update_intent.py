@@ -1,4 +1,6 @@
-from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, status
+import os
+
+content = """from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, status
 from typing import Optional, List, Dict, Any
 from core.supabase import get_supabase_client
 from core.security import get_current_user_id
@@ -10,7 +12,7 @@ router = APIRouter()
 
 @router.get("/")
 def get_intent_status(owner_id: str = Depends(get_current_user_id)):
-    """Get the current active intent declaration for the vault owner."""
+    \"\"\"Get the current active intent declaration for the vault owner.\"\"\"
     supabase = get_supabase_client()
     
     # Get active intent
@@ -31,9 +33,9 @@ async def upload_asset_intent_video(
     file: UploadFile = File(...),
     owner_id: str = Depends(get_current_user_id)
 ):
-    """
+    \"\"\"
     Tab 1: Upload Asset Intent Will video, save to Supabase Storage, and save mappings.
-    """
+    \"\"\"
     supabase = get_supabase_client()
     
     # 1. Supersede any existing accepted intent
@@ -102,9 +104,9 @@ async def upload_asset_intent_video(
 
 @router.get("/messages")
 def get_personal_messages(owner_id: str = Depends(get_current_user_id)):
-    """
+    \"\"\"
     Get all personal messages recorded by the vault owner for different beneficiaries.
-    """
+    \"\"\"
     supabase = get_supabase_client()
     res = supabase.table("personal_messages").select("*").eq("owner_id", owner_id).execute()
     return {"messages": res.data}
@@ -115,9 +117,9 @@ async def upload_personal_message(
     file: UploadFile = File(...),
     owner_id: str = Depends(get_current_user_id)
 ):
-    """
+    \"\"\"
     Tab 2: Upload a private personal message for a beneficiary.
-    """
+    \"\"\"
     supabase = get_supabase_client()
     
     # 1. Check if an existing message exists and delete the file if necessary
@@ -156,7 +158,7 @@ async def upload_personal_message(
 
 @router.delete("/messages/{message_id}")
 def delete_personal_message(message_id: str, owner_id: str = Depends(get_current_user_id)):
-    """Delete a personal message"""
+    \"\"\"Delete a personal message\"\"\"
     supabase = get_supabase_client()
     
     # verify ownership
@@ -173,3 +175,7 @@ def delete_personal_message(message_id: str, owner_id: str = Depends(get_current
         
     supabase.table("personal_messages").delete().eq("id", message_id).execute()
     return {"message": "Message deleted"}
+"""
+
+with open(r'c:\Meraki\backend\routers\intent.py', 'w', encoding='utf-8') as f:
+    f.write(content)

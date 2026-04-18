@@ -46,6 +46,7 @@
         "react-dom": "^18.3.x",
         "react-dropzone": "^14.x",
         "react-hook-form": "^7.x",
+        "react-media-recorder": "^1.7.2",
         "react-pdf": "^10.4.1",
         "recharts": "^2.x",
         "sonner": "^1.7.4",
