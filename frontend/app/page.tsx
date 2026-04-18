@@ -65,7 +65,7 @@ function FAQItem({
                 <span className="font-sans text-xl text-black group-hover:text-black transition-colors leading-snug">
                     {q}
                 </span>
-                <span className="shrink-0 mt-1 w-6 h-6 rounded-full border border-[#e5e5e5] flex items-center justify-center text-[#737373] group-hover:border-brand group-hover:text-black transition-all">
+                <span className="shrink-0 mt-1 w-6 h-6 rounded-full border border-[#e5e5e5] flex items-center justify-center text-[#737373] group-hover:border-primary group-hover:text-black transition-all">
                     {isOpen ? <MinusIcon className="w-3.5 h-3.5" /> : <PlusIcon className="w-3.5 h-3.5" />}
                 </span>
             </button>

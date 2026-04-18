@@ -8,44 +8,30 @@ import { BeneficiarySummary } from "@/components/dashboard/overview/BeneficiaryS
 import { EscalationStatus } from "@/components/dashboard/overview/EscalationStatus";
 import { QuickActions } from "@/components/dashboard/overview/QuickActions";
 import { ActivityFeed } from "@/components/dashboard/overview/ActivityFeed";
-import { PendingActionBanner } from "@/components/dashboard/overview/PendingActionBanner";
-import { NetWorthTrend } from "@/components/dashboard/overview/NetWorthTrend";
 
 export default function DashboardOverview() {
     const { data, isLoading, error } = useVaultSummary();
 
     if (error) {
         return (
-            <div className="p-6 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-4">
-                <ShieldAlertIcon className="w-6 h-6 text-destructive shrink-0" />
+            <div className="p-6 bg-red-50 border border-red-200 rounded-xl flex items-start gap-4">
+                <ShieldAlertIcon className="w-6 h-6 text-red-600 shrink-0" />
                 <div>
-                    <h3 className="font-semibold text-destructive">Connection Error</h3>
-                    <p className="text-destructive mt-1">{error}</p>
+                    <h3 className="font-semibold text-red-800">Connection Error</h3>
+                    <p className="text-red-600 mt-1">{error}</p>
                 </div>
             </div>
         );
     }
 
     const hasUnassignedAssets = (data?.asset_count ?? 0) > 0 && (data?.beneficiary_count ?? 0) === 0;
-    
-    // We mock check-in overdue logic for demo purposes
-    const hasOverdueCheckIn = false; 
-
-    const totalVaultValue = data?.assets_by_type?.reduce((acc, curr) => acc + curr.total_value, 0) || 0;
 
     return (
         <div className="space-y-6 max-w-5xl mx-auto pb-12">
-            <header className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-semibold tracking-tight text-foreground">Dashboard Overview</h1>
-                    <p className="text-muted-foreground mt-1">Welcome back to your secure vault.</p>
-                </div>
+            <header className="mb-8">
+                <h1 className="text-3xl font-sans font-bold text-foreground">Dashboard Overview</h1>
+                <p className="text-muted-foreground mt-2">Welcome back to your secure vault.</p>
             </header>
-
-            <PendingActionBanner 
-                hasUnassignedAssets={hasUnassignedAssets} 
-                hasOverdueCheckIn={hasOverdueCheckIn} 
-            />
 
             <OnboardingChecklist
                 step={data?.onboarding_step ?? 0}
@@ -54,16 +40,14 @@ export default function DashboardOverview() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <VaultHealthRing score={data?.health_score ?? 0} isLoading={isLoading} />
-                <NetWorthTrend totalValue={totalVaultValue} />
-                <BeneficiarySummary
-                    count={data?.beneficiary_count ?? 0}
-                    hasUnassignedAssets={hasUnassignedAssets}
-                    isLoading={isLoading}
-                />
-            </div>
-
-            <div className="grid grid-cols-1 gap-6">
-                <AssetSummaryCards assetsByType={data?.assets_by_type ?? []} isLoading={isLoading} />
+                <div className="col-span-2 grid grid-cols-2 gap-6">
+                    <AssetSummaryCards assetsByType={data?.assets_by_type ?? []} isLoading={isLoading} />
+                    <BeneficiarySummary
+                        count={data?.beneficiary_count ?? 0}
+                        hasUnassignedAssets={hasUnassignedAssets}
+                        isLoading={isLoading}
+                    />
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -73,7 +57,7 @@ export default function DashboardOverview() {
                     checkInFrequencyDays={data?.check_in_frequency_days ?? 90}
                     isLoading={isLoading}
                 />
-                <div className="space-y-6">
+                <div className="space-y-4">
                     <QuickActions />
                     <ActivityFeed activities={data?.recent_activity ?? []} isLoading={isLoading} />
                 </div>

@@ -20,7 +20,7 @@ export function TwoFactorVerify() {
 
     return (
         <form onSubmit={handleVerify} className="flex flex-col items-center">
-            <p className="text-olive-gray font-sans text-center text-sm mb-6 leading-relaxed">
+            <p className="text-muted-foreground font-sans text-center text-sm mb-6 leading-relaxed">
                 Enter the 6-digit code from your authenticator app to access your vault.
             </p>
 
@@ -31,7 +31,7 @@ export function TwoFactorVerify() {
             <Button
                 type="submit"
                 disabled={otp.length !== 6 || isLoading}
-                className="w-full bg-brand text-ivory hover:bg-[#b05637] transition-all rounded-lg py-6 shadow-sm group border-none"
+                className="w-full bg-primary text-primary-foreground hover:bg-[#b05637] transition-all rounded-lg py-6 shadow-sm group border-none"
             >
                 {isLoading ? (
                     <span className="animate-pulse">Verifying...</span>
@@ -40,7 +40,7 @@ export function TwoFactorVerify() {
                 )}
             </Button>
 
-            <button type="button" className="text-sm text-brand hover:underline font-sans mt-6">
+            <button type="button" className="text-sm text-primary hover:underline font-sans mt-6">
                 Having trouble? Use a backup code
             </button>
         </form>

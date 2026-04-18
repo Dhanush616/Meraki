@@ -49,7 +49,7 @@ export function OTPInput({ length = 6, value, onChange }: OTPInputProps) {
                     onChange={(e) => handleChange(e, index)}
                     onKeyDown={(e) => handleKeyDown(e, index)}
                     ref={(el) => { inputs.current[index] = el; }}
-                    className="w-12 h-14 text-center text-xl font-medium bg-parchment border border-border-cream rounded-lg outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/40 text-near-black shadow-inner transition-all"
+                    className="w-12 h-14 text-center text-xl font-medium bg-background border border-border rounded-lg outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring/40 text-foreground shadow-inner transition-all"
                 />
             ))}
         </div>
