@@ -1293,6 +1293,11 @@ CREATE POLICY "Users view their own activity"
 --   Max file size: 10MB
 --   Allowed MIME types: application/pdf, image/jpeg, image/png
 
+-- Bucket 5: 'avatars'
+--   Purpose: User profile pictures
+--   Max file size: 5MB
+--   Allowed MIME types: image/jpeg, image/png, image/webp
+
 -- All files accessed via signed URLs (60-minute expiry) generated server-side.
 -- No direct public access to any bucket.
 

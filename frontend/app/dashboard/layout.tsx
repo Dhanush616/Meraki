@@ -2,10 +2,10 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { 
-    LayoutDashboardIcon, ShieldCheckIcon, UsersIcon, 
-    VideoIcon, FileTextIcon, AlertTriangleIcon, 
-    ActivityIcon, SettingsIcon, LogOutIcon, WalletIcon
+import {
+    LayoutDashboardIcon, ShieldCheckIcon, UserIcon,
+    VideoIcon, FileTextIcon, AlertTriangleIcon,
+    ActivityIcon, SettingsIcon, LogOutIcon, WalletIcon, UsersIcon
 } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -20,7 +20,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const navLinks = [
         { name: "Overview", href: "/dashboard", icon: <LayoutDashboardIcon className="w-5 h-5" /> },
         { name: "My Vault", href: "/dashboard/vault", icon: <WalletIcon className="w-5 h-5" /> },
-        { name: "Beneficiaries", href: "/dashboard/beneficiaries", icon: <UsersIcon className="w-5 h-5" /> },
+        { name: "Beneficiaries", href: "/dashboard/beneficiaries", icon: <UserIcon className="w-5 h-5" /> },
         { name: "Intent Declaration", href: "/dashboard/intent", icon: <VideoIcon className="w-5 h-5" /> },
         { name: "Will Document", href: "/dashboard/will", icon: <FileTextIcon className="w-5 h-5" /> },
         { name: "Escalation", href: "/dashboard/escalation", icon: <AlertTriangleIcon className="w-5 h-5" /> },
@@ -42,8 +42,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     {navLinks.map((link) => {
                         const isActive = pathname === link.href;
                         return (
-                            <Link 
-                                key={link.name} 
+                            <Link
+                                key={link.name}
                                 href={link.href}
                                 className={"flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors " + (isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-background hover:text-foreground")}
                             >
@@ -55,8 +55,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </nav>
                 <div className="p-4 border-t border-border mt-auto space-y-2">
                     <Link href="/dashboard/settings" className="flex items-center gap-3 px-3 py-2 w-full text-left text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-background">
-                        <SettingsIcon className="w-5 h-5" />
-                        Settings
+                        <UserIcon className="w-5 h-5" />
+                        Profile
                     </Link>
                     <button onClick={handleSignOut} className="flex items-center gap-3 px-3 py-2 w-full text-left text-sm font-medium text-red-600 hover:bg-red-50 transition-colors rounded-lg">
                         <LogOutIcon className="w-5 h-5" />

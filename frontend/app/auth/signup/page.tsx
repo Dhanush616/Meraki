@@ -51,8 +51,8 @@ export default function SignUpPage() {
                 }
 
                 console.log("Signup successful", data);
-                // Optionally auto-login and push to /dashboard
-                router.push("/dashboard"); 
+                // Go to verification screen
+                router.push("/auth/verify-email");
             } catch (err: any) {
                 setError(err.message || "An unexpected error occurred");
             } finally {

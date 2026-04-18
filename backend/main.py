@@ -6,7 +6,7 @@ load_dotenv()
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import (
-    health, assets, beneficiaries, intent,
+    health, profiles, assets, beneficiaries, intent,
     documents, escalation, verification, execution,
     auth, vault, security, activity, guardian, internal, will
 )
@@ -41,6 +41,7 @@ app.include_router(will.router, prefix="/api/documents/will", tags=["Will"])
 app.include_router(escalation.router, prefix="/api/escalation", tags=["Escalation"])
 app.include_router(verification.router, prefix="/api/verification", tags=["Verification"])
 app.include_router(execution.router, prefix="/api/execution", tags=["Execution"])
+app.include_router(profiles.router, prefix="/api/profiles", tags=["Profiles"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(vault.router, prefix="/api/vault", tags=["Vault"])
 app.include_router(security.router, prefix="/api/security", tags=["Security"])
