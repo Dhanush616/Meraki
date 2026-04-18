@@ -2,7 +2,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from core.supabase import get_supabase_client
-from core.security import get_current_user_id
+from core.security import get_current_user_id, get_authorized_owner_id
 
 router = APIRouter()
 
@@ -25,10 +25,11 @@ class ProfileUpdate(BaseModel):
     religion: Optional[str] = None
 
 @router.get("/")
-def get_profile(user_id: str = Depends(get_current_user_id)):
+async def get_profile(user_id: str = Depends(get_current_user_id)):
     client = get_supabase_client()
+    owner_id = await get_authorized_owner_id(user_id)
     
-    response = client.table("profiles").select("*").eq("id", user_id).single().execute()
+    response = client.table("profiles").select("*").eq("id", owner_id).single().execute()
     if not response.data:
         raise HTTPException(status_code=404, detail="Profile not found")
         
