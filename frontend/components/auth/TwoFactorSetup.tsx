@@ -21,26 +21,26 @@ export function TwoFactorSetup() {
 
     return (
         <div className="flex flex-col items-center">
-            <p className="text-olive-gray font-sans text-center text-sm mb-6 leading-relaxed">
+            <p className="text-muted-foreground font-sans text-center text-sm mb-6 leading-relaxed">
                 Scan the QR code with your authenticator app (like Google Authenticator or Authy), or enter the setup key manually.
             </p>
 
             {/* Dummy QR Code Block */}
-            <div className="w-48 h-48 bg-parchment rounded-xl border-2 border-border-cream flex items-center justify-center p-4 mb-6 shadow-inner">
+            <div className="w-48 h-48 bg-background rounded-xl border-2 border-border flex items-center justify-center p-4 mb-6 shadow-inner">
                 <div className="w-full h-full border-4 border-near-black border-dashed flex items-center justify-center relative">
-                    <div className="w-8 h-8 bg-brand absolute" />
+                    <div className="w-8 h-8 bg-primary absolute" />
                 </div>
             </div>
 
-            <div className="w-full flex items-center justify-between bg-parchment p-3 rounded-lg border border-border-cream mb-8">
-                <code className="text-near-black font-mono text-sm tracking-widest">{secret}</code>
-                <button onClick={handleCopy} className="text-olive-gray hover:text-brand transition-colors p-2 bg-ivory rounded-md shadow-sm border border-border-cream">
+            <div className="w-full flex items-center justify-between bg-background p-3 rounded-lg border border-border mb-8">
+                <code className="text-foreground font-mono text-sm tracking-widest">{secret}</code>
+                <button onClick={handleCopy} className="text-muted-foreground hover:text-primary transition-colors p-2 bg-card rounded-md shadow-sm border border-border">
                     {copied ? <CheckIcon className="w-4 h-4 text-green-600" /> : <CopyIcon className="w-4 h-4" />}
                 </button>
             </div>
 
             <div className="w-full mb-8">
-                <label className="text-sm font-medium text-near-black font-sans block text-center mb-4">
+                <label className="text-sm font-medium text-foreground font-sans block text-center mb-4">
                     Enter the 6-digit code from your app
                 </label>
                 <OTPInput value={otp} onChange={setOtp} length={6} />
@@ -49,7 +49,7 @@ export function TwoFactorSetup() {
             <Button
                 onClick={handleVerify}
                 disabled={otp.length !== 6}
-                className="w-full bg-near-black text-ivory hover:bg-[#1a1c1a] py-6 text-base rounded-lg border-none"
+                className="w-full bg-near-black text-primary-foreground hover:bg-[#1a1c1a] py-6 text-base rounded-lg border-none"
             >
                 Verify & Enable 2FA
             </Button>

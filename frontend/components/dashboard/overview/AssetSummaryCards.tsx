@@ -42,9 +42,9 @@ export function AssetSummaryCards({ assetsByType, isLoading }: Props) {
     }
     if (assetsByType.length === 0) {
         return (
-            <Link href="/dashboard/vault/add" className="col-span-2 bg-ivory rounded-2xl p-6 border border-dashed border-oat-border flex flex-col items-center justify-center gap-2 hover:border-brand/40 hover:bg-brand/5 transition-all group">
-                <PlusCircleIcon className="w-8 h-8 text-olive-gray group-hover:text-brand transition-colors" />
-                <span className="text-sm font-medium text-olive-gray group-hover:text-brand transition-colors">Add your first asset</span>
+            <Link href="/dashboard/vault/add" className="col-span-2 bg-card rounded-2xl p-6 border border-dashed border-oat-border flex flex-col items-center justify-center gap-2 hover:border-ring/40 hover:bg-primary/5 transition-all group">
+                <PlusCircleIcon className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
+                <span className="text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">Add your first asset</span>
             </Link>
         );
     }
@@ -53,11 +53,11 @@ export function AssetSummaryCards({ assetsByType, isLoading }: Props) {
             {assetsByType.map((item) => {
                 const meta = ASSET_META[item.asset_type] ?? ASSET_META.other;
                 return (
-                    <Link key={item.asset_type} href={`/dashboard/vault?type=${item.asset_type}`} className="bg-ivory rounded-2xl p-4 border border-oat-border hover:border-brand/30 hover:shadow-sm transition-all">
+                    <Link key={item.asset_type} href={`/dashboard/vault?type=${item.asset_type}`} className="bg-card rounded-2xl p-4 border border-oat-border hover:border-primary/30 hover:shadow-sm transition-all">
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 ${meta.color}`}>{meta.icon}</div>
-                        <p className="text-xs text-olive-gray font-medium truncate">{meta.label}</p>
-                        <p className="text-xl font-bold text-near-black font-serif">{item.count}</p>
-                        {item.total_value > 0 && <p className="text-xs text-olive-gray mt-0.5">{formatINR(item.total_value)}</p>}
+                        <p className="text-xs text-muted-foreground font-medium truncate">{meta.label}</p>
+                        <p className="text-xl font-bold text-foreground font-sans">{item.count}</p>
+                        {item.total_value > 0 && <p className="text-xs text-muted-foreground mt-0.5">{formatINR(item.total_value)}</p>}
                     </Link>
                 );
             })}

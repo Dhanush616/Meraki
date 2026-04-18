@@ -39,18 +39,18 @@ export function SignUpForm({
                         exit={{ x: -20, opacity: 0 }}
                         className="space-y-4"
                     >
-                        <label className="text-sm font-medium text-near-black font-sans">Enter your email</label>
+                        <label className="text-sm font-medium text-foreground font-sans">Enter your email</label>
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full bg-parchment border border-border-cream rounded-lg px-4 py-4 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/40 transition-all font-sans text-near-black text-lg shadow-inner"
+                            className="w-full bg-background border border-border rounded-lg px-4 py-4 outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring/40 transition-all font-sans text-foreground text-lg shadow-inner"
                             placeholder="you@example.com"
                             autoFocus
                             required
                         />
-                        <p className="text-sm text-olive-gray font-sans flex items-center gap-2 mt-4">
-                            <ShieldCheckIcon className="w-4 h-4 text-brand" /> {steps[0].desc}
+                        <p className="text-sm text-muted-foreground font-sans flex items-center gap-2 mt-4">
+                            <ShieldCheckIcon className="w-4 h-4 text-primary" /> {steps[0].desc}
                         </p>
                     </motion.div>
                 ) : (
@@ -61,18 +61,18 @@ export function SignUpForm({
                         exit={{ x: -20, opacity: 0 }}
                         className="space-y-4"
                     >
-                        <label className="text-sm font-medium text-near-black font-sans">Create Master Password</label>
+                        <label className="text-sm font-medium text-foreground font-sans">Create Master Password</label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full bg-parchment border-2 border-brand rounded-lg px-4 py-4 outline-none focus:ring-4 focus:ring-brand/20 transition-all font-sans text-near-black text-lg shadow-inner"
+                            className="w-full bg-background border-2 border-primary rounded-lg px-4 py-4 outline-none focus:ring-4 focus:ring-ring/20 transition-all font-sans text-foreground text-lg shadow-inner"
                             placeholder="••••••••"
                             autoFocus
                             required
                         />
-                        <p className="text-sm text-olive-gray font-sans flex items-center gap-2 mt-4">
-                            <KeySquareIcon className="w-4 h-4 text-brand" /> {steps[1].desc}
+                        <p className="text-sm text-muted-foreground font-sans flex items-center gap-2 mt-4">
+                            <KeySquareIcon className="w-4 h-4 text-primary" /> {steps[1].desc}
                         </p>
                     </motion.div>
                 )}
@@ -80,13 +80,13 @@ export function SignUpForm({
 
             <div className="mt-auto pt-12 flex justify-between items-center">
                 {step === 1 ? (
-                    <button type="button" onClick={() => setStep(0)} className="text-sm text-olive-gray hover:text-near-black font-sans">
+                    <button type="button" onClick={() => setStep(0)} className="text-sm text-muted-foreground hover:text-foreground font-sans">
                         Back
                     </button>
                 ) : (
                     <div />
                 )}
-                <Button type="submit" className="bg-brand text-ivory hover:bg-[#b05637] transition-all rounded-full py-6 px-8 group self-end ml-auto border-none">
+                <Button type="submit" className="bg-primary text-primary-foreground hover:bg-[#b05637] transition-all rounded-full py-6 px-8 group self-end ml-auto border-none">
                     <span className="font-medium text-base ml-2">{step === 0 ? "Continue" : "Create Vault"}</span>
                     <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>

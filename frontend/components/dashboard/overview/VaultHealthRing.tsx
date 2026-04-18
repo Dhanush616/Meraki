@@ -23,10 +23,10 @@ interface Props { score: number; isLoading: boolean; }
 export function VaultHealthRing({ score, isLoading }: Props) {
     const colors = healthColors(score);
     return (
-        <Link href="/dashboard/health" className="col-span-1 bg-ivory rounded-2xl p-6 border border-oat-border shadow-sm hover:shadow-md transition-shadow group flex flex-col">
-            <h3 className="text-sm font-medium uppercase tracking-wider text-olive-gray flex items-center justify-between mb-4">
+        <Link href="/dashboard/health" className="col-span-1 bg-card rounded-2xl p-6 border border-oat-border shadow-sm hover:shadow-md transition-shadow group flex flex-col">
+            <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground flex items-center justify-between mb-4">
                 Vault Health
-                <ChevronRightIcon className="w-4 h-4 group-hover:text-brand transition-colors" />
+                <ChevronRightIcon className="w-4 h-4 group-hover:text-primary transition-colors" />
             </h3>
             {isLoading ? (
                 <div className="flex flex-col items-center py-4 gap-4">
@@ -50,7 +50,7 @@ export function VaultHealthRing({ score, isLoading }: Props) {
                             />
                         </svg>
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <motion.span className={`text-3xl font-bold font-serif ${colors.text}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+                            <motion.span className={`text-3xl font-bold font-sans ${colors.text}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
                                 {score}
                             </motion.span>
                         </div>
@@ -58,7 +58,7 @@ export function VaultHealthRing({ score, isLoading }: Props) {
                     <span className={`mt-3 text-xs font-semibold px-3 py-1 rounded-full ${colors.bg} ${colors.badge}`}>
                         {healthLabel(score)}
                     </span>
-                    <p className="text-xs text-olive-gray mt-3 text-center">Click to see full breakdown</p>
+                    <p className="text-xs text-muted-foreground mt-3 text-center">Click to see full breakdown</p>
                 </div>
             )}
         </Link>

@@ -27,34 +27,34 @@ export function OnboardingChecklist({ step, onboardingDone }: Props) {
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="bg-brand/5 border border-brand/20 rounded-2xl p-6"
+                className="bg-primary/5 border border-primary/20 rounded-2xl p-6"
             >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                     <div>
-                        <h3 className="font-semibold text-near-black">Vault Setup — Step {step + 1} of {STEPS.length}</h3>
-                        <p className="text-sm text-olive-gray mt-0.5">Complete all steps to fully protect your family.</p>
+                        <h3 className="font-semibold text-foreground">Vault Setup — Step {step + 1} of {STEPS.length}</h3>
+                        <p className="text-sm text-muted-foreground mt-0.5">Complete all steps to fully protect your family.</p>
                     </div>
                     <Link href={activeStep.href}>
-                        <Button className="bg-brand text-ivory hover:bg-[#b05637] shrink-0">
+                        <Button className="bg-primary text-primary-foreground hover:bg-[#b05637] shrink-0">
                             Continue <ChevronRightIcon className="w-4 h-4 ml-1.5" />
                         </Button>
                     </Link>
                 </div>
                 <div className="w-full bg-oat-border rounded-full h-1.5 mb-5">
-                    <motion.div className="bg-brand h-1.5 rounded-full" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.6, ease: "easeOut" }} />
+                    <motion.div className="bg-primary h-1.5 rounded-full" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.6, ease: "easeOut" }} />
                 </div>
                 <ol className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {STEPS.map((s, i) => {
                         const done = i < step;
                         const active = i === step;
                         return (
-                            <li key={i} className={`flex items-center gap-2.5 text-sm rounded-lg px-3 py-2 ${active ? "bg-brand/10 text-brand font-medium" : done ? "text-olive-gray" : "text-olive-gray/40"}`}>
+                            <li key={i} className={`flex items-center gap-2.5 text-sm rounded-lg px-3 py-2 ${active ? "bg-primary/10 text-primary font-medium" : done ? "text-muted-foreground" : "text-muted-foreground/40"}`}>
                                 {done ? (
                                     <CheckCircle2Icon className="w-4 h-4 text-emerald-500 shrink-0" />
                                 ) : active ? (
                                     <span className="w-4 h-4 shrink-0 relative flex items-center justify-center">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-50" />
-                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-brand" />
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-50" />
+                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-primary" />
                                     </span>
                                 ) : (
                                     <CircleIcon className="w-4 h-4 shrink-0 opacity-25" />

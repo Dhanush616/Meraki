@@ -29,8 +29,8 @@ export default function DashboardOverview() {
     return (
         <div className="space-y-6 max-w-5xl mx-auto pb-12">
             <header className="mb-8">
-                <h1 className="text-3xl font-serif font-bold text-near-black">Dashboard Overview</h1>
-                <p className="text-olive-gray mt-2">Welcome back to your secure vault.</p>
+                <h1 className="text-3xl font-sans font-bold text-foreground">Dashboard Overview</h1>
+                <p className="text-muted-foreground mt-2">Welcome back to your secure vault.</p>
             </header>
 
             <OnboardingChecklist

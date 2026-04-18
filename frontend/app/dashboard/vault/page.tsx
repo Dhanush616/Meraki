@@ -32,7 +32,7 @@ export default function MyVaultPage() {
                 const res = await fetch(`${apiUrl}/api/assets`, {
                     headers: { "Authorization": `Bearer ${token}` }
                 });
-                if (!res.ok) throw new Error("Failed to fetch assets");
+                if (!res.ok) throw new Error("Failed to fetch assets from database");
                 const data = await res.json();
                 setAssets(data);
             } catch (err: any) {
@@ -60,19 +60,39 @@ export default function MyVaultPage() {
         return acc;
     }, {} as Record<string, Asset[]>);
 
+    const handleDeleteAsset = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if(!confirm("Are you sure you want to delete this asset?")) return;
+        
+        try {
+            const token = localStorage.getItem("paradosis_access_token");
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const res = await fetch(`${apiUrl}/api/assets/${id}`, {
+                method: 'DELETE',
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error("Failed to delete asset from database");
+            
+            // Optimistic update
+            setAssets(prev => prev.filter(a => a.id !== id));
+        } catch (err: any) {
+            alert(err.message);
+        }
+    };
+
     return (
         <div className="space-y-6 max-w-5xl mx-auto pb-12">
             <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-serif font-bold text-near-black">My Vault</h1>
-                    <p className="text-olive-gray mt-2">Securely view and manage all your assets.</p>
+                    <h1 className="text-3xl font-sans font-bold text-foreground">My Vault</h1>
+                    <p className="text-muted-foreground mt-2">Securely view and manage all your assets.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button variant="outline" className="border-border-cream text-near-black hover:bg-parchment">
+                    <Button variant="outline" className="border-border text-foreground hover:bg-background">
                         <DownloadIcon className="w-4 h-4 mr-2" /> Export
                     </Button>
                     <Link href="/dashboard/vault/add">
-                        <Button className="bg-brand text-ivory hover:bg-[#b05637]">
+                        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                             <PlusIcon className="w-4 h-4 mr-2" /> Add Asset
                         </Button>
                     </Link>
@@ -91,15 +111,15 @@ export default function MyVaultPage() {
             )}
 
             {/* Toolbar */}
-            <div className="bg-ivory border border-border-cream rounded-xl p-3 flex items-center justify-between shadow-sm">
+            <div className="bg-card border border-border rounded-xl p-3 flex items-center justify-between shadow-sm">
                 <div className="relative w-full max-w-md">
-                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-olive-gray" />
+                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                         type="text"
                         placeholder="Search assets..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 bg-parchment border border-border-cream rounded-lg text-sm text-near-black outline-none focus:ring-2 focus:ring-brand/20 transition-all focus:border-brand/40"
+                        className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg text-sm text-foreground outline-none focus:ring-2 focus:ring-ring/20 transition-all focus:border-ring/40"
                     />
                 </div>
             </div>
@@ -107,44 +127,44 @@ export default function MyVaultPage() {
             {/* Asset List */}
             {isLoading ? (
                 <div className="h-64 flex items-center justify-center">
-                    <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                 </div>
             ) : error ? (
                 <div className="p-4 text-red-600 bg-red-50 rounded-xl">{error}</div>
             ) : Object.keys(groupedAssets).length === 0 ? (
-                <div className="text-center py-16 bg-ivory rounded-2xl border border-dashed border-border-cream">
-                    <WalletIcon className="w-12 h-12 text-olive-gray opacity-50 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-near-black">No assets found</h3>
-                    <p className="text-olive-gray text-sm mt-1 mb-6">You haven't added any assets to your vault yet.</p>
+                <div className="text-center py-16 bg-card rounded-2xl border border-dashed border-border">
+                    <WalletIcon className="w-12 h-12 text-muted-foreground opacity-50 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground">No assets found</h3>
+                    <p className="text-muted-foreground text-sm mt-1 mb-6">You haven't added any assets to your vault yet.</p>
                     <Link href="/dashboard/vault/add">
-                        <Button className="bg-brand text-ivory">Add Your First Asset</Button>
+                        <Button className="bg-primary text-primary-foreground">Add Your First Asset</Button>
                     </Link>
                 </div>
             ) : (
                 <div className="space-y-6">
                     {Object.entries(groupedAssets).map(([type, groupAssets]) => (
-                        <div key={type} className="bg-ivory border border-border-cream rounded-2xl overflow-hidden shadow-sm">
-                            <div className="bg-parchment/50 border-b border-border-cream px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-parchment transition-colors">
+                        <div key={type} className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+                            <div className="bg-background/50 border-b border-border px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-background transition-colors">
                                 <div className="flex items-center gap-3">
-                                    <h3 className="font-semibold text-near-black capitalize">{type.replace(/_/g, ' ')}</h3>
-                                    <span className="text-xs font-medium bg-white text-olive-gray border border-border-cream px-2 py-0.5 rounded-full">{groupAssets.length}</span>
+                                    <h3 className="font-semibold text-foreground capitalize">{type.replace(/_/g, ' ')}</h3>
+                                    <span className="text-xs font-medium bg-white text-muted-foreground border border-border px-2 py-0.5 rounded-full">{groupAssets.length}</span>
                                 </div>
-                                <ChevronDownIcon className="w-5 h-5 text-olive-gray" />
+                                <ChevronDownIcon className="w-5 h-5 text-muted-foreground" />
                             </div>
                             <div className="p-6 space-y-4">
                                 {groupAssets.map(asset => (
-                                    <div key={asset.id} className="group border border-border-cream rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-brand/30 hover:shadow-sm transition-all cursor-pointer bg-white">
+                                    <div key={asset.id} className="group border border-border rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer bg-white relative">
                                         <div className="flex items-start gap-4">
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${asset.primary_total_pct === 100 && asset.backup_beneficiary_count > 0 ? "bg-emerald-50 text-emerald-600" : asset.primary_total_pct === 100 ? "bg-amber-50 text-amber-600" : "bg-red-50 text-red-600"}`}>
                                                 <WalletIcon className="w-5 h-5" />
                                             </div>
                                             <div>
-                                                <h4 className="font-semibold text-near-black font-serif">{asset.nickname}</h4>
-                                                <div className="text-sm text-olive-gray mt-1 flex items-center gap-2">
+                                                <h4 className="font-semibold text-foreground font-sans">{asset.nickname}</h4>
+                                                <div className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
                                                     <span>{asset.institution_name || "Unknown Inst."}</span>
                                                     {asset.account_identifier && (
                                                         <>
-                                                            <span className="w-1 h-1 bg-border-cream rounded-full"></span>
+                                                            <span className="w-1 h-1 bg-border rounded-full"></span>
                                                             <span className="font-mono text-xs">•••• {asset.account_identifier.slice(-4)}</span>
                                                         </>
                                                     )}
@@ -152,9 +172,14 @@ export default function MyVaultPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4 sm:flex-col sm:items-end">
-                                            <div className="text-right">
-                                                <p className="text-sm font-semibold text-near-black">{asset.estimated_value_inr ? `₹${asset.estimated_value_inr}` : "--"}</p>
-                                                <p className="text-xs text-olive-gray mt-0.5">{asset.primary_total_pct}% Allocated</p>
+                                            <div className="text-right flex items-center gap-4">
+                                                <div>
+                                                    <p className="text-sm font-semibold text-foreground">{asset.estimated_value_inr ? `₹${asset.estimated_value_inr}` : "--"}</p>
+                                                    <p className="text-xs text-muted-foreground mt-0.5">{asset.primary_total_pct}% Allocated</p>
+                                                </div>
+                                                <button onClick={(e) => handleDeleteAsset(asset.id, e)} className="p-2 ml-4 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100">
+                                                    Delete
+                                                </button>
                                             </div>
                                         </div>
                                     </div>

@@ -59,7 +59,7 @@ export default function SignInPage() {
     };
 
     return (
-        <div className="min-h-screen bg-parchment flex items-center justify-center p-4">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -68,29 +68,29 @@ export default function SignInPage() {
             >
                 <div className="flex flex-col items-center mb-8">
                     <Link href="/" className="flex flex-col items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-brand flex items-center justify-center shadow-lg">
-                            <span className="w-4 h-4 bg-ivory rounded-full"></span>
+                        <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                            <span className="w-4 h-4 bg-card rounded-full"></span>
                         </div>
-                        <span className="font-serif text-3xl font-bold text-near-black">Paradosis</span>
+                        <span className="font-sans text-3xl font-bold text-foreground">Paradosis</span>
                     </Link>
-                    <h1 className="mt-6 text-2xl font-serif text-near-black">Welcome back</h1>
-                    <p className="text-olive-gray font-sans mt-2">Enter your credentials to access your vault</p>
+                    <h1 className="mt-6 text-2xl font-sans text-foreground">Welcome back</h1>
+                    <p className="text-muted-foreground font-sans mt-2">Enter your credentials to access your vault</p>
                 </div>
 
-                <div className="bg-ivory rounded-2xl p-8 border border-border-cream shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
+                <div className="bg-card rounded-2xl p-8 border border-border shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
                     
-                    <div className="flex p-1 bg-parchment rounded-lg mb-6 border border-border-cream">
+                    <div className="flex p-1 bg-background rounded-lg mb-6 border border-border">
                         <button
                             type="button"
                             onClick={() => setLoginType("owner")}
-                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${loginType === "owner" ? "bg-white text-near-black shadow-sm" : "text-olive-gray hover:text-near-black"}`}
+                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${loginType === "owner" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
                         >
                             Vault Owner
                         </button>
                         <button
                             type="button"
                             onClick={() => setLoginType("guardian")}
-                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${loginType === "guardian" ? "bg-white text-near-black shadow-sm" : "text-olive-gray hover:text-near-black"}`}
+                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${loginType === "guardian" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
                         >
                             Guardian
                         </button>
@@ -103,12 +103,12 @@ export default function SignInPage() {
                     )}
                     <form className="space-y-5" onSubmit={handleLogin}>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-near-black font-sans">Email address</label>
+                            <label className="text-sm font-medium text-foreground font-sans">Email address</label>
                             <input
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-parchment border border-border-cream rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/40 transition-all font-sans text-near-black"
+                                className="w-full bg-background border border-border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring/40 transition-all font-sans text-foreground"
                                 placeholder="you@example.com"
                                 required
                             />
@@ -117,29 +117,29 @@ export default function SignInPage() {
                         {loginType === "owner" && (
                             <div className="space-y-2">
                                 <div className="flex justify-between">
-                                    <label className="text-sm font-medium text-near-black font-sans">Password</label>
-                                    <Link href="#" className="text-sm text-brand hover:underline font-sans">Forgot password?</Link>
+                                    <label className="text-sm font-medium text-foreground font-sans">Password</label>
+                                    <Link href="#" className="text-sm text-primary hover:underline font-sans">Forgot password?</Link>
                                 </div>
                                 <input
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-parchment border border-border-cream rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/40 transition-all font-sans text-near-black"
+                                    className="w-full bg-background border border-border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring/40 transition-all font-sans text-foreground"
                                     placeholder="••••••••"
                                     required
                                 />
                             </div>
                         )}
 
-                        <Button type="submit" disabled={loading} className="w-full bg-brand text-ivory hover:bg-[#b05637] transition-all rounded-lg py-6 mt-4 group">
+                        <Button type="submit" disabled={loading} className="w-full bg-primary text-primary-foreground hover:bg-[#b05637] transition-all rounded-lg py-6 mt-4 group">
                             <span className="font-medium text-base">{loading ? "Signing in..." : "Sign In"}</span>
                             {!loading && <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />}
                         </Button>
                     </form>
                 </div>
 
-                <p className="text-center mt-8 text-olive-gray font-sans text-sm">
-                    Don't have a vault yet? <Link href="/auth/signup" className="text-brand font-medium hover:underline">Get started securely</Link>
+                <p className="text-center mt-8 text-muted-foreground font-sans text-sm">
+                    Don't have a vault yet? <Link href="/auth/signup" className="text-primary font-medium hover:underline">Get started securely</Link>
                 </p>
             </motion.div>
         </div>

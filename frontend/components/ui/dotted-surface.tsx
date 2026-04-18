@@ -14,7 +14,7 @@ export const DottedSurface = ({
     return (
         <div
             className={cn(
-                "relative h-full w-full bg-parchment flex items-center justify-center",
+                "relative h-full w-full bg-background flex items-center justify-center",
                 className
             )}
         >
@@ -26,7 +26,7 @@ export const DottedSurface = ({
                 }}
             />
             {/* Soft fade out masks at edges */}
-            <div className="absolute inset-0 pointer-events-none [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] bg-parchment mix-blend-normal"></div>
+            <div className="absolute inset-0 pointer-events-none [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] bg-background mix-blend-normal"></div>
 
             <div className="relative z-10 w-full h-full">
                 {children}

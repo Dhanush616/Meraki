@@ -17,6 +17,9 @@ class AssetBase(BaseModel):
     nominee_registered: Optional[bool] = False
     metadata: Optional[Dict[str, Any]] = {}
     status: str = "active"
+    primary_total_pct: Optional[float] = 100
+    primary_beneficiary_count: Optional[int] = 1
+    backup_beneficiary_count: Optional[int] = 0
 
 class AssetCreate(AssetBase):
     pass

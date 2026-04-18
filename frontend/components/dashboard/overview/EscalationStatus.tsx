@@ -51,8 +51,8 @@ export function EscalationStatus({ level, lastCheckIn, checkInFrequencyDays, isL
     const info = LEVEL_INFO[level] ?? LEVEL_INFO.level_0_normal;
 
     return (
-        <div className="bg-ivory rounded-2xl p-6 border border-oat-border shadow-sm">
-            <h3 className="text-sm font-medium uppercase tracking-wider text-olive-gray flex items-center gap-2 mb-5">
+        <div className="bg-card rounded-2xl p-6 border border-oat-border shadow-sm">
+            <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2 mb-5">
                 <ShieldCheckIcon className={`w-4 h-4 ${info.iconClass}`} /> Escalation Status
             </h3>
 
@@ -67,25 +67,25 @@ export function EscalationStatus({ level, lastCheckIn, checkInFrequencyDays, isL
                     <div className={`flex items-center justify-between p-4 rounded-xl border mb-4 ${info.badgeClass}`}>
                         <div>
                             <p className="text-xs opacity-70 uppercase tracking-wider font-semibold mb-1">Current State</p>
-                            <p className="text-lg font-serif font-bold">{info.label}</p>
+                            <p className="text-lg font-sans font-bold">{info.label}</p>
                         </div>
                         <ShieldCheckIcon className={`w-8 h-8 opacity-40`} />
                     </div>
 
                     <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2 text-near-black">
-                            <CalendarIcon className="w-4 h-4 text-olive-gray shrink-0" />
+                        <div className="flex items-center gap-2 text-foreground">
+                            <CalendarIcon className="w-4 h-4 text-muted-foreground shrink-0" />
                             <span>Last check-in: <strong className="font-medium">{formatDate(lastCheckIn)}</strong></span>
                         </div>
-                        <div className="flex items-center gap-2 text-near-black">
-                            <CalendarIcon className="w-4 h-4 text-olive-gray shrink-0" />
+                        <div className="flex items-center gap-2 text-foreground">
+                            <CalendarIcon className="w-4 h-4 text-muted-foreground shrink-0" />
                             <span>Next check-in: <strong className="font-medium">{nextCheckInDate(lastCheckIn, checkInFrequencyDays)}</strong></span>
                         </div>
                     </div>
 
                     <Link
                         href="/dashboard/escalation"
-                        className="mt-5 flex items-center gap-1 text-xs text-brand font-medium hover:underline"
+                        className="mt-5 flex items-center gap-1 text-xs text-primary font-medium hover:underline"
                     >
                         Configure monitoring <ArrowRightIcon className="w-3 h-3" />
                     </Link>

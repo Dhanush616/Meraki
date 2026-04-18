@@ -13,7 +13,7 @@ export function BeneficiarySummary({ count, hasUnassignedAssets, isLoading }: Pr
     return (
         <Link
             href="/dashboard/beneficiaries"
-            className="bg-ivory rounded-2xl p-6 border border-oat-border shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between"
+            className="bg-card rounded-2xl p-6 border border-oat-border shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between"
         >
             {isLoading ? (
                 <div className="space-y-3">
@@ -34,8 +34,8 @@ export function BeneficiarySummary({ count, hasUnassignedAssets, isLoading }: Pr
                                 </span>
                             )}
                         </div>
-                        <h3 className="text-3xl font-serif font-bold text-near-black mb-1">{count}</h3>
-                        <p className="text-olive-gray text-sm font-medium">Beneficiaries</p>
+                        <h3 className="text-3xl font-sans font-bold text-foreground mb-1">{count}</h3>
+                        <p className="text-muted-foreground text-sm font-medium">Beneficiaries</p>
                     </div>
                     <div className="mt-6 flex items-center text-sm text-blue-600 font-medium group-hover:translate-x-1 transition-transform">
                         Manage People <ChevronRightIcon className="w-4 h-4 ml-1" />
