@@ -44,7 +44,7 @@ export default function DashboardOverview() {
                 <div className="lg:col-span-2 space-y-6">
                     <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
                         <div className="px-6 py-4 border-b border-border bg-muted/30">
-                            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Asset Inventory</h2>
+                            <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Asset Inventory</h2>
                         </div>
                         <div className="p-6">
                             <AssetSummaryCards assetsByType={data?.assets_by_type ?? []} isLoading={isLoading} />
@@ -53,7 +53,7 @@ export default function DashboardOverview() {
 
                     <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
                         <div className="px-6 py-4 border-b border-border bg-muted/30">
-                            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Recent Activity</h2>
+                            <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Recent Activity</h2>
                         </div>
                         <ActivityFeed activities={data?.recent_activity ?? []} isLoading={isLoading} />
                     </div>
@@ -75,7 +75,7 @@ export default function DashboardOverview() {
                     />
 
                     <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-                        <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Quick Actions</h2>
+                        <h2 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">Quick Actions</h2>
                         <QuickActions />
                     </div>
                 </div>

@@ -25,9 +25,12 @@ export function EscalationStatus({ level, lastCheckIn, checkInFrequencyDays, isL
 
     if (isLoading) return <Skeleton className="h-48 w-full rounded-xl" />;
 
+    const lastCheckInDate = lastCheckIn ? parseISO(lastCheckIn) : new Date();
+    const nextDueDate = addDays(lastCheckInDate, checkInFrequencyDays);
+
     return (
         <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <div className="flex items-center gap-2 text-sm font-semibold text-foreground uppercase tracking-wider mb-6">
+            <div className="flex items-center gap-2 text-sm font-bold text-foreground uppercase tracking-wider mb-6">
                 <ShieldCheckIcon className="w-4 h-4" />
                 Escalation Status
             </div>
@@ -44,7 +47,7 @@ export function EscalationStatus({ level, lastCheckIn, checkInFrequencyDays, isL
                             <CalendarIcon className="w-3 h-3" /> Last check-in
                         </span>
                         <span className="font-semibold text-foreground">
-                            {lastCheckIn ? format(parseISO(lastCheckIn), "MMM d, yyyy") : "Never"}
+                            {format(lastCheckInDate, "MMM d, yyyy")}
                         </span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
@@ -52,7 +55,7 @@ export function EscalationStatus({ level, lastCheckIn, checkInFrequencyDays, isL
                             <CalendarIcon className="w-3 h-3" /> Next due
                         </span>
                         <span className="font-semibold text-foreground">
-                            {lastCheckIn ? format(addDays(parseISO(lastCheckIn), checkInFrequencyDays), "MMM d, yyyy") : "Pending"}
+                            {format(nextDueDate, "MMM d, yyyy")}
                         </span>
                     </div>
                 </div>
