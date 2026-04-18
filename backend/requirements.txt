@@ -16,3 +16,4 @@ httpx
 aiofiles
 python-dateutil
 qrcode
+gunicorn==21.2.0
