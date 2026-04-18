@@ -124,24 +124,79 @@ async def beneficiary_login(credentials: BeneficiaryLoginRequest):
     Returns their token and beneficiary_id.
     """
     async with httpx.AsyncClient() as client:
-        response = await client.post(
-            f"{os.getenv('SUPABASE_URL')}/auth/v1/token?grant_type=password",
-            headers={
-                "apikey": os.getenv('SUPABASE_SERVICE_ROLE_KEY'),
-                "Content-Type": "application/json"
-            },
-            json={
-                "email": credentials.email,
-                "password": "Demo@1234"
-            }
-        )
-        
+        # Helper to perform Supabase Auth login
+        async def do_login():
+            return await client.post(
+                f"{os.getenv('SUPABASE_URL')}/auth/v1/token?grant_type=password",
+                headers={
+                    "apikey": os.getenv('SUPABASE_SERVICE_ROLE_KEY'),
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "email": credentials.email,
+                    "password": "Demo@1234"
+                }
+            )
+
+        response = await do_login()
+
+        # ── HACKATHON DEMO LOGIC: Auto-Activation ──
+        if response.status_code != 200:
+            # Check if this email exists in our beneficiaries table (case-insensitive)
+            from core.supabase import get_supabase_client
+            supabase = get_supabase_client()
+            # Use ilike for case-insensitive lookup
+            bene_lookup = supabase.table("beneficiaries").select("*").ilike("email", credentials.email).execute()
+
+            if bene_lookup.data:
+                # Use the canonical email from our DB
+                canonical_email = bene_lookup.data[0]["email"]
+                print(f"Auto-activating beneficiary account for {canonical_email}")
+                try:
+                    # 1. Create/Update user via admin API
+                    new_user = supabase.auth.admin.create_user({
+                        "email": credentials.email,
+                        "password": "Demo@1234",
+                        "email_confirm": True
+                    })
+                    user_id = new_user.user.id
+
+                    # 2. Update the beneficiary record to link user_id (using ilike for robustness)
+                    supabase.table("beneficiaries").update({"user_id": user_id}).ilike("email", credentials.email).execute()
+
+                    # 3. Ensure role exists
+                    supabase.table("user_roles").upsert({
+                        "user_id": user_id,
+                        "role": "beneficiary",
+                        "linked_owner_id": bene_lookup.data[0]["owner_id"]
+                    }).execute()
+
+                    # 4. Retry login
+                    response = await do_login()
+                except Exception as e:
+                    print(f"Activation failed: {str(e)}")
+                    # If admin create fails (e.g. user exists but different password), try admin update
+                    try:
+                        # Find existing user ID to reset password
+                        users_res = supabase.auth.admin.list_users()
+                        users_list = getattr(users_res, 'users', users_res)
+                        for u in users_list:
+                            if u.email == credentials.email:
+                                supabase.auth.admin.update_user_by_id(u.id, {"password": "Demo@1234", "email_confirm": True})
+                                # Link it just in case
+                                supabase.table("beneficiaries").update({"user_id": u.id}).eq("email", credentials.email).execute()
+                                # Retry login
+                                response = await do_login()
+                                break
+                    except:
+                        pass
+
         if response.status_code != 200:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid beneficiary email address.",
             )
-            
+
         data = response.json()
         user_id = data.get("user", {}).get("id")
         access_token = data.get("access_token")
@@ -151,14 +206,13 @@ async def beneficiary_login(credentials: BeneficiaryLoginRequest):
         b_res = supabase.table("beneficiaries").select("id").eq("user_id", user_id).execute()
         if not b_res.data:
             raise HTTPException(status_code=403, detail="No beneficiary record found for this user.")
-        
+
         b_id = b_res.data[0]["id"]
-        
+
         return {
             "token": access_token,
             "beneficiary_id": b_id
         }
-
 from core.security import get_current_user_id
 
 @router.get("/beneficiary-me")
