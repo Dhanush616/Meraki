@@ -1,39 +1,10 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { CheckCircleIcon, AlertCircleIcon, Loader2Icon, WalletIcon } from "lucide-react";
-
-interface Asset {
-    id: string;
-    nickname: string;
-    asset_type: string;
-    status: string;
-    primary_total_pct: number;
-}
+import { useAssets } from "@/hooks/useAssets";
 
 export function AllocationOverview() {
-    const [assets, setAssets] = useState<Asset[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchAssets = async () => {
-            try {
-                const token = localStorage.getItem("paradosis_access_token");
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-                const res = await fetch(`${apiUrl}/api/assets`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                if (!res.ok) throw new Error("Failed to load assets");
-                const data: Asset[] = await res.json();
-                setAssets(data.filter((a) => a.status === "active"));
-            } catch (err: unknown) {
-                setError(err instanceof Error ? err.message : "Unknown error");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchAssets();
-    }, []);
+    const { assets, isLoading, error } = useAssets();
 
     if (isLoading) {
         return (
@@ -54,7 +25,9 @@ export function AllocationOverview() {
         );
     }
 
-    if (assets.length === 0) {
+    const activeAssets = assets.filter((a) => a.status === "active");
+
+    if (activeAssets.length === 0) {
         return (
             <div className="bg-card border border-border rounded-2xl p-6 text-center">
                 <WalletIcon className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
@@ -63,8 +36,8 @@ export function AllocationOverview() {
         );
     }
 
-    const completeAssets = assets.filter((a) => a.primary_total_pct === 100);
-    const incompleteAssets = assets.filter((a) => a.primary_total_pct !== 100);
+    const completeAssets = activeAssets.filter((a) => a.primary_total_pct === 100);
+    const incompleteAssets = activeAssets.filter((a) => a.primary_total_pct !== 100);
     const allGood = incompleteAssets.length === 0;
 
     return (

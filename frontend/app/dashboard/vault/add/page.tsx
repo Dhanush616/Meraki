@@ -8,6 +8,8 @@ import {
     BriefcaseIcon, GemIcon, CheckCircle2Icon, ChevronRightIcon, ArrowLeftIcon 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useBeneficiaries } from "@/hooks/useBeneficiaries";
+import { AssetAllocation } from "@/components/dashboard/vault/AssetAllocation";
 
 const ASSET_FIELD_CONFIG: Record<string, { institutionLabel: string; identifierLabel: string; extraFields?: { id: string; label: string; placeholder: string }[] }> = {
     bank_account: { institutionLabel: "Institution / Bank Name", identifierLabel: "Account / Identifier" },
@@ -52,6 +54,7 @@ const ASSET_TYPES = [
 
 export default function AddAssetWizard() {
     const router = useRouter();
+    const { beneficiaries } = useBeneficiaries();
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -62,6 +65,9 @@ export default function AddAssetWizard() {
     const [accountIdentifier, setAccountIdentifier] = useState("");
     const [estimatedValue, setEstimatedValue] = useState("");
     const [customFields, setCustomFields] = useState<Record<string, string>>({});
+    
+    // Allocation State
+    const [allocations, setAllocations] = useState<{ beneficiary_id: string; percentage: number }[]>([]);
 
     const currentConfig = ASSET_FIELD_CONFIG[assetType] || ASSET_FIELD_CONFIG.bank_account;
 
@@ -76,23 +82,35 @@ export default function AddAssetWizard() {
         else router.push("/dashboard/vault");
     };
 
+    const handleAllocationSave = (newAllocations: { beneficiary_id: string; percentage: number }[]) => {
+        setAllocations(newAllocations);
+        setStep(4);
+    };
+
+    const handleAllocationSkip = () => {
+        setAllocations([]);
+        setStep(4);
+    };
+
     const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
             const token = localStorage.getItem("paradosis_access_token");
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
             
+            const totalPct = allocations.reduce((sum, a) => sum + a.percentage, 0);
+
             const newAsset = {
                 nickname,
                 asset_type: assetType,
                 institution_name: institutionName,
                 account_identifier: accountIdentifier.slice(-4), // Masked for demo
-                estimated_value_inr: estimatedValue ? parseFloat(estimatedValue.replaceAll(',', '')) : 0,
+                estimated_value_inr: estimatedValue ? parseFloat(estimatedValue.toString().replaceAll(',', '')) : 0,
                 metadata: customFields,
                 status: "active",
                 nominee_registered: true,
-                primary_total_pct: 100,
-                primary_beneficiary_count: 1,
+                primary_total_pct: totalPct,
+                primary_beneficiary_count: allocations.length,
                 backup_beneficiary_count: 0
             };
 
@@ -108,6 +126,29 @@ export default function AddAssetWizard() {
             if (!res.ok) {
                 const errorData = await res.json();
                 throw new Error(errorData.detail || "Failed to save asset to database");
+            }
+            
+            const createdAsset = await res.json();
+
+            // Save mappings if any
+            if (allocations.length > 0) {
+                const mappingsRes = await fetch(`${apiUrl}/api/assets/${createdAsset.id}/mappings`, {
+                    method: "PUT",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}` 
+                    },
+                    body: JSON.stringify(allocations.map(a => ({
+                        beneficiary_id: a.beneficiary_id,
+                        role: "primary",
+                        percentage: a.percentage,
+                        priority_order: 1
+                    })))
+                });
+                
+                if (!mappingsRes.ok) {
+                    console.error("Failed to save mappings, but asset was created.");
+                }
             }
             
             router.push("/dashboard/vault");
@@ -235,14 +276,12 @@ export default function AddAssetWizard() {
 
                     {step === 3 && (
                         <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                            <h2 className="text-xl font-bold font-sans text-foreground mb-6">Assign Beneficiaries</h2>
-                            <p className="text-sm text-muted-foreground mb-8">Who should receive this asset? For this CRUD demo, we will automatically assign it 100% to your default beneficiary.</p>
-                            
-                            <div className="bg-background border border-border rounded-xl p-6 text-center">
-                                <CheckCircle2Icon className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
-                                <h3 className="font-bold text-foreground">Default Allocation Applied</h3>
-                                <p className="text-muted-foreground text-sm mt-2">100% allocated. You can edit intricate percentages later from the Beneficiary manager.</p>
-                            </div>
+                            <AssetAllocation 
+                                assetNickname={nickname || "New Asset"}
+                                beneficiaries={beneficiaries}
+                                onSave={handleAllocationSave}
+                                onSkip={handleAllocationSkip}
+                            />
                         </motion.div>
                     )}
 
@@ -264,15 +303,24 @@ export default function AddAssetWizard() {
                                     <span className="font-semibold text-sm">{institutionName}</span>
                                 </div>
                                 <div className="flex justify-between py-2 border-b border-border/50">
-                                    <span className="text-muted-foreground text-sm">{currentConfig.identifierLabel}</span>
-                                    <span className="font-semibold text-sm font-mono">•••• {accountIdentifier.slice(-4) || "XXXX"}</span>
+                                    <span className="text-muted-foreground text-sm">Allocation</span>
+                                    <span className={`font-semibold text-sm ${allocations.length > 0 ? "text-emerald-600" : "text-amber-600"}`}>
+                                        {allocations.length > 0 ? "100% Allocated" : "Skipped (0%)"}
+                                    </span>
                                 </div>
-                                {currentConfig.extraFields?.map(field => (
-                                    <div key={field.id} className="flex justify-between py-2 border-b border-border/50">
-                                        <span className="text-muted-foreground text-sm">{field.label}</span>
-                                        <span className="font-semibold text-sm">{customFields[field.id] || "--"}</span>
+                                {allocations.length > 0 && (
+                                    <div className="py-2 border-b border-border/50">
+                                        <p className="text-muted-foreground text-xs mb-2">Beneficiary Splits:</p>
+                                        <div className="space-y-1">
+                                            {allocations.map(a => (
+                                                <div key={a.beneficiary_id} className="flex justify-between text-xs">
+                                                    <span>{beneficiaries.find(b => b.id === a.beneficiary_id)?.full_name}</span>
+                                                    <span className="font-medium">{a.percentage}%</span>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                ))}
+                                )}
                                 <div className="flex justify-between py-2">
                                     <span className="text-muted-foreground text-sm">Value</span>
                                     <span className="font-semibold text-sm">₹{estimatedValue || "--"}</span>
@@ -289,7 +337,7 @@ export default function AddAssetWizard() {
 
             {/* Footer Navigation */}
             <div className="flex justify-end mt-8">
-                {step < 4 ? (
+                {step < 3 ? (
                     <Button 
                         onClick={handleNext} 
                         disabled={(step === 1 && !assetType) || (step === 2 && !nickname)}
@@ -297,7 +345,7 @@ export default function AddAssetWizard() {
                     >
                         Continue <ChevronRightIcon className="w-4 h-4 ml-2" />
                     </Button>
-                ) : (
+                ) : step === 4 ? (
                     <Button 
                         onClick={handleSubmit} 
                         disabled={isSubmitting}
@@ -307,7 +355,7 @@ export default function AddAssetWizard() {
                             <>Confirm & Save Asset <CheckCircle2Icon className="w-4 h-4 ml-2" /></>
                         )}
                     </Button>
-                )}
+                ) : null}
             </div>
         </div>
     );
