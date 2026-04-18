@@ -646,6 +646,34 @@ CREATE INDEX idx_intent_mappings_intent_id ON intent_mappings(intent_id);
 CREATE INDEX idx_intent_mappings_owner_id ON intent_mappings(owner_id);
 
 
+-- ----------------------------------------------------------
+-- 7.3 PERSONAL MESSAGES
+-- Private video messages for specific beneficiaries. Not parsed by AI.
+-- ----------------------------------------------------------
+CREATE TABLE personal_messages (
+  id               UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  owner_id         UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  beneficiary_id   UUID REFERENCES beneficiaries(id) ON DELETE SET NULL,
+  -- null if message is for someone not in the vault
+
+  recipient_name   TEXT NOT NULL,        -- [ENCRYPTED]
+  recipient_email  TEXT,                 -- [ENCRYPTED] for delivery
+  video_storage_path TEXT NOT NULL,      -- Supabase Storage path
+  video_duration_secs INT,
+  thumbnail_path   TEXT,                 -- optional preview thumbnail
+
+  is_delivered     BOOLEAN DEFAULT FALSE,
+  delivered_at     TIMESTAMPTZ,
+
+  created_at       TIMESTAMPTZ DEFAULT NOW(),
+  updated_at       TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TRIGGER personal_messages_updated_at
+  BEFORE UPDATE ON personal_messages
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+
 -- ============================================================
 -- SECTION 8: LEGAL DOCUMENTS
 -- ============================================================
