@@ -7,7 +7,7 @@ import { VacationMode } from "@/components/dashboard/escalation/VacationMode";
 import { EmergencyContactForm } from "@/components/dashboard/escalation/EmergencyContactForm";
 import { BeneficiaryContactOrder } from "@/components/dashboard/escalation/BeneficiaryContactOrder";
 import { useEscalationSettings } from "@/hooks/useEscalationSettings";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { ShieldAlertIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function EscalationPage() {
@@ -26,17 +26,17 @@ export default function EscalationPage() {
     if (loading) {
         return (
             <div className="flex h-[80vh] items-center justify-center">
-                <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="p-8 text-center bg-red-50 border-2 border-red-200 rounded-3xl mt-10 mx-auto max-w-2xl">
-                <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                <h2 className="text-xl font-bold text-red-800">Something went wrong</h2>
-                <p className="text-red-600 mt-2">{error}</p>
+            <div className="p-10 border border-border rounded-xl bg-muted/30 max-w-2xl mx-auto mt-20 text-center">
+                <ShieldAlertIcon className="w-10 h-10 text-foreground mx-auto mb-4" />
+                <h2 className="text-lg font-bold text-foreground">Configuration Error</h2>
+                <p className="text-muted-foreground mt-1 text-sm">{error}</p>
             </div>
         );
     }
@@ -62,38 +62,50 @@ export default function EscalationPage() {
     };
 
     return (
-        <div className="p-6 md:p-10 space-y-12 max-w-7xl mx-auto pb-20">
-            {/* Header */}
-            <header className="space-y-2">
+        <div className="p-6 md:p-10 space-y-10 max-w-[90rem] mx-auto pb-20">
+            {/* Standard Header */}
+            <header className="space-y-2 pb-6 border-b border-border">
                 <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-2xl bg-amber-100 text-amber-700 shadow-sm border-2 border-amber-200">
-                        <AlertTriangle className="w-8 h-8" />
+                    <div className="p-2 rounded-lg bg-black text-white">
+                        <ShieldAlertIcon className="w-6 h-6" />
                     </div>
-                    <h1 className="text-4xl font-bold tracking-tight">Escalation Settings</h1>
+                    <h1 className="text-2xl font-bold text-foreground">Escalation Protocol</h1>
                 </div>
-                <p className="text-muted-foreground text-lg max-w-2xl">
-                    Configure how Amaanat monitors your wellbeing and who should be contacted if we don't hear from you for a while.
+                <p className="text-muted-foreground text-sm max-w-2xl">
+                    Configure automated monitoring and the sequence of contact if your vault remains inactive.
                 </p>
             </header>
 
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
-                {/* Left Column: Ladder (Visual) */}
-                <div className="xl:col-span-5">
-                    <div className="sticky top-24">
-                        <h2 className="text-xs uppercase tracking-[0.2em] font-black text-muted-foreground mb-6">
-                            The Escalation Ladder
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+                {/* Left Column: Visual Ladder + Emergency Contact */}
+                <div className="xl:col-span-6 space-y-8">
+                    <section className="space-y-4">
+                        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1">
+                            System Progression
                         </h2>
-                        <EscalationLadder currentLevel={settings?.current_escalation_level || "level_0_normal"} />
-                    </div>
+                        <div className="bg-card border border-border rounded-xl p-8 shadow-sm">
+                            <EscalationLadder currentLevel={settings?.current_escalation_level || "level_0_normal"} />
+                        </div>
+                    </section>
+
+                    <section className="space-y-4">
+                        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1">
+                            Verification Point
+                        </h2>
+                        <EmergencyContactForm 
+                            initialData={emergencyContact} 
+                            onSubmit={handleUpdateEmergencyContact} 
+                        />
+                    </section>
                 </div>
 
-                {/* Right Column: Controls */}
-                <div className="xl:col-span-7 space-y-10">
-                    <section>
-                        <h2 className="text-xs uppercase tracking-[0.2em] font-black text-muted-foreground mb-6">
-                            Safety Controls
+                {/* Right Column: Monitoring + Hierarchy */}
+                <div className="xl:col-span-6 space-y-8">
+                    <section className="space-y-4">
+                        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1">
+                            Monitoring Parameters
                         </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <CheckInFrequency 
                                 value={settings?.check_in_frequency_days || 90} 
                                 lastCheckIn={settings?.last_check_in_responded_at || null}
@@ -108,22 +120,14 @@ export default function EscalationPage() {
                         </div>
                     </section>
 
-                    <section className="grid grid-cols-1 gap-10">
-                        <div>
-                            <h2 className="text-xs uppercase tracking-[0.2em] font-black text-muted-foreground mb-6">
-                                People
-                            </h2>
-                            <div className="space-y-10">
-                                <EmergencyContactForm 
-                                    initialData={emergencyContact} 
-                                    onSubmit={handleUpdateEmergencyContact} 
-                                />
-                                <BeneficiaryContactOrder 
-                                    items={beneficiaryOrder} 
-                                    onOrderChange={handleOrderChange} 
-                                />
-                            </div>
-                        </div>
+                    <section className="space-y-4">
+                        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1">
+                            Succession Chain
+                        </h2>
+                        <BeneficiaryContactOrder 
+                            items={beneficiaryOrder} 
+                            onOrderChange={handleOrderChange} 
+                        />
                     </section>
                 </div>
             </div>

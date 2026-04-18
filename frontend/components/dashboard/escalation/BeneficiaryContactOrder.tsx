@@ -15,7 +15,7 @@ import {
     useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { GripVertical, Users } from "lucide-react";
 import { BeneficiaryOrder } from "@/hooks/useEscalationSettings";
@@ -45,35 +45,27 @@ function SortableItem({ id, beneficiary }: SortableItemProps) {
         <div
             ref={setNodeRef}
             style={style}
-            className={`flex items-center gap-4 p-4 bg-background border-2 rounded-xl mb-3 ${
-                isDragging ? "border-primary shadow-lg ring-2 ring-primary/20" : "border-oat-border"
+            className={`flex items-center gap-4 p-4 bg-background border rounded-lg mb-2 transition-all ${
+                isDragging ? "border-black shadow-lg ring-2 ring-muted" : "border-border hover:border-zinc-300"
             }`}
         >
-            <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded">
-                <GripVertical className="w-5 h-5 text-muted-foreground" />
+            <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded text-muted-foreground hover:text-black transition-colors">
+                <GripVertical className="w-4 h-4" />
             </div>
             
-            <div className="flex-1">
-                <div className="flex items-center gap-2">
-                    <span className="font-bold text-foreground">{beneficiary.full_name}</span>
-                    <Badge variant="outline" className="text-[10px] uppercase font-bold py-0 h-5">
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3">
+                    <span className="text-sm font-bold text-black">{beneficiary.full_name}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-2 py-0.5 bg-muted rounded">
                         {beneficiary.relationship}
-                    </Badge>
+                    </span>
                 </div>
-                <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">Disclosure:</span>
-                    <Badge 
-                        className={`text-[9px] uppercase font-black px-1.5 h-4 ${
-                            beneficiary.disclosure_level === 'full_transparency' 
-                                ? 'bg-matcha-100 text-matcha-700' 
-                                : beneficiary.disclosure_level === 'partial_awareness'
-                                ? 'bg-slushie-100 text-slushie-700'
-                                : 'bg-muted text-muted-foreground'
-                        }`}
-                    >
-                        {beneficiary.disclosure_level.replace('_', ' ')}
-                    </Badge>
-                </div>
+            </div>
+
+            <div className="text-right">
+                <Badge variant="outline" className="text-[9px] font-black uppercase tracking-[0.15em] px-2 py-0 border-zinc-200">
+                    {beneficiary.disclosure_level.replace('_', ' ')}
+                </Badge>
             </div>
         </div>
     );
@@ -112,17 +104,18 @@ export function BeneficiaryContactOrder({ items, onOrderChange }: BeneficiaryCon
     };
 
     return (
-        <Card className="border-2 border-oat-border shadow-clay">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-ube-800">
-                    <Users className="w-5 h-5 text-ube-800" />
-                    Beneficiary Contact Order
+        <Card className="border border-border rounded-xl shadow-sm overflow-hidden">
+            <CardHeader className="bg-muted/30 border-b border-border py-4 px-6">
+                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider">
+                    <Users className="w-4 h-4" />
+                    Succession Chain
                 </CardTitle>
-                <CardDescription>
-                    Drag and drop to set the order in which your beneficiaries are contacted.
-                </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-8">
+                <p className="text-xs text-muted-foreground mb-6 font-medium">
+                    Establish the hierarchical sequence of notification. Top-tier nodes are contacted first.
+                </p>
+
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
@@ -130,20 +123,21 @@ export function BeneficiaryContactOrder({ items, onOrderChange }: BeneficiaryCon
                 >
                     <SortableContext items={list.map((i) => i.id)} strategy={verticalListSortingStrategy}>
                         {list.length > 0 ? (
-                            list.map((item) => <SortableItem key={item.id} id={item.id} beneficiary={item} />)
+                            <div className="space-y-1">
+                                {list.map((item) => <SortableItem key={item.id} id={item.id} beneficiary={item} />)}
+                            </div>
                         ) : (
-                            <div className="p-8 border-2 border-dashed border-muted rounded-2xl text-center">
-                                <p className="text-sm text-muted-foreground font-medium">No beneficiaries added yet.</p>
-                                <p className="text-xs text-muted-foreground mt-1">Add beneficiaries in the 'Beneficiaries' tab to see them here.</p>
+                            <div className="p-12 border border-dashed border-border rounded-lg text-center bg-muted/20">
+                                <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">No_Active_Nodes</p>
                             </div>
                         )}
                     </SortableContext>
                 </DndContext>
                 
-                <div className="mt-6 p-4 bg-ube-50 border border-ube-200 rounded-xl">
-                    <p className="text-xs text-ube-800 leading-relaxed">
-                        <span className="font-black uppercase mr-2">Pro Tip:</span> 
-                        Place your most trusted or tech-savvy beneficiaries at the top. They will be the first to receive the execution package when the vault is unlocked.
+                <div className="mt-8 p-4 bg-muted/50 border border-border rounded-lg">
+                    <p className="text-[10px] text-muted-foreground leading-relaxed font-bold uppercase tracking-tight">
+                        <span className="text-black mr-2">PROTOCOL_NOTE:</span> 
+                        Hierarchy determines the order of asset execution packages. Ensure primary nodes are correctly prioritized at the top.
                     </p>
                 </div>
             </CardContent>
