@@ -15,6 +15,7 @@ import type { Beneficiary, BeneficiaryFormData } from "@/hooks/useBeneficiaries"
 import { BeneficiaryTable } from "@/components/dashboard/beneficiaries/BeneficiaryTable";
 import { AddBeneficiaryForm } from "@/components/dashboard/beneficiaries/AddBeneficiaryForm";
 import { AllocationOverview } from "@/components/dashboard/beneficiaries/AllocationOverview";
+import { PendingAllocations } from "@/components/dashboard/beneficiaries/PendingAllocations";
 
 export default function BeneficiariesPage() {
     const {
@@ -96,6 +97,7 @@ export default function BeneficiariesPage() {
 
     return (
         <div className="space-y-6 max-w-5xl mx-auto pb-12">
+            <PendingAllocations />
             {/* Form Modal */}
             <AddBeneficiaryForm
                 open={formOpen}
