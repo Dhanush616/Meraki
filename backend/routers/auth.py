@@ -112,3 +112,101 @@ async def logout(access_token: str):
             }
         )
     return {"message": "Successfully logged out"}
+
+
+class BeneficiaryLoginRequest(BaseModel):
+    email: str
+
+@router.post("/beneficiary-login")
+async def beneficiary_login(credentials: BeneficiaryLoginRequest):
+    """
+    Login a beneficiary using the hardcoded Demo@1234 password.
+    Returns their token and beneficiary_id.
+    """
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{settings.SUPABASE_URL}/auth/v1/token?grant_type=password",
+            headers={
+                "apikey": settings.SUPABASE_SERVICE_ROLE_KEY,
+                "Content-Type": "application/json"
+            },
+            json={
+                "email": credentials.email,
+                "password": "Demo@1234"
+            }
+        )
+        
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid beneficiary email address.",
+            )
+            
+        data = response.json()
+        user_id = data.get("user", {}).get("id")
+        access_token = data.get("access_token")
+
+        from core.supabase import get_supabase_client
+        supabase = get_supabase_client()
+        b_res = supabase.table("beneficiaries").select("id").eq("user_id", user_id).execute()
+        if not b_res.data:
+            raise HTTPException(status_code=403, detail="No beneficiary record found for this user.")
+        
+        b_id = b_res.data[0]["id"]
+        
+        return {
+            "token": access_token,
+            "beneficiary_id": b_id
+        }
+
+from core.security import get_current_user_id
+
+@router.get("/beneficiary-me")
+async def get_beneficiary_context(user_id: str = Depends(get_current_user_id)):
+    """
+    Returns the context for a logged in Beneficiary.
+    Varies heavily by disclosure_level.
+    """
+    from core.supabase import get_supabase_client
+    supabase = get_supabase_client()
+    
+    # 1. Find beneficiary record
+    b_res = supabase.table("beneficiaries").select("*").eq("user_id", user_id).execute()
+    if not b_res.data:
+        raise HTTPException(status_code=403, detail="Beneficiary not found")
+        
+    bene = b_res.data[0]
+    disclosure_level = bene.get("disclosure_level", "total_secrecy")
+    owner_id = bene.get("owner_id")
+    
+    # 2. Get Vault Owner's Name
+    owner_name = "the owner"
+    prof_res = supabase.table("profiles").select("full_name").eq("id", owner_id).execute()
+    if prof_res.data:
+        owner_name = prof_res.data[0].get("full_name", owner_name)
+    
+    response_data = {
+        "beneficiary_name": bene.get("full_name"),
+        "disclosure_level": disclosure_level,
+        "owner_name": owner_name,
+        "status": bene.get("status")
+    }
+    
+    # If full_transparency, return assigned assets
+    if disclosure_level == "full_transparency":
+        mappings_res = supabase.table("asset_beneficiary_mappings").select("percentage, assets(nickname, asset_type)").eq("beneficiary_id", bene["id"]).execute()
+        allocated_assets = []
+        if mappings_res.data:
+            for m in mappings_res.data:
+                # Handle Supabase embedded JSON joins
+                asset = m.get("assets")
+                if asset:
+                    allocated_assets.append({
+                        "nickname": asset.get("nickname"),
+                        "asset_type": asset.get("asset_type"),
+                        "percentage": m.get("percentage")
+                    })
+        response_data["allocated_assets"] = allocated_assets
+        
+    return response_data
+

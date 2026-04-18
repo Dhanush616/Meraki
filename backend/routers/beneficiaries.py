@@ -51,6 +51,19 @@ class BeneficiaryUpdate(BaseModel):
 
 # ── Endpoints ────────────────────────────────────────────────────────────────
 
+def _map_from_db_fields(data: dict) -> dict:
+    mapped = dict(data)
+    mapping = {
+        "aadhaar_number": "aadhaar",
+        "pan_number": "pan",
+        "phone_number": "phone",
+        "trustee_beneficiary_id": "trustee_id"
+    }
+    for db_k, out_k in mapping.items():
+        if db_k in mapped:
+            mapped[out_k] = mapped.pop(db_k)
+    return mapped
+
 @router.get("")
 def list_beneficiaries(user_id: str = Depends(get_current_user_id)):
     """List all beneficiaries for the current user."""
@@ -73,7 +86,23 @@ def list_beneficiaries(user_id: str = Depends(get_current_user_id)):
         )
         bene["assets_assigned_count"] = len(mappings.data) if mappings.data else 0
 
-    return beneficiaries
+    return [_map_from_db_fields(b) for b in beneficiaries]
+
+
+def _map_to_db_fields(data: dict) -> dict:
+    mapped = {}
+    db_mapping = {
+        "aadhaar": "aadhaar_number",
+        "pan": "pan_number",
+        "phone": "phone_number",
+        "trustee_id": "trustee_beneficiary_id"
+    }
+    for k, v in data.items():
+        if k in db_mapping:
+            mapped[db_mapping[k]] = v
+        else:
+            mapped[k] = v
+    return mapped
 
 
 @router.post("")
@@ -84,12 +113,40 @@ def create_beneficiary(
     """Create a new beneficiary."""
     supabase = get_supabase_client()
     data = beneficiary.dict()
+    
+    # ── HACKATHON DEMO LOGIC ──
+    # If the beneficiary has an email and is not total_secrecy, we map them an auth account immediately
+    # so we can log them in with "Demo@1234" from the beneficiary portal.
+    bene_user_id = None
+    if data.get("email") and data.get("disclosure_level") != "total_secrecy":
+        try:
+            # Note: supabase.auth.admin automatically auto-confirms email and bypasses rate limits
+            new_user = supabase.auth.admin.create_user({
+                "email": data["email"],
+                "password": "Demo@1234",
+                "email_confirm": True
+            })
+            bene_user_id = new_user.user.id
+            
+            # Add to user_roles mapping
+            supabase.table("user_roles").insert({
+                "user_id": bene_user_id,
+                "role": "beneficiary",
+                "linked_owner_id": user_id
+            }).execute()
+        except Exception as e:
+            print(f"Warning: Could not auto-create beneficiary auth user: {str(e)}")
+            # For the demo, if they already exist, we might try fetching them by email
+            # but we won't crash the beneficiary creation itself.
+
+    data = _map_to_db_fields(data)
     data["owner_id"] = user_id
+    data["user_id"] = bene_user_id  # Link to their Amaanat account
     data["status"] = "registered"
     response = supabase.table("beneficiaries").insert(data).execute()
     if not response.data:
         raise HTTPException(status_code=400, detail="Failed to create beneficiary")
-    return response.data[0]
+    return _map_from_db_fields(response.data[0])
 
 
 @router.put("/{beneficiary_id}")
@@ -101,6 +158,7 @@ def update_beneficiary(
     """Update an existing beneficiary."""
     supabase = get_supabase_client()
     update_data = {k: v for k, v in beneficiary.dict().items() if v is not None}
+    update_data = _map_to_db_fields(update_data)
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields to update")
     response = (
@@ -114,7 +172,7 @@ def update_beneficiary(
         raise HTTPException(
             status_code=404, detail="Beneficiary not found or not authorized"
         )
-    return response.data[0]
+    return _map_from_db_fields(response.data[0])
 
 
 @router.delete("/{beneficiary_id}")

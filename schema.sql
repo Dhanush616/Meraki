@@ -56,7 +56,7 @@ CREATE TYPE disclosure_level_enum AS ENUM (
 
 CREATE TYPE beneficiary_status_enum AS ENUM (
   'registered',           -- added to vault, not yet contacted
-  'contacted',            -- Amaanat has reached out (post-suspected death)
+  'contacted',            -- Paradosis has reached out (post-suspected death)
   'pending_verification', -- submitted death cert, under review
   'unlocked',             -- death confirmed, full access granted
   'declined',             -- beneficiary declined inheritance
@@ -410,13 +410,13 @@ CREATE TRIGGER assets_updated_at
 -- 5.1 BENEFICIARIES
 -- People named by the vault owner to receive assets.
 -- All PII fields are [ENCRYPTED] at the application layer.
--- A beneficiary may or may not have an Amaanat account (user_id can be null).
+-- A beneficiary may or may not have an Paradosis account (user_id can be null).
 -- ----------------------------------------------------------
 CREATE TABLE beneficiaries (
   id                      UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   owner_id                UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   user_id                 UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  -- ^ set if the beneficiary has created an Amaanat account
+  -- ^ set if the beneficiary has created an Paradosis account
 
   -- Identity (all [ENCRYPTED])
   full_name               TEXT NOT NULL,       -- [ENCRYPTED]
@@ -519,14 +519,14 @@ CREATE TRIGGER residual_beneficiary_updated_at
 -- ----------------------------------------------------------
 -- 6.1 GUARDIANS (optional, legacy support)
 -- People the vault owner trusts to manually confirm suspected death.
--- Note: primary death detection is Amaanat's escalation system,
+-- Note: primary death detection is Paradosis's escalation system,
 -- but guardians can also initiate a report.
 -- ----------------------------------------------------------
 CREATE TABLE guardians (
   id               UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   owner_id         UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   user_id          UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  -- ^ set if guardian has an Amaanat account
+  -- ^ set if guardian has an Paradosis account
 
   full_name        TEXT NOT NULL,
   email            TEXT NOT NULL,             -- [ENCRYPTED]

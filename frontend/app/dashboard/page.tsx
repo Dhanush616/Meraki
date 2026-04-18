@@ -33,10 +33,12 @@ export default function DashboardOverview() {
                 <p className="text-muted-foreground mt-2">Welcome back to your secure vault.</p>
             </header>
 
-            <OnboardingChecklist
-                step={data?.onboarding_step ?? 0}
-                onboardingDone={data?.onboarding_done ?? false}
-            />
+            {!data?.onboarding_done && (
+                <OnboardingChecklist
+                    step={data?.onboarding_step ?? 0}
+                    onboardingDone={data?.onboarding_done ?? false}
+                />
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 auto-rows-min gap-6">
                 <div className="flex flex-col gap-6 md:col-span-1 xl:col-span-1">
