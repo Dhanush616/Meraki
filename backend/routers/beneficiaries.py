@@ -49,7 +49,20 @@ class BeneficiaryUpdate(BaseModel):
     personal_message: Optional[str] = None
 
 
-# ── Endpoints ────────────────────────────────────────────────────────────────
+# ── Helpers ──────────────────────────────────────────────────────────────────
+
+def log_activity(supabase, user_id: str, action: str, entity_type: str, entity_id: str, metadata: dict = None):
+    """Helper to log user actions."""
+    try:
+        supabase.table("activity_logs").insert({
+            "owner_id": user_id,
+            "action": action,
+            "entity_type": entity_type,
+            "entity_id": entity_id,
+            "metadata": metadata or {}
+        }).execute()
+    except Exception as e:
+        print(f"Failed to log activity: {e}")
 
 def _map_from_db_fields(data: dict) -> dict:
     mapped = dict(data)
@@ -63,6 +76,24 @@ def _map_from_db_fields(data: dict) -> dict:
         if db_k in mapped:
             mapped[out_k] = mapped.pop(db_k)
     return mapped
+
+def _map_to_db_fields(data: dict) -> dict:
+    mapped = {}
+    db_mapping = {
+        "aadhaar": "aadhaar_number",
+        "pan": "pan_number",
+        "phone": "phone_number",
+        "trustee_id": "trustee_beneficiary_id"
+    }
+    for k, v in data.items():
+        if k in db_mapping:
+            mapped[db_mapping[k]] = v
+        else:
+            mapped[k] = v
+    return mapped
+
+
+# ── Endpoints ────────────────────────────────────────────────────────────────
 
 @router.get("")
 def list_beneficiaries(user_id: str = Depends(get_current_user_id)):
@@ -87,22 +118,6 @@ def list_beneficiaries(user_id: str = Depends(get_current_user_id)):
         bene["assets_assigned_count"] = len(mappings.data) if mappings.data else 0
 
     return [_map_from_db_fields(b) for b in beneficiaries]
-
-
-def _map_to_db_fields(data: dict) -> dict:
-    mapped = {}
-    db_mapping = {
-        "aadhaar": "aadhaar_number",
-        "pan": "pan_number",
-        "phone": "phone_number",
-        "trustee_id": "trustee_beneficiary_id"
-    }
-    for k, v in data.items():
-        if k in db_mapping:
-            mapped[db_mapping[k]] = v
-        else:
-            mapped[k] = v
-    return mapped
 
 
 @router.post("")
@@ -136,17 +151,19 @@ def create_beneficiary(
             }).execute()
         except Exception as e:
             print(f"Warning: Could not auto-create beneficiary auth user: {str(e)}")
-            # For the demo, if they already exist, we might try fetching them by email
-            # but we won't crash the beneficiary creation itself.
 
-    data = _map_to_db_fields(data)
-    data["owner_id"] = user_id
-    data["user_id"] = bene_user_id  # Link to their Amaanat account
-    data["status"] = "registered"
-    response = supabase.table("beneficiaries").insert(data).execute()
+    db_data = _map_to_db_fields(data)
+    db_data["owner_id"] = user_id
+    db_data["user_id"] = bene_user_id  # Link to their Amaanat account
+    db_data["status"] = "registered"
+    response = supabase.table("beneficiaries").insert(db_data).execute()
     if not response.data:
         raise HTTPException(status_code=400, detail="Failed to create beneficiary")
-    return _map_from_db_fields(response.data[0])
+    
+    new_bene = response.data[0]
+    log_activity(supabase, user_id, "beneficiary.created", "beneficiary", new_bene["id"], {"name": new_bene["full_name"], "relation": new_bene["relationship"]})
+    
+    return _map_from_db_fields(new_bene)
 
 
 @router.put("/{beneficiary_id}")
@@ -172,7 +189,11 @@ def update_beneficiary(
         raise HTTPException(
             status_code=404, detail="Beneficiary not found or not authorized"
         )
-    return _map_from_db_fields(response.data[0])
+    
+    updated_bene = response.data[0]
+    log_activity(supabase, user_id, "beneficiary.updated", "beneficiary", updated_bene["id"], {"name": updated_bene["full_name"]})
+    
+    return _map_from_db_fields(updated_bene)
 
 
 @router.delete("/{beneficiary_id}")
@@ -207,4 +228,7 @@ def delete_beneficiary(
         raise HTTPException(
             status_code=404, detail="Beneficiary not found or not authorized"
         )
+    
+    log_activity(supabase, user_id, "beneficiary.deleted", "beneficiary", str(beneficiary_id))
+    
     return {"message": "Beneficiary successfully deleted"}

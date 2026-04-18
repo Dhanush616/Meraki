@@ -24,7 +24,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { name: "Intent Declaration", href: "/dashboard/intent", icon: <VideoIcon className="w-5 h-5" /> },
         { name: "Will Document", href: "/dashboard/will", icon: <FileTextIcon className="w-5 h-5" /> },
         { name: "Escalation", href: "/dashboard/escalation", icon: <AlertTriangleIcon className="w-5 h-5" /> },
-        { name: "Health Score", href: "/dashboard/health", icon: <ActivityIcon className="w-5 h-5" /> },
         { name: "Security", href: "/dashboard/security", icon: <ShieldCheckIcon className="w-5 h-5" /> },
         { name: "Activity Log", href: "/dashboard/activity", icon: <ActivityIcon className="w-5 h-5" /> },
     ];

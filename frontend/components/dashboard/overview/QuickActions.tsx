@@ -1,20 +1,20 @@
 "use client";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { PlusCircleIcon, VideoIcon } from "lucide-react";
+import { PlusIcon, VideoIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function QuickActions() {
     return (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-3">
             {[
-                { href: "/dashboard/vault/add", icon: <PlusCircleIcon className="w-7 h-7 text-foreground" />, label: "Add Asset",    hover: "hover:bg-muted/50" },
-                { href: "/dashboard/intent",    icon: <VideoIcon className="w-7 h-7 text-foreground" />,   label: "Record Will", hover: "hover:bg-muted/50" },
+                { href: "/dashboard/vault/add", icon: <PlusIcon className="w-4 h-4" />, label: "Add Asset" },
+                { href: "/dashboard/intent",    icon: <VideoIcon className="w-4 h-4" />,   label: "Record Intent" },
             ].map((a) => (
-                <Link key={a.href} href={a.href}>
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className={`flex flex-col items-center justify-center p-5 bg-card rounded-2xl border border-border transition-all text-center cursor-pointer ${a.hover}`}>
+                <Link key={a.href} href={a.href} className="block w-full">
+                    <Button variant="outline" className="w-full justify-start gap-3 rounded-lg border-border h-11 hover:bg-muted transition-colors font-medium">
                         {a.icon}
-                        <span className="mt-2.5 text-sm font-medium text-foreground">{a.label}</span>
-                    </motion.div>
+                        {a.label}
+                    </Button>
                 </Link>
             ))}
         </div>
