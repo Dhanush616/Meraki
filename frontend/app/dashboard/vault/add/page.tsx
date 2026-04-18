@@ -81,25 +81,6 @@ export default function AddAssetWizard() {
     // Allocation State
     const [allocations, setAllocations] = useState<{ beneficiary_id: string; percentage: number }[]>([]);
 
-    const [beneficiaries, setBeneficiaries] = useState<any[]>([]);
-    const [allocations, setAllocations] = useState<{ beneficiary_id: string, percentage: number }[]>([]);
-
-    useEffect(() => {
-        async function fetchBeneficiaries() {
-            const token = localStorage.getItem("paradosis_access_token");
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-            try {
-                const res = await fetch(`${apiUrl}/api/beneficiaries`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    setBeneficiaries(await res.json());
-                }
-            } catch (err) { }
-        }
-        fetchBeneficiaries();
-    }, []);
-
     const addAllocation = (beneId: string) => {
         if (!allocations.find(a => a.beneficiary_id === beneId)) {
             setAllocations([...allocations, { beneficiary_id: beneId, percentage: 0 }]);

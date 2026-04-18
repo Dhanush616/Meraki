@@ -1,100 +1,178 @@
-import React, { useState } from "react";
+"use client";
+import React, { useState, useEffect } from "react";
+import {
+    PalmtreeIcon, AlertTriangleIcon, Loader2Icon,
+    CalendarIcon, XIcon, CheckCircleIcon,
+} from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format, differenceInDays } from "date-fns";
-import { CalendarIcon, PlaneTakeoff, Info } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { DateRange } from "react-day-picker";
 
 interface VacationModeProps {
     isActive: boolean;
     startDate: string | null;
     endDate: string | null;
-    onToggle: (active: boolean, dates?: { start: string; end: string }) => void;
+    onActivate: (startDate: string, endDate: string) => Promise<void>;
+    onDeactivate: () => Promise<void>;
 }
 
-export function VacationMode({ isActive, startDate, endDate, onToggle }: VacationModeProps) {
-    const [date, setDate] = useState<DateRange | undefined>(
-        startDate && endDate ? { from: new Date(startDate), to: new Date(endDate) } : undefined
-    );
+function formatDate(d: string | null) {
+    if (!d) return "—";
+    return new Date(d).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+    });
+}
 
-    const handleToggle = (checked: boolean) => {
-        if (checked) {
-            if (date?.from && date?.to) {
-                onToggle(true, { start: date.from.toISOString(), end: date.to.toISOString() });
+function daysBetween(start: string, end: string) {
+    const s = new Date(start);
+    const e = new Date(end);
+    return Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+export function VacationMode({
+    isActive,
+    startDate,
+    endDate,
+    onActivate,
+    onDeactivate,
+}: VacationModeProps) {
+    const today = new Date().toISOString().split("T")[0];
+    const [localStart, setLocalStart] = useState(startDate?.split("T")[0] ?? today);
+    const [localEnd, setLocalEnd] = useState(
+        endDate?.split("T")[0] ?? new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0]
+    );
+    const [isSaving, setIsSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (startDate) setLocalStart(startDate.split("T")[0]);
+        if (endDate) setLocalEnd(endDate.split("T")[0]);
+    }, [startDate, endDate]);
+
+    const duration = daysBetween(localStart, localEnd);
+    const tooLong = duration > 180;
+    const invalidRange = duration < 1;
+
+    const handleToggle = async (checked: boolean) => {
+        setIsSaving(true);
+        setError(null);
+        try {
+            if (checked) {
+                if (invalidRange) {
+                    setError("End date must be after start date.");
+                    return;
+                }
+                await onActivate(localStart, localEnd);
+            } else {
+                await onDeactivate();
             }
-        } else {
-            onToggle(false);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Failed");
+        } finally {
+            setIsSaving(false);
         }
     };
 
-    const isLongVacation = date?.from && date?.to && differenceInDays(date.to, date.from) > 180;
-
     return (
-        <Card className="border border-border rounded-xl shadow-sm h-full">
-            <CardHeader className="bg-muted/30 border-b border-border py-3 px-5 flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    <PlaneTakeoff className="w-3.5 h-3.5" />
-                    Vacation
-                </CardTitle>
-                <Switch 
-                    checked={isActive} 
-                    onCheckedChange={handleToggle}
-                    className="scale-75"
-                    disabled={!isActive && (!date?.from || !date?.to || isLongVacation)}
-                />
-            </CardHeader>
-            <CardContent className="p-5 space-y-4">
-                <div className="flex flex-col gap-2">
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button
-                                variant={"outline"}
-                                className={cn(
-                                    "w-full justify-start text-left font-medium border rounded-lg h-9 text-[10px] px-3",
-                                    !date && "text-muted-foreground"
-                                )}
-                            >
-                                <CalendarIcon className="mr-2 h-3 w-3" />
-                                {date?.from ? (
-                                    date.to ? (
-                                        <>{format(date.from, "MMM d")} - {format(date.to, "MMM d")}</>
-                                    ) : (
-                                        format(date.from, "MMM d")
-                                    )
-                                ) : (
-                                    <span>Select Dates</span>
-                                )}
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                                initialFocus
-                                mode="range"
-                                defaultMonth={date?.from}
-                                selected={date}
-                                onSelect={setDate}
-                                numberOfMonths={1}
-                                disabled={(date) => date < new Date()}
-                            />
-                        </PopoverContent>
-                    </Popover>
+        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                <div>
+                    <h3 className="text-sm font-semibold text-foreground">Vacation Mode</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                        Pause all check-ins while you&apos;re away.
+                    </p>
+                </div>
+                {isActive && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
+                        <PalmtreeIcon className="w-3.5 h-3.5" /> Active
+                    </span>
+                )}
+            </div>
+
+            <div className="px-6 py-5 space-y-4">
+                {/* Toggle */}
+                <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-background">
+                    <div className="flex items-center gap-3">
+                        <PalmtreeIcon className="w-5 h-5 text-muted-foreground" />
+                        <div>
+                            <p className="text-sm font-medium text-foreground">
+                                {isActive ? "Vacation mode is on" : "Enable vacation mode"}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                                {isActive
+                                    ? `${formatDate(startDate)} — ${formatDate(endDate)}`
+                                    : "All check-ins and escalations will be paused."}
+                            </p>
+                        </div>
+                    </div>
+                    <Switch
+                        checked={isActive}
+                        onCheckedChange={handleToggle}
+                        disabled={isSaving}
+                    />
                 </div>
 
-                {isActive ? (
-                    <div className="p-2 bg-zinc-900 text-white rounded-lg flex items-center gap-2">
-                        <PlaneTakeoff className="w-3 h-3 text-white ml-1" />
-                        <p className="text-[8px] font-black uppercase tracking-[0.2em]">Protection_Paused</p>
+                {/* Date pickers — show only when not active (configuring) or active (viewing) */}
+                {!isActive && (
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                                <CalendarIcon className="w-3 h-3" /> Start Date
+                            </label>
+                            <input
+                                type="date"
+                                value={localStart}
+                                min={today}
+                                onChange={(e) => setLocalStart(e.target.value)}
+                                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-foreground/20 transition-all"
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                                <CalendarIcon className="w-3 h-3" /> End Date
+                            </label>
+                            <input
+                                type="date"
+                                value={localEnd}
+                                min={localStart}
+                                onChange={(e) => setLocalEnd(e.target.value)}
+                                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-foreground/20 transition-all"
+                            />
+                        </div>
                     </div>
-                ) : (
-                    <p className="text-[9px] text-muted-foreground font-medium flex items-center gap-1.5 italic">
-                        <Info className="w-2.5 h-2.5" /> Set dates to enable pause.
-                    </p>
                 )}
-            </CardContent>
-        </Card>
+
+                {/* Duration badge */}
+                {!isActive && !invalidRange && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span className="font-medium">{duration} days</span>
+                        {tooLong && (
+                            <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                                <AlertTriangleIcon className="w-3 h-3" />
+                                Exceeds 180-day recommended limit
+                            </span>
+                        )}
+                    </div>
+                )}
+
+                {/* Error */}
+                {error && (
+                    <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400 text-xs">
+                        <XIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" /> {error}
+                    </div>
+                )}
+
+                {/* Active state info */}
+                {isActive && (
+                    <div className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs">
+                        <CheckCircleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                        <span>
+                            All check-ins are paused until <span className="font-semibold">{formatDate(endDate)}</span>.
+                            Toggle off to resume monitoring.
+                        </span>
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }

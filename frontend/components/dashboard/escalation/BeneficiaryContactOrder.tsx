@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import {
     DndContext,
@@ -6,26 +7,30 @@ import {
     PointerSensor,
     useSensor,
     useSensors,
+    DragEndEvent,
 } from "@dnd-kit/core";
 import {
     arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
-    verticalListSortingStrategy,
     useSortable,
+    verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { GripVertical, Users } from "lucide-react";
-import { BeneficiaryOrder } from "@/hooks/useEscalationSettings";
+import { GripVerticalIcon, SaveIcon, Loader2Icon, UsersIcon } from "lucide-react";
+import { DisclosureBadge } from "@/components/dashboard/beneficiaries/DisclosureBadge";
+import type { BeneficiaryOrder } from "@/hooks/useEscalationSettings";
 
-interface SortableItemProps {
-    id: string;
-    beneficiary: BeneficiaryOrder;
+interface BeneficiaryContactOrderProps {
+    beneficiaries: BeneficiaryOrder[];
+    onSave: (orderedIds: string[]) => Promise<void>;
 }
 
-function SortableItem({ id, beneficiary }: SortableItemProps) {
+function formatRelationship(r: string) {
+    return r.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function SortableRow({ item, index }: { item: BeneficiaryOrder; index: number }) {
     const {
         attributes,
         listeners,
@@ -33,114 +38,154 @@ function SortableItem({ id, beneficiary }: SortableItemProps) {
         transform,
         transition,
         isDragging,
-    } = useSortable({ id });
+    } = useSortable({ id: item.id });
 
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        zIndex: isDragging ? 10 : 1,
     };
 
     return (
         <div
             ref={setNodeRef}
             style={style}
-            className={`flex items-center gap-4 p-4 bg-background border rounded-lg mb-2 transition-all ${
-                isDragging ? "border-black shadow-lg ring-2 ring-muted" : "border-border hover:border-zinc-300"
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${
+                isDragging
+                    ? "bg-muted border-foreground/20 shadow-lg z-50 scale-[1.02]"
+                    : "bg-background border-border hover:border-foreground/10"
             }`}
         >
-            <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded text-muted-foreground hover:text-black transition-colors">
-                <GripVertical className="w-4 h-4" />
-            </div>
-            
-            <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3">
-                    <span className="text-sm font-bold text-black">{beneficiary.full_name}</span>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-2 py-0.5 bg-muted rounded">
-                        {beneficiary.relationship}
-                    </span>
-                </div>
+            {/* Drag handle */}
+            <button
+                {...attributes}
+                {...listeners}
+                className="p-1 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing rounded transition-colors"
+                aria-label="Reorder"
+            >
+                <GripVerticalIcon className="w-4 h-4" />
+            </button>
+
+            {/* Order number */}
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-foreground/5 text-[11px] font-bold text-foreground shrink-0">
+                {index + 1}
+            </span>
+
+            {/* Avatar */}
+            <div className="w-8 h-8 rounded-full bg-foreground/5 border border-border flex items-center justify-center shrink-0">
+                <span className="text-xs font-semibold text-foreground">
+                    {item.full_name.charAt(0).toUpperCase()}
+                </span>
             </div>
 
-            <div className="text-right">
-                <Badge variant="outline" className="text-[9px] font-black uppercase tracking-[0.15em] px-2 py-0 border-zinc-200">
-                    {beneficiary.disclosure_level.replace('_', ' ')}
-                </Badge>
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">{item.full_name}</p>
+                <p className="text-xs text-muted-foreground">{formatRelationship(item.relationship)}</p>
             </div>
+
+            {/* Disclosure badge */}
+            <DisclosureBadge
+                level={item.disclosure_level as "total_secrecy" | "partial_awareness" | "full_transparency"}
+                compact
+            />
         </div>
     );
 }
 
-interface BeneficiaryContactOrderProps {
-    items: BeneficiaryOrder[];
-    onOrderChange: (newOrder: string[]) => void;
-}
-
-export function BeneficiaryContactOrder({ items, onOrderChange }: BeneficiaryContactOrderProps) {
-    const [list, setList] = useState(items);
+export function BeneficiaryContactOrder({ beneficiaries, onSave }: BeneficiaryContactOrderProps) {
+    const [items, setItems] = useState<BeneficiaryOrder[]>(beneficiaries);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saved, setSaved] = useState(false);
 
     useEffect(() => {
-        setList(items);
-    }, [items]);
+        setItems(beneficiaries);
+    }, [beneficiaries]);
+
+    const isDirty = items.some((item, i) => item.id !== beneficiaries[i]?.id);
 
     const sensors = useSensors(
-        useSensor(PointerSensor),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
-    const handleDragEnd = (event: any) => {
+    const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
-
-        if (active.id !== over.id) {
-            const oldIndex = list.findIndex((i) => i.id === active.id);
-            const newIndex = list.findIndex((i) => i.id === over.id);
-
-            const newList = arrayMove(list, oldIndex, newIndex);
-            setList(newList);
-            onOrderChange(newList.map((i) => i.id));
+        if (over && active.id !== over.id) {
+            setItems((prev) => {
+                const oldIndex = prev.findIndex((p) => p.id === active.id);
+                const newIndex = prev.findIndex((p) => p.id === over.id);
+                return arrayMove(prev, oldIndex, newIndex);
+            });
         }
     };
 
-    return (
-        <Card className="border border-border rounded-xl shadow-sm overflow-hidden">
-            <CardHeader className="bg-muted/30 border-b border-border py-4 px-6">
-                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider">
-                    <Users className="w-4 h-4" />
-                    Succession Chain
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="p-8">
-                <p className="text-xs text-muted-foreground mb-6 font-medium">
-                    Establish the hierarchical sequence of notification. Top-tier nodes are contacted first.
-                </p>
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            await onSave(items.map((i) => i.id));
+            setSaved(true);
+            setTimeout(() => setSaved(false), 2000);
+        } catch {
+            // handled upstream
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
+    if (items.length === 0) {
+        return (
+            <div className="bg-card border border-border rounded-2xl p-6 text-center">
+                <UsersIcon className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">No beneficiaries to order. Add beneficiaries first.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                <div>
+                    <h3 className="text-sm font-semibold text-foreground">Beneficiary Contact Order</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                        Drag to set the order in which beneficiaries are contacted during escalation.
+                    </p>
+                </div>
+                {isDirty && (
+                    <button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-foreground text-background rounded-lg text-xs font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50"
+                    >
+                        {isSaving ? (
+                            <Loader2Icon className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                            <SaveIcon className="w-3.5 h-3.5" />
+                        )}
+                        {saved ? "Saved!" : "Save Order"}
+                    </button>
+                )}
+            </div>
+
+            <div className="p-4 space-y-2">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragEnd={handleDragEnd}
                 >
-                    <SortableContext items={list.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-                        {list.length > 0 ? (
-                            <div className="space-y-1">
-                                {list.map((item) => <SortableItem key={item.id} id={item.id} beneficiary={item} />)}
-                            </div>
-                        ) : (
-                            <div className="p-12 border border-dashed border-border rounded-lg text-center bg-muted/20">
-                                <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">No_Active_Nodes</p>
-                            </div>
-                        )}
+                    <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+                        {items.map((item, index) => (
+                            <SortableRow key={item.id} item={item} index={index} />
+                        ))}
                     </SortableContext>
                 </DndContext>
-                
-                <div className="mt-8 p-4 bg-muted/50 border border-border rounded-lg">
-                    <p className="text-[10px] text-muted-foreground leading-relaxed font-bold uppercase tracking-tight">
-                        <span className="text-black mr-2">PROTOCOL_NOTE:</span> 
-                        Hierarchy determines the order of asset execution packages. Ensure primary nodes are correctly prioritized at the top.
-                    </p>
-                </div>
-            </CardContent>
-        </Card>
+            </div>
+
+            {/* Legend */}
+            <div className="px-6 py-3 border-t border-border flex items-center gap-4 text-[10px] text-muted-foreground">
+                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Secrecy</span>
+                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Partial</span>
+                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Transparent</span>
+            </div>
+        </div>
     );
 }
