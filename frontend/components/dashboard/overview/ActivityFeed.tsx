@@ -18,19 +18,19 @@ interface Props { activities: ActivityLog[]; isLoading: boolean; }
 
 export function ActivityFeed({ activities, isLoading }: Props) {
     return (
-        <div className="bg-ivory rounded-2xl p-5 border border-oat-border">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-medium uppercase tracking-wider text-olive-gray flex items-center gap-2">
+        <div className="bg-card rounded-lg p-6 border border-border">
+            <div className="flex items-center justify-between mb-5">
+                <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                     <ActivityIcon className="w-4 h-4" /> Recent Activity
                 </h3>
-                <Link href="/dashboard/activity" className="text-xs text-brand hover:underline font-medium">View all</Link>
+                <Link href="/dashboard/activity" className="text-xs text-primary uppercase tracking-wider font-semibold hover:underline">View all</Link>
             </div>
             {isLoading ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {[0, 1, 2].map((i) => (
                         <div key={i} className="flex gap-3 items-start">
                             <Skeleton className="w-2 h-2 mt-1.5 rounded-full shrink-0" />
-                            <div className="flex-1 space-y-1.5">
+                            <div className="flex-1 space-y-2">
                                 <Skeleton className="h-3 w-3/4" />
                                 <Skeleton className="h-3 w-1/3" />
                             </div>
@@ -38,19 +38,19 @@ export function ActivityFeed({ activities, isLoading }: Props) {
                     ))}
                 </div>
             ) : activities.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {activities.map((log) => (
                         <div key={log.id} className="flex gap-3 text-sm">
-                            <div className="w-2 h-2 mt-1.5 rounded-full bg-oat-border shrink-0" />
+                            <div className="w-2 h-2 mt-1.5 rounded-full bg-border shrink-0" />
                             <div>
-                                <p className="text-near-black font-medium">{formatAction(log.action)}</p>
-                                <p className="text-xs text-olive-gray mt-0.5">{timeAgo(log.created_at)}</p>
+                                <p className="text-foreground font-medium">{formatAction(log.action)}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(log.created_at)}</p>
                             </div>
                         </div>
                     ))}
                 </div>
             ) : (
-                <p className="text-sm text-olive-gray py-4 text-center bg-parchment rounded-lg border border-dashed border-oat-border">
+                <p className="text-sm text-muted-foreground py-6 text-center bg-muted/30 rounded-lg border border-dashed border-border">
                     No activity yet.
                 </p>
             )}
