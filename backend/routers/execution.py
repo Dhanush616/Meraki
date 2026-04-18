@@ -35,7 +35,7 @@ DEFAULT_NEXT_STEPS = "Please visit the relevant government or financial institut
 
 
 @router.get("/package/{token}")
-async def get_execution_package(token: str):
+def get_execution_package(token: str):
     """
     Public endpoint — no JWT required.
     Validates the package_access_token and returns the full beneficiary package.

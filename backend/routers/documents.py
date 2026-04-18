@@ -30,7 +30,7 @@ def _validate_package_token(supabase, token: str, execution_id: str, beneficiary
 
 
 @router.post("/claim-form")
-async def generate_claim_form(body: ClaimFormRequest):
+def generate_claim_form(body: ClaimFormRequest):
     """Generate a pre-filled claim form PDF for a single asset."""
     from services.pdf_service import generate_claim_form
 

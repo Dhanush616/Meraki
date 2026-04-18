@@ -12,12 +12,14 @@ export default function SignInPage() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [loginType, setLoginType] = useState<"owner" | "guardian">("owner");
+    const [loginType, setLoginType] = useState<"owner" | "guardian" | "beneficiary">("owner");
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         setLoading(true);
+
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
         if (loginType === "guardian") {
             // Mock guardian login
@@ -28,8 +30,33 @@ export default function SignInPage() {
             return;
         }
 
+        if (loginType === "beneficiary") {
+            try {
+                const res = await fetch(`${apiUrl}/api/auth/beneficiary-login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.detail || "Login failed");
+                }
+
+                localStorage.setItem("beneficiary_token", data.token);
+                localStorage.setItem("beneficiary_id", data.beneficiary_id);
+                router.push("/beneficiary/locked");
+            } catch (err: any) {
+                setError(err.message || "Invalid beneficiary email");
+            } finally {
+                setLoading(false);
+            }
+            return;
+        }
+
+        // Vault Owner Login
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
             const response = await fetch(`${apiUrl}/api/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -78,19 +105,26 @@ export default function SignInPage() {
                 </div>
 
                 <div className="bg-card rounded-2xl p-8 border border-border shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
-                    
+
                     <div className="flex p-1 bg-background rounded-lg mb-6 border border-border">
                         <button
                             type="button"
                             onClick={() => setLoginType("owner")}
-                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${loginType === "owner" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                            className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${loginType === "owner" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
                         >
                             Vault Owner
                         </button>
                         <button
                             type="button"
+                            onClick={() => setLoginType("beneficiary")}
+                            className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${loginType === "beneficiary" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                        >
+                            Beneficiary
+                        </button>
+                        <button
+                            type="button"
                             onClick={() => setLoginType("guardian")}
-                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${loginType === "guardian" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                            className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${loginType === "guardian" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
                         >
                             Guardian
                         </button>
@@ -113,7 +147,7 @@ export default function SignInPage() {
                                 required
                             />
                         </div>
-                        
+
                         {loginType === "owner" && (
                             <div className="space-y-2">
                                 <div className="flex justify-between">

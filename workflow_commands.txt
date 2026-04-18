@@ -1,3 +1,5 @@
 cd backend
 .\.venv\Scripts\activate
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+ask me any follow up questions if you have any doubt until youre 95% sure you understand what you're doing. you can even suggest me changes or improvements if needed.

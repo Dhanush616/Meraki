@@ -6,16 +6,23 @@ import { ShieldIcon, LogOutIcon, ArrowRightIcon } from "lucide-react";
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const DISCLOSURE_TEXT: Record<string, string> = {
-    total_secrecy:      "This vault is currently active and protected. You will be notified if anything changes.",
-    partial_awareness:  "You have been named as a beneficiary. This vault is currently active.",
-    full_transparency:  "You are named as a beneficiary. This vault is currently active and secure.",
+    total_secrecy: "This vault is currently active and protected. You will be notified if anything changes.",
+    partial_awareness: "You have been named as a beneficiary. This vault is currently active.",
+    full_transparency: "You are named as a beneficiary. This vault is currently active and secure.",
 };
+
+interface AllocatedAsset {
+    nickname: string;
+    asset_type: string;
+    percentage: number;
+}
 
 interface BeneficiaryContext {
     beneficiary_name: string;
     disclosure_level: string;
     owner_name?: string;
     status: string;
+    allocated_assets?: AllocatedAsset[];
 }
 
 export default function BeneficiaryLockedPage() {
@@ -91,6 +98,26 @@ export default function BeneficiaryLockedPage() {
                             {subtext}
                         </p>
                     </div>
+
+                    {/* Allocated Assets (Full Transparency Only) */}
+                    {disclosureLevel === "full_transparency" && ctx?.allocated_assets && ctx.allocated_assets.length > 0 && (
+                        <div className="bg-white/5 border border-white/10 rounded-xl p-5 text-left space-y-4">
+                            <h3 className="text-sm font-semibold text-white/90">Your Allocated Assets</h3>
+                            <ul className="space-y-3">
+                                {ctx.allocated_assets.map((asset, i) => (
+                                    <li key={i} className="flex flex-col gap-1 w-full pb-3 border-b border-white/5 last:border-0 last:pb-0">
+                                        <div className="flex w-full items-center justify-between">
+                                            <span className="text-sm font-medium text-white">{asset.nickname}</span>
+                                            <span className="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">
+                                                {asset.percentage}% share
+                                            </span>
+                                        </div>
+                                        <span className="text-xs text-white/40 uppercase tracking-wider">{asset.asset_type.replace('_', ' ')}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
 
                     {/* Divider */}
                     <div className="border-t border-white/10" />

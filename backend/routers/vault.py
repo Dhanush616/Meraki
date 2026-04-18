@@ -4,12 +4,26 @@ from collections import defaultdict
 from core.supabase import get_supabase_client
 from core.security import get_current_user_id
 
+import concurrent.futures
+
 router = APIRouter()
 
 @router.get("/summary", response_model=Dict[str, Any])
-async def get_vault_summary(user_id: str = Depends(get_current_user_id)):
+def get_vault_summary(user_id: str = Depends(get_current_user_id)):
     """Get the dashboard summary for the overview page."""
     supabase = get_supabase_client()
+
+    # Offload sequential queries to a ThreadPool to make them run in parallel
+    queries = [
+        lambda: supabase.table("vault_summary").select("*").eq("owner_id", user_id).execute(),
+        lambda: supabase.table("activity_logs").select("*").eq("owner_id", user_id).order("created_at", desc=True).limit(5).execute(),
+        lambda: supabase.table("profiles").select("onboarding_step, onboarding_done").eq("id", user_id).single().execute(),
+        lambda: supabase.table("assets").select("asset_type, estimated_value_inr").eq("owner_id", user_id).eq("status", "active").execute(),
+        lambda: supabase.table("escalation_settings").select("check_in_frequency_days").eq("owner_id", user_id).single().execute(),
+    ]
+    
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        results = list(executor.map(lambda q: q(), queries))
 
     (
         summary_response,
@@ -17,13 +31,7 @@ async def get_vault_summary(user_id: str = Depends(get_current_user_id)):
         profile_response,
         assets_response,
         escalation_response,
-    ) = (
-        supabase.table("vault_summary").select("*").eq("owner_id", user_id).execute(),
-        supabase.table("activity_logs").select("*").eq("owner_id", user_id).order("created_at", desc=True).limit(5).execute(),
-        supabase.table("profiles").select("onboarding_step, onboarding_done").eq("id", user_id).single().execute(),
-        supabase.table("assets").select("asset_type, estimated_value_inr").eq("owner_id", user_id).eq("status", "active").execute(),
-        supabase.table("escalation_settings").select("check_in_frequency_days").eq("owner_id", user_id).single().execute(),
-    )
+    ) = results
 
     profile = profile_response.data or {}
     onboarding_step = profile.get("onboarding_step", 0)

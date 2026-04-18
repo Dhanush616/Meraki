@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import useSWR from "swr";
 
 export interface Beneficiary {
     id: string;
@@ -46,46 +46,44 @@ function getApiUrl() {
 }
 
 function getToken() {
-    return localStorage.getItem("paradosis_access_token");
+    return typeof window !== "undefined" ? localStorage.getItem("paradosis_access_token") : null;
 }
 
-function authHeaders() {
-    return {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getToken()}`,
-    };
-}
+const fetcher = async (url: string) => {
+    const token = getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const res = await fetch(url, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Failed to fetch data");
+    }
+    return res.json();
+};
 
 export function useBeneficiaries() {
-    const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const apiUrl = `${getApiUrl()}/api/beneficiaries`;
 
-    const fetchBeneficiaries = useCallback(async () => {
-        try {
-            setIsLoading(true);
-            const res = await fetch(`${getApiUrl()}/api/beneficiaries`, {
-                headers: authHeaders(),
-            });
-            if (!res.ok) throw new Error("Failed to fetch beneficiaries");
-            const data: Beneficiary[] = await res.json();
-            setBeneficiaries(data);
-            setError(null);
-        } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "Unknown error");
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        fetchBeneficiaries();
-    }, [fetchBeneficiaries]);
+    // SWR handles caching, revalidation, and loading states out of the box
+    const { data: beneficiaries = [], error, isLoading, mutate } = useSWR<Beneficiary[]>(apiUrl, fetcher, {
+        revalidateOnFocus: true,
+        dedupingInterval: 2000,
+    });
 
     const createBeneficiary = async (data: BeneficiaryFormData): Promise<Beneficiary> => {
-        const res = await fetch(`${getApiUrl()}/api/beneficiaries`, {
+        const token = getToken();
+        const res = await fetch(apiUrl, {
             method: "POST",
-            headers: authHeaders(),
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
             body: JSON.stringify(data),
         });
         if (!res.ok) {
@@ -93,14 +91,18 @@ export function useBeneficiaries() {
             throw new Error(err.detail || "Failed to create beneficiary");
         }
         const created: Beneficiary = await res.json();
-        setBeneficiaries((prev) => [...prev, { ...created, assets_assigned_count: 0 }]);
+        await mutate([...beneficiaries, { ...created, assets_assigned_count: 0 }], false);
         return created;
     };
 
     const updateBeneficiary = async (id: string, data: Partial<BeneficiaryFormData>): Promise<Beneficiary> => {
-        const res = await fetch(`${getApiUrl()}/api/beneficiaries/${id}`, {
+        const token = getToken();
+        const res = await fetch(`${apiUrl}/${id}`, {
             method: "PUT",
-            headers: authHeaders(),
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
             body: JSON.stringify(data),
         });
         if (!res.ok) {
@@ -108,29 +110,31 @@ export function useBeneficiaries() {
             throw new Error(err.detail || "Failed to update beneficiary");
         }
         const updated: Beneficiary = await res.json();
-        setBeneficiaries((prev) =>
-            prev.map((b) => (b.id === id ? { ...updated, assets_assigned_count: b.assets_assigned_count } : b))
+        await mutate(
+            beneficiaries.map((b) => (b.id === id ? { ...updated, assets_assigned_count: b.assets_assigned_count } : b)),
+            false
         );
         return updated;
     };
 
     const deleteBeneficiary = async (id: string): Promise<void> => {
-        const res = await fetch(`${getApiUrl()}/api/beneficiaries/${id}`, {
+        const token = getToken();
+        const res = await fetch(`${apiUrl}/${id}`, {
             method: "DELETE",
-            headers: authHeaders(),
+            headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) {
             const err = await res.json();
             throw new Error(err.detail || "Failed to delete beneficiary");
         }
-        setBeneficiaries((prev) => prev.filter((b) => b.id !== id));
+        await mutate(beneficiaries.filter((b) => b.id !== id), false);
     };
 
     return {
         beneficiaries,
         isLoading,
-        error,
-        refetch: fetchBeneficiaries,
+        error: error ? error.message : null,
+        refetch: mutate,
         createBeneficiary,
         updateBeneficiary,
         deleteBeneficiary,
