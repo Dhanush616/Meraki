@@ -11,12 +11,12 @@ interface LevelInfo {
 }
 
 const LEVEL_INFO: Record<string, LevelInfo> = {
-    level_0_normal:             { label: "All Clear",          badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",  iconClass: "text-emerald-500" },
-    level_1_concern:            { label: "Concern",            badgeClass: "bg-amber-50 text-amber-700 border-amber-200",        iconClass: "text-amber-500" },
-    level_2_alert:              { label: "Alert",              badgeClass: "bg-amber-50 text-amber-700 border-amber-200",        iconClass: "text-amber-500" },
-    level_3_suspected_death:    { label: "Suspected Death",    badgeClass: "bg-rose-50 text-rose-700 border-rose-200",           iconClass: "text-rose-500" },
-    level_4_death_claimed:      { label: "Death Claimed",      badgeClass: "bg-rose-50 text-rose-700 border-rose-200",           iconClass: "text-rose-500" },
-    level_5_executed:           { label: "Vault Executed",     badgeClass: "bg-gray-100 text-gray-700 border-gray-200",          iconClass: "text-gray-500" },
+    level_0_normal:             { label: "All Clear",          badgeClass: "bg-muted text-foreground border-border",  iconClass: "text-foreground" },
+    level_1_concern:            { label: "Concern",            badgeClass: "bg-muted text-muted-foreground border-border",        iconClass: "text-muted-foreground" },
+    level_2_alert:              { label: "Alert",              badgeClass: "bg-muted text-muted-foreground border-border",        iconClass: "text-muted-foreground" },
+    level_3_suspected_death:    { label: "Suspected Death",    badgeClass: "bg-destructive/10 text-destructive border-destructive/20",           iconClass: "text-destructive" },
+    level_4_death_claimed:      { label: "Death Claimed",      badgeClass: "bg-destructive/10 text-destructive border-destructive/20",           iconClass: "text-destructive" },
+    level_5_executed:           { label: "Vault Executed",     badgeClass: "bg-muted text-muted-foreground border-border",          iconClass: "text-muted-foreground" },
 };
 
 function formatDate(iso: string | null): string {
@@ -51,41 +51,41 @@ export function EscalationStatus({ level, lastCheckIn, checkInFrequencyDays, isL
     const info = LEVEL_INFO[level] ?? LEVEL_INFO.level_0_normal;
 
     return (
-        <div className="bg-ivory rounded-2xl p-6 border border-oat-border shadow-sm">
-            <h3 className="text-sm font-medium uppercase tracking-wider text-olive-gray flex items-center gap-2 mb-5">
+        <div className="bg-card rounded-lg p-6 border border-border">
+            <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2 mb-5">
                 <ShieldCheckIcon className={`w-4 h-4 ${info.iconClass}`} /> Escalation Status
             </h3>
 
             {isLoading ? (
                 <div className="space-y-3">
-                    <Skeleton className="h-14 rounded-xl" />
+                    <Skeleton className="h-14 rounded-lg" />
                     <Skeleton className="h-4 w-48" />
                     <Skeleton className="h-4 w-40" />
                 </div>
             ) : (
                 <>
-                    <div className={`flex items-center justify-between p-4 rounded-xl border mb-4 ${info.badgeClass}`}>
+                    <div className={`flex items-center justify-between p-4 rounded-lg border mb-4 ${info.badgeClass}`}>
                         <div>
-                            <p className="text-xs opacity-70 uppercase tracking-wider font-semibold mb-1">Current State</p>
-                            <p className="text-lg font-serif font-bold">{info.label}</p>
+                            <p className="text-[10px] opacity-70 uppercase tracking-wider font-bold mb-1">Current State</p>
+                            <p className="text-xl font-bold tracking-tight">{info.label}</p>
                         </div>
                         <ShieldCheckIcon className={`w-8 h-8 opacity-40`} />
                     </div>
 
                     <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2 text-near-black">
-                            <CalendarIcon className="w-4 h-4 text-olive-gray shrink-0" />
-                            <span>Last check-in: <strong className="font-medium">{formatDate(lastCheckIn)}</strong></span>
+                        <div className="flex items-center gap-2 text-foreground">
+                            <CalendarIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <span>Last check-in: <strong className="font-semibold">{formatDate(lastCheckIn)}</strong></span>
                         </div>
-                        <div className="flex items-center gap-2 text-near-black">
-                            <CalendarIcon className="w-4 h-4 text-olive-gray shrink-0" />
-                            <span>Next check-in: <strong className="font-medium">{nextCheckInDate(lastCheckIn, checkInFrequencyDays)}</strong></span>
+                        <div className="flex items-center gap-2 text-foreground">
+                            <CalendarIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <span>Next check-in: <strong className="font-semibold">{nextCheckInDate(lastCheckIn, checkInFrequencyDays)}</strong></span>
                         </div>
                     </div>
 
                     <Link
                         href="/dashboard/escalation"
-                        className="mt-5 flex items-center gap-1 text-xs text-brand font-medium hover:underline"
+                        className="mt-5 flex items-center gap-1 text-xs text-primary font-semibold uppercase tracking-wider hover:underline"
                     >
                         Configure monitoring <ArrowRightIcon className="w-3 h-3" />
                     </Link>

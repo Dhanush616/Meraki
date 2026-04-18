@@ -71,19 +71,21 @@ export function useVaultSummary() {
     }, []);
 
     useEffect(() => {
+        let isMounted = true;
         let channel: ReturnType<ReturnType<typeof createClient>["channel"]> | null = null;
+        const supabase = createClient();
 
         fetchSummary().then((result) => {
-            if (!result) return;
+            if (!isMounted || !result) return;
             const { token, userId } = result;
             if (!userId) return;
 
             // Realtime subscription for live activity feed updates
-            const supabase = createClient();
             supabase.realtime.setAuth(token);
 
+            const channelName = `activity-feed-${userId}-${Date.now()}`;
             channel = supabase
-                .channel("activity-feed")
+                .channel(channelName)
                 .on(
                     "postgres_changes",
                     {
@@ -110,8 +112,8 @@ export function useVaultSummary() {
         });
 
         return () => {
+            isMounted = false;
             if (channel) {
-                const supabase = createClient();
                 supabase.removeChannel(channel);
             }
         };
