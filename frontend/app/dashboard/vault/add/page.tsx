@@ -1,11 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-    BuildingIcon, LandmarkIcon, BitcoinIcon, CarIcon, ShieldIcon, 
-    BriefcaseIcon, GemIcon, CheckCircle2Icon, ChevronRightIcon, ArrowLeftIcon 
+import {
+    BuildingIcon, LandmarkIcon, BitcoinIcon, CarIcon, ShieldIcon,
+    BriefcaseIcon, GemIcon, CheckCircle2Icon, ChevronRightIcon, ArrowLeftIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBeneficiaries } from "@/hooks/useBeneficiaries";
@@ -13,30 +13,42 @@ import { AssetAllocation } from "@/components/dashboard/vault/AssetAllocation";
 
 const ASSET_FIELD_CONFIG: Record<string, { institutionLabel: string; identifierLabel: string; extraFields?: { id: string; label: string; placeholder: string }[] }> = {
     bank_account: { institutionLabel: "Institution / Bank Name", identifierLabel: "Account / Identifier" },
-    fixed_deposit: { institutionLabel: "Bank / Issuer", identifierLabel: "FD Receipt Number", extraFields: [
-        { id: "maturity_date", label: "Maturity Date", placeholder: "YYYY-MM-DD" },
-        { id: "interest_rate", label: "Interest Rate (%)", placeholder: "e.g. 7.5" }
-    ] },
-    property: { institutionLabel: "Property Type", identifierLabel: "Registry Number", extraFields: [
-        { id: "address", label: "Complete Address", placeholder: "e.g. 123 Main St, City" }
-    ] },
-    insurance: { institutionLabel: "Insurance Provider", identifierLabel: "Policy Number", extraFields: [
-        { id: "policy_type", label: "Policy Type", placeholder: "e.g. Term Life, Health" },
-        { id: "premium_amount", label: "Premium Amount / Year (₹)", placeholder: "e.g. 25000" }
-    ] },
-    mutual_fund: { institutionLabel: "Fund House", identifierLabel: "Folio Number", extraFields: [
-        { id: "total_units", label: "Total Units", placeholder: "e.g. 1500" }
-    ] },
+    fixed_deposit: {
+        institutionLabel: "Bank / Issuer", identifierLabel: "FD Receipt Number", extraFields: [
+            { id: "maturity_date", label: "Maturity Date", placeholder: "YYYY-MM-DD" },
+            { id: "interest_rate", label: "Interest Rate (%)", placeholder: "e.g. 7.5" }
+        ]
+    },
+    property: {
+        institutionLabel: "Property Type", identifierLabel: "Registry Number", extraFields: [
+            { id: "address", label: "Complete Address", placeholder: "e.g. 123 Main St, City" }
+        ]
+    },
+    insurance: {
+        institutionLabel: "Insurance Provider", identifierLabel: "Policy Number", extraFields: [
+            { id: "policy_type", label: "Policy Type", placeholder: "e.g. Term Life, Health" },
+            { id: "premium_amount", label: "Premium Amount / Year (₹)", placeholder: "e.g. 25000" }
+        ]
+    },
+    mutual_fund: {
+        institutionLabel: "Fund House", identifierLabel: "Folio Number", extraFields: [
+            { id: "total_units", label: "Total Units", placeholder: "e.g. 1500" }
+        ]
+    },
     stocks_demat: { institutionLabel: "Broker Name", identifierLabel: "Demat Account ID" },
     crypto_wallet: { institutionLabel: "Exchange / Wallet Provider", identifierLabel: "Wallet Address" },
-    vehicle: { institutionLabel: "Vehicle Type", identifierLabel: "Registration Number", extraFields: [
-        { id: "chassis_number", label: "Chassis Number (Optional)", placeholder: "e.g. MA1ZA..." }
-    ] },
+    vehicle: {
+        institutionLabel: "Vehicle Type", identifierLabel: "Registration Number", extraFields: [
+            { id: "chassis_number", label: "Chassis Number (Optional)", placeholder: "e.g. MA1ZA..." }
+        ]
+    },
     ppf_epf: { institutionLabel: "Provider (e.g. EPFO)", identifierLabel: "UAN / Account No." },
-    gold_jewellery: { institutionLabel: "Location Stored", identifierLabel: "Locker / Receipt No.", extraFields: [
-        { id: "weight_grams", label: "Weight (Grams)", placeholder: "e.g. 50" },
-        { id: "purity_karat", label: "Purity (Karat)", placeholder: "e.g. 24K" }
-    ] }
+    gold_jewellery: {
+        institutionLabel: "Location Stored", identifierLabel: "Locker / Receipt No.", extraFields: [
+            { id: "weight_grams", label: "Weight (Grams)", placeholder: "e.g. 50" },
+            { id: "purity_karat", label: "Purity (Karat)", placeholder: "e.g. 24K" }
+        ]
+    }
 };
 
 const ASSET_TYPES = [
@@ -68,6 +80,41 @@ export default function AddAssetWizard() {
     
     // Allocation State
     const [allocations, setAllocations] = useState<{ beneficiary_id: string; percentage: number }[]>([]);
+
+    const [beneficiaries, setBeneficiaries] = useState<any[]>([]);
+    const [allocations, setAllocations] = useState<{ beneficiary_id: string, percentage: number }[]>([]);
+
+    useEffect(() => {
+        async function fetchBeneficiaries() {
+            const token = localStorage.getItem("paradosis_access_token");
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            try {
+                const res = await fetch(`${apiUrl}/api/beneficiaries`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    setBeneficiaries(await res.json());
+                }
+            } catch (err) { }
+        }
+        fetchBeneficiaries();
+    }, []);
+
+    const addAllocation = (beneId: string) => {
+        if (!allocations.find(a => a.beneficiary_id === beneId)) {
+            setAllocations([...allocations, { beneficiary_id: beneId, percentage: 0 }]);
+        }
+    };
+
+    const updateAllocation = (beneId: string, percentage: number) => {
+        setAllocations(allocations.map(a => a.beneficiary_id === beneId ? { ...a, percentage } : a));
+    };
+
+    const removeAllocation = (beneId: string) => {
+        setAllocations(allocations.filter(a => a.beneficiary_id !== beneId));
+    };
+
+    const totalPercentage = allocations.reduce((sum, a) => sum + (a.percentage || 0), 0);
 
     const currentConfig = ASSET_FIELD_CONFIG[assetType] || ASSET_FIELD_CONFIG.bank_account;
 
@@ -116,9 +163,9 @@ export default function AddAssetWizard() {
 
             const res = await fetch(`${apiUrl}/api/assets`, {
                 method: "POST",
-                headers: { 
+                headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}` 
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify(newAsset)
             });
@@ -173,8 +220,8 @@ export default function AddAssetWizard() {
 
             {/* Progress Bar */}
             <div className="w-full bg-border rounded-full h-2 mb-8 overflow-hidden">
-                <motion.div 
-                    className="bg-primary h-2 rounded-full" 
+                <motion.div
+                    className="bg-primary h-2 rounded-full"
                     initial={{ width: "25%" }}
                     animate={{ width: `${(step / 4) * 100}%` }}
                     transition={{ ease: "easeInOut" }}
@@ -247,7 +294,7 @@ export default function AddAssetWizard() {
                                     />
                                     <div className="absolute right-3 top-9 text-xs font-semibold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">ENC</div>
                                 </div>
-                                
+
                                 {currentConfig.extraFields?.map(field => (
                                     <div key={field.id} className="space-y-2">
                                         <label className="text-sm font-medium text-foreground">{field.label}</label>
@@ -288,7 +335,7 @@ export default function AddAssetWizard() {
                     {step === 4 && (
                         <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                             <h2 className="text-xl font-bold font-sans text-foreground mb-6">Review & Confirm</h2>
-                            
+
                             <div className="bg-background border border-border rounded-xl p-6 space-y-4">
                                 <div className="flex justify-between py-2 border-b border-border/50">
                                     <span className="text-muted-foreground text-sm">Asset Type</span>

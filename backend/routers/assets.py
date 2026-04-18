@@ -21,6 +21,13 @@ class AssetBase(BaseModel):
     primary_beneficiary_count: Optional[int] = 1
     backup_beneficiary_count: Optional[int] = 0
 
+class BeneficiaryAllocation(BaseModel):
+    beneficiary_id: str
+    percentage: float
+    role: str = "primary"
+    priority_order: int = 1
+    special_instructions: Optional[str] = None
+
 class AssetCreate(AssetBase):
     primary_total_pct: Optional[float] = 0
     primary_beneficiary_count: Optional[int] = 0
@@ -75,7 +82,7 @@ def list_assets(user_id: str = Depends(get_current_user_id)):
 def create_asset(asset: AssetCreate, user_id: str = Depends(get_current_user_id)):
     """Create a new asset."""
     supabase = get_supabase_client()
-    data = asset.dict()
+    data = asset.dict(exclude={"allocations"})
     data["owner_id"] = user_id
     response = supabase.table("assets").insert(data).execute()
     if not response.data:
@@ -84,6 +91,25 @@ def create_asset(asset: AssetCreate, user_id: str = Depends(get_current_user_id)
     new_asset = response.data[0]
     log_activity(supabase, user_id, "asset.created", "asset", str(new_asset["id"]), {"nickname": new_asset["nickname"], "type": new_asset["asset_type"]})
     
+    if asset.allocations:
+        mappings = []
+        for alloc in asset.allocations:
+            mappings.append({
+                "owner_id": user_id,
+                "asset_id": new_asset["id"],
+                "beneficiary_id": alloc.beneficiary_id,
+                "percentage": alloc.percentage,
+                "role": alloc.role,
+                "priority_order": alloc.priority_order,
+                "special_instructions": alloc.special_instructions
+            })
+        supabase.table("asset_beneficiary_mappings").insert(mappings).execute()
+    
+    # Auto-increment onboarding step if it is 1
+    current_profile = supabase.table("profiles").select("onboarding_step").eq("id", user_id).single().execute()
+    if current_profile.data and current_profile.data.get("onboarding_step", 0) == 1:
+        supabase.table("profiles").update({"onboarding_step": 2}).eq("id", user_id).execute()
+        
     return new_asset
 
 @router.get("/{asset_id}/mappings", response_model=List[MappingResponse])
