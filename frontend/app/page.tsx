@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { HeroGemini } from "@/components/HeroGemini";
 import { DottedSurface } from "@/components/ui/dotted-surface";
+import { Navbar } from "@/components/navbar";
 
 const fadeUp = {
     hidden: { opacity: 0, y: 28 },
@@ -94,6 +95,7 @@ export default function LandingPage() {
 
     return (
         <main className="min-h-screen bg-white w-full">
+            <Navbar />
 
             {/* Hero */}
             <section className="w-full relative z-20">

@@ -1,35 +1,44 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { ShieldAlertIcon, CheckCircle2Icon, AlertTriangleIcon, ActivityIcon } from "lucide-react";
+import { ShieldAlertIcon, CheckCircle2Icon, AlertTriangleIcon, ActivityIcon, UploadCloudIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
 
 export default function GuardianPortalPage() {
     const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
     const [reportStep, setReportStep] = useState(1);
+    const [dragOver, setDragOver] = useState(false);
+    const [file, setFile] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [escalationLevel, setEscalationLevel] = useState(0); // 0 = Normal, 3 = Escalated
 
     const handleReport = async () => {
         setIsSubmitting(true);
-        try {
-            // Mocking the backend API call POST /api/guardian/report
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            setEscalationLevel(3);
-            setIsReportDialogOpen(false);
-            setReportStep(1); // reset
-        } catch (e) {
-            console.error(e);
-        } finally {
+        setTimeout(() => {
             setIsSubmitting(false);
-        }
+            setReportStep(3); // Next step: upload certificate
+        }, 1000);
+    };
+
+    const handleFile = (f: File) => {
+        if (!["application/pdf", "image/jpeg", "image/png"].includes(f.type)) { alert("Invalid type"); return; }
+        setFile(f);
+    };
+
+    const handleUpload = () => {
+        setIsSubmitting(true);
+        setTimeout(() => {
+            setIsSubmitting(false);
+            setEscalationLevel(3);
+            setReportStep(4); // Success step
+        }, 2000);
     };
 
     return (
@@ -77,16 +86,16 @@ export default function GuardianPortalPage() {
                                     )}
                                 </h3>
                                 <p className="text-sm text-muted-foreground mt-1">
-                                    {escalationLevel === 0 
-                                        ? "The vault is safely secured. Arjun's normal check-in schedule is active." 
+                                    {escalationLevel === 0
+                                        ? "The vault is safely secured. Arjun's normal check-in schedule is active."
                                         : "You have reported a suspected death. The verification liveness window has started."}
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <Button 
-                        onClick={() => setIsReportDialogOpen(true)} 
+                    <Button
+                        onClick={() => setIsReportDialogOpen(true)}
                         disabled={escalationLevel > 0}
                         className={`w-full sm:w-auto px-8 py-6 rounded-full text-base font-medium transition-all ${escalationLevel > 0 ? "bg-gray-200 text-gray-400" : "bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-600/20"}`}
                     >
@@ -96,9 +105,9 @@ export default function GuardianPortalPage() {
             </main>
 
             <Dialog open={isReportDialogOpen} onOpenChange={(open) => {
-                if(!isSubmitting) {
+                if (!isSubmitting) {
                     setIsReportDialogOpen(open);
-                    if(!open) setTimeout(() => setReportStep(1), 300);
+                    if (!open) setTimeout(() => setReportStep(1), 300);
                 }
             }}>
                 <DialogContent className="sm:max-w-[450px] p-0 overflow-hidden bg-card border-none shadow-2xl">
@@ -111,7 +120,7 @@ export default function GuardianPortalPage() {
                                 {reportStep === 1 ? "Are you sure?" : "Final Confirmation"}
                             </DialogTitle>
                             <DialogDescription className="text-center text-muted-foreground font-sans pt-2">
-                                {reportStep === 1 
+                                {reportStep === 1
                                     ? "This begins the formal death verification process. An automated liveness check will be sent to the owner."
                                     : "Have you been unable to reach Arjun for an extended period?"}
                             </DialogDescription>
@@ -119,14 +128,14 @@ export default function GuardianPortalPage() {
 
                         {reportStep === 1 ? (
                             <div className="flex flex-col gap-3 mt-8">
-                                <Button 
-                                    onClick={() => setReportStep(2)} 
+                                <Button
+                                    onClick={() => setReportStep(2)}
                                     className="w-full bg-red-600 hover:bg-red-700 text-white rounded-lg py-6"
                                 >
                                     Yes, I want to proceed
                                 </Button>
-                                <Button 
-                                    variant="ghost" 
+                                <Button
+                                    variant="ghost"
                                     onClick={() => setIsReportDialogOpen(false)}
                                     className="w-full text-muted-foreground hover:text-foreground"
                                 >
@@ -135,8 +144,8 @@ export default function GuardianPortalPage() {
                             </div>
                         ) : (
                             <div className="flex flex-col gap-3 mt-8">
-                                <Button 
-                                    onClick={handleReport} 
+                                <Button
+                                    onClick={handleReport}
                                     disabled={isSubmitting}
                                     className="w-full bg-red-600 hover:bg-red-700 text-white rounded-lg py-6 flex items-center justify-center gap-2"
                                 >
@@ -147,8 +156,8 @@ export default function GuardianPortalPage() {
                                         </>
                                     )}
                                 </Button>
-                                <Button 
-                                    variant="ghost" 
+                                <Button
+                                    variant="ghost"
                                     onClick={() => setReportStep(1)}
                                     disabled={isSubmitting}
                                     className="w-full text-muted-foreground hover:text-foreground"
@@ -159,7 +168,7 @@ export default function GuardianPortalPage() {
                         )}
                     </div>
                 </DialogContent>
-            </Dialog>            
+            </Dialog>
         </div>
     );
 }

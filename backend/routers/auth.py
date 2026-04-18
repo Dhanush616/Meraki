@@ -125,9 +125,9 @@ async def beneficiary_login(credentials: BeneficiaryLoginRequest):
     """
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            f"{settings.SUPABASE_URL}/auth/v1/token?grant_type=password",
+            f"{os.getenv('SUPABASE_URL')}/auth/v1/token?grant_type=password",
             headers={
-                "apikey": settings.SUPABASE_SERVICE_ROLE_KEY,
+                "apikey": os.getenv('SUPABASE_SERVICE_ROLE_KEY'),
                 "Content-Type": "application/json"
             },
             json={

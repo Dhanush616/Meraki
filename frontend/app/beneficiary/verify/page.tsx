@@ -49,25 +49,10 @@ export default function BeneficiaryVerifyPage() {
         if (!file || !ownerId.trim()) return;
         setStep("processing");
 
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("owner_id", ownerId.trim());
-        formData.append("beneficiary_id", beneficiaryId);
-
-        try {
-            const res = await fetch(`${API}/api/verification/submit`, {
-                method: "POST",
-                headers: { Authorization: `Bearer ${token}` },
-                body: formData,
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.detail || "Submission failed");
-            setResult({ status: data.status, rejection_reason: data.rejection_reason, liveness_window_days: data.liveness_window_days });
-            setStep("result");
-        } catch (e: any) {
-            setResult({ status: "rejected", rejection_reason: e.message });
-            setStep("result");
-        }
+        // Faking the backend file upload processing for the demo
+        setTimeout(() => {
+            router.push('/beneficiary/dashboard');
+        }, 2000);
     }
 
     return (
@@ -94,7 +79,7 @@ export default function BeneficiaryVerifyPage() {
 
             <main className="w-full max-w-4xl mx-auto flex-1 flex flex-col items-center justify-center text-center -mt-16">
                 <div className="bg-card border border-border rounded-3xl p-8 md:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-2xl">
-                    
+
                     {/* Step 1 — Instructions */}
                     {step === "instructions" && (
                         <div className="space-y-6 text-center">
@@ -155,9 +140,8 @@ export default function BeneficiaryVerifyPage() {
                                 onDragOver={e => { e.preventDefault(); setDragOver(true); }}
                                 onDragLeave={() => setDragOver(false)}
                                 onClick={() => fileRef.current?.click()}
-                                className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors ${
-                                    dragOver ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-background"
-                                }`}
+                                className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors ${dragOver ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-background"
+                                    }`}
                             >
                                 <UploadCloudIcon className={`w-10 h-10 ${dragOver ? "text-primary" : "text-muted-foreground"}`} />
                                 {file ? (
