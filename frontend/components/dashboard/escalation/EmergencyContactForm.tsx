@@ -36,7 +36,7 @@ export function EmergencyContactForm({ initialData, onSubmit }: EmergencyContact
             <CardHeader className="bg-muted/30 border-b border-border py-4 px-6">
                 <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider">
                     <ShieldCheck className="w-4 h-4" />
-                    Primary Emergency Point
+                    Guardian Details
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-8">

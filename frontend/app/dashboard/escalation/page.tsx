@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { EscalationLadder } from "@/components/dashboard/escalation/EscalationLadder";
 import { CheckInFrequency } from "@/components/dashboard/escalation/CheckInFrequency";
 import { VacationMode } from "@/components/dashboard/escalation/VacationMode";
 import { EmergencyContactForm } from "@/components/dashboard/escalation/EmergencyContactForm";
@@ -77,32 +76,20 @@ export default function EscalationPage() {
             </header>
 
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-                {/* Left Column: Visual Ladder + Emergency Contact */}
+                {/* Left Column: Guardian + Monitoring */}
                 <div className="xl:col-span-6 space-y-8">
                     <section className="space-y-4">
-                        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1">
-                            System Progression
-                        </h2>
-                        <div className="bg-card border border-border rounded-xl p-8 shadow-sm">
-                            <EscalationLadder currentLevel={settings?.current_escalation_level || "level_0_normal"} />
-                        </div>
-                    </section>
-
-                    <section className="space-y-4">
-                        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1">
-                            Verification Point
+                        <h2 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+                            Guardian Details
                         </h2>
                         <EmergencyContactForm 
                             initialData={emergencyContact} 
                             onSubmit={handleUpdateEmergencyContact} 
                         />
                     </section>
-                </div>
 
-                {/* Right Column: Monitoring + Hierarchy */}
-                <div className="xl:col-span-6 space-y-8">
                     <section className="space-y-4">
-                        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1">
+                        <h2 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
                             Monitoring Parameters
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -119,9 +106,12 @@ export default function EscalationPage() {
                             />
                         </div>
                     </section>
+                </div>
 
+                {/* Right Column: Succession Chain */}
+                <div className="xl:col-span-6 space-y-8">
                     <section className="space-y-4">
-                        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1">
+                        <h2 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
                             Succession Chain
                         </h2>
                         <BeneficiaryContactOrder 

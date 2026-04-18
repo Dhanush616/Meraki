@@ -34,7 +34,7 @@ export function CheckInFrequency({ value, lastCheckIn, onChange }: CheckInFreque
     return (
         <Card className="border border-border rounded-xl shadow-sm h-full">
             <CardHeader className="bg-muted/30 border-b border-border py-3 px-5">
-                <CardTitle className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider">
                     <CalendarClock className="w-3.5 h-3.5" />
                     Frequency
                 </CardTitle>
