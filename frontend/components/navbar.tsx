@@ -7,8 +7,9 @@ import { ShieldIcon } from "lucide-react";
 export function Navbar() {
   const pathname = usePathname();
   const isAuthPage = pathname?.startsWith("/auth");
+  const isDashboard = pathname?.startsWith("/dashboard");
 
-  if (isAuthPage) return null;
+  if (isAuthPage || isDashboard) return null;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#e5e5e5] bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 transition-colors duration-300">
