@@ -9,6 +9,106 @@ from core.security import get_current_user_id
 router = APIRouter()
 
 
+# ── Beneficiary Portal Endpoints ──────────────────────────────────────────────
+
+@router.get("/portal/dashboard")
+def get_beneficiary_dashboard(user_id: str = Depends(get_current_user_id)):
+    """Get dashboard data for a logged-in beneficiary."""
+    supabase = get_supabase_client()
+    
+    # 1. Verify user is a beneficiary and get owner_id
+    role_res = supabase.table("user_roles").select("linked_owner_id").eq("user_id", user_id).eq("role", "beneficiary").execute()
+    if not role_res.data:
+        raise HTTPException(status_code=403, detail="Not authorized as a beneficiary")
+    owner_id = role_res.data[0]["linked_owner_id"]
+    
+    # 2. Get beneficiary_id for this user
+    bene_res = supabase.table("beneficiaries").select("id, full_name").eq("user_id", user_id).eq("owner_id", owner_id).execute()
+    if not bene_res.data:
+        raise HTTPException(status_code=404, detail="Beneficiary record not found")
+    beneficiary = bene_res.data[0]
+    beneficiary_id = beneficiary["id"]
+    
+    # 3. Get all assets and mappings for the vault
+    all_assets_res = supabase.table("assets").select("*").eq("owner_id", owner_id).execute()
+    all_mappings_res = supabase.table("asset_beneficiary_mappings").select("*, beneficiaries(full_name)").eq("owner_id", owner_id).execute()
+    
+    mappings_by_asset = {}
+    for m in all_mappings_res.data or []:
+        asset_id = m["asset_id"]
+        if asset_id not in mappings_by_asset:
+            mappings_by_asset[asset_id] = []
+        mappings_by_asset[asset_id].append(m)
+        
+    allocated_assets = []
+    other_assets = []
+    
+    import json
+    for asset in all_assets_res.data or []:
+        asset_mappings = mappings_by_asset.get(asset["id"], [])
+        
+        is_allocated_to_me = False
+        my_percentage = 0
+        other_beneficiaries = []
+        
+        for m in asset_mappings:
+            if m["beneficiary_id"] == beneficiary_id:
+                is_allocated_to_me = True
+                my_percentage = m["percentage"]
+            else:
+                other_beneficiaries.append({
+                    "name": m.get("beneficiaries", {}).get("full_name", "Unknown"),
+                    "percentage": m["percentage"]
+                })
+                
+        # Parse metadata_encrypted (if any) - in a real app this is decrypted, here we just return it or parse if it's plaintext JSON
+        details = {}
+        if asset.get("metadata_encrypted"):
+            try:
+                details = json.loads(asset["metadata_encrypted"])
+            except:
+                pass
+                
+        asset_info = {
+            "id": asset["id"],
+            "nickname": asset["nickname"],
+            "asset_type": asset["asset_type"],
+            "details": details
+        }
+                
+        if is_allocated_to_me:
+            allocated_assets.append({
+                **asset_info,
+                "percentage": my_percentage,
+                "other_beneficiaries": other_beneficiaries
+            })
+        else:
+            other_assets.append({
+                **asset_info,
+                "beneficiaries": other_beneficiaries
+            })
+            
+    # 4. Will document
+    will_res = supabase.table("will_documents").select("*").eq("owner_id", owner_id).eq("is_current", True).execute()
+    will_document = will_res.data[0] if will_res.data else None
+    
+    # 5. Personal message
+    msg_res = supabase.table("personal_messages").select("*").eq("beneficiary_id", beneficiary_id).execute()
+    personal_message = msg_res.data[0] if msg_res.data else None
+    
+    # 6. Get owner name
+    owner_res = supabase.table("profiles").select("full_name").eq("id", owner_id).execute()
+    owner_name = owner_res.data[0]["full_name"] if owner_res.data else "Vault Owner"
+    
+    return {
+        "owner_name": owner_name,
+        "beneficiary_name": beneficiary["full_name"],
+        "allocated_assets": allocated_assets,
+        "other_assets": other_assets,
+        "will_document": will_document,
+        "personal_message": personal_message
+    }
+
 # ── Schemas ──────────────────────────────────────────────────────────────────
 
 class BeneficiaryBase(BaseModel):

@@ -9,37 +9,45 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const MOCK_ASSETS = [
-    { 
-        id: "1", 
-        nickname: "HDFC Savings Account", 
-        asset_type: "bank_account",
-        percentage: 100, 
-        details: { account_number: "XXXX-XXXX-1234", branch: "Anna Nagar, Chennai", balance_estimate: "4,50,000 INR" }
-    },
-    { 
-        id: "2", 
-        nickname: "Family Flat in Adyar", 
-        asset_type: "property",
-        percentage: 50, 
-        details: { address: "14, Gandhi Nagar, Adyar", area: "1500 sqft", status: "fully_paid" }
-    },
-    { 
-        id: "3", 
-        nickname: "Bitcoin Wallet", 
-        asset_type: "crypto_wallet",
-        percentage: 100, 
-        details: { wallet_type: "Hardware (Ledger)", location: "Left drawer of the study desk", instructions: "PIN is same as my secondary phone" }
-    }
-];
+
 
 export default function BeneficiaryDashboard() {
     const router = useRouter();
+    const [data, setData] = useState<any>(null);
+    const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        setTimeout(() => setLoading(false), 800);
-    }, []);
+        const fetchDashboardData = async () => {
+            try {
+                const token = localStorage.getItem("beneficiary_token");
+                if (!token) {
+                    router.push("/auth/signin");
+                    return;
+                }
+
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+                const res = await fetch(`${apiUrl}/api/beneficiaries/portal/dashboard`, {
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error("Failed to load dashboard data");
+                }
+
+                const json = await res.json();
+                setData(json);
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, [router]);
 
     function signOut() {
         localStorage.removeItem("beneficiary_token");
@@ -84,7 +92,7 @@ export default function BeneficiaryDashboard() {
             <main className="w-full max-w-5xl mx-auto flex-1 flex flex-col">
                 <div className="bg-card border border-border shadow-sm rounded-3xl p-8 mb-8 flex flex-col sm:flex-row items-center gap-6 justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-foreground mb-2">Arjun's Vault</h1>
+                        <h1 className="text-3xl font-bold text-foreground mb-2">{data?.owner_name || "Vault Owner"}'s Vault</h1>
                         <p className="text-muted-foreground">The death certificate has been verified. You now have full access to your allocated assets, personal messages, and next-step instructions left by the vault owner.</p>
                     </div>
                     <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -96,61 +104,123 @@ export default function BeneficiaryDashboard() {
                     <div className="lg:col-span-2 space-y-6">
                         <h2 className="text-xl font-bold text-foreground mb-4">Allocated Assets</h2>
                         <div className="space-y-4">
-                            {MOCK_ASSETS.map((asset) => (
-                                <div key={asset.id} className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
-                                                {getAssetIcon(asset.asset_type)}
+                            {data?.allocated_assets?.length === 0 ? (
+                                <p className="text-muted-foreground">No assets allocated to you.</p>
+                            ) : (
+                                data?.allocated_assets?.map((asset: any) => (
+                                    <div key={asset.id} className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                                                    {getAssetIcon(asset.asset_type)}
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-lg text-foreground">{asset.nickname}</h3>
+                                                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                                                        {asset.asset_type.replace("_", " ")}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h3 className="font-bold text-lg text-foreground">{asset.nickname}</h3>
-                                                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                                                    {asset.asset_type.replace("_", " ")}
+                                            <div className="bg-primary/10 text-primary border border-primary/20 px-3 py-1 rounded-lg text-sm font-bold">
+                                                {asset.percentage}% Share
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="bg-muted border border-border rounded-xl p-4 mt-4">
+                                            <h4 className="text-xs font-bold uppercase text-muted-foreground mb-3 tracking-wider">Confidential Details</h4>
+                                            {Object.keys(asset.details || {}).length > 0 ? (
+                                                <div className="grid sm:grid-cols-2 gap-3">
+                                                    {Object.entries(asset.details).map(([key, val]) => (
+                                                        <div key={key}>
+                                                            <p className="text-xs text-muted-foreground capitalize">{key.replace("_", " ")}</p>
+                                                            <p className="text-sm font-medium text-foreground">{val as string}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm text-muted-foreground">No additional details available.</p>
+                                            )}
+                                        </div>
+
+                                        {asset.other_beneficiaries && asset.other_beneficiaries.length > 0 && (
+                                            <div className="mt-4 border-t border-border pt-4">
+                                                <p className="text-xs text-muted-foreground">Also shared with: {asset.other_beneficiaries.map((b: any) => `${b.name} (${b.percentage}%)`).join(", ")}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))
+                            )}
+
+                            {data?.other_assets?.length > 0 && (
+                                <>
+                                    <h2 className="text-xl font-bold text-foreground mb-4 mt-8">Other Assets in Vault</h2>
+                                    {data?.other_assets?.map((asset: any) => (
+                                        <div key={asset.id} className="bg-card border border-border rounded-2xl p-6 shadow-sm opacity-80">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                                                        {getAssetIcon(asset.asset_type)}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-bold text-lg text-foreground">{asset.nickname}</h3>
+                                                        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                                                            {asset.asset_type.replace("_", " ")}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="mt-4">
+                                                <p className="text-sm text-muted-foreground">
+                                                    Allocated to: {asset.beneficiaries?.map((b: any) => `${b.name} (${b.percentage}%)`).join(", ")}
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="bg-primary/10 text-primary border border-primary/20 px-3 py-1 rounded-lg text-sm font-bold">
-                                            {asset.percentage}% Share
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="bg-muted border border-border rounded-xl p-4 mt-4">
-                                        <h4 className="text-xs font-bold uppercase text-muted-foreground mb-3 tracking-wider">Confidential Details</h4>
-                                        <div className="grid sm:grid-cols-2 gap-3">
-                                            {Object.entries(asset.details).map(([key, val]) => (
-                                                <div key={key}>
-                                                    <p className="text-xs text-muted-foreground capitalize">{key.replace("_", " ")}</p>
-                                                    <p className="text-sm font-medium text-foreground">{val as string}</p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                                    ))}
+                                </>
+                            )}
                         </div>
                     </div>
 
                     <div className="space-y-6">
                         <h2 className="text-xl font-bold text-foreground mb-4">Personal Media</h2>
                         
-                        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-                            <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4">
-                                <VideoIcon className="w-6 h-6" />
+                        {data?.personal_message ? (
+                            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                                <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4">
+                                    <VideoIcon className="w-6 h-6" />
+                                </div>
+                                <h3 className="font-bold text-foreground mb-1">Personal Message</h3>
+                                <p className="text-sm text-muted-foreground mb-4">{data.owner_name} recorded a private video message specifically for you.</p>
+                                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2 font-medium">Watch Video</Button>
                             </div>
-                            <h3 className="font-bold text-foreground mb-1">Personal Message</h3>
-                            <p className="text-sm text-muted-foreground mb-4">Arjun recorded a private video message specifically for you.</p>
-                            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2 font-medium">Watch Video</Button>
-                        </div>
+                        ) : (
+                            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm opacity-70">
+                                <div className="w-12 h-12 rounded-full bg-muted text-muted-foreground flex items-center justify-center mb-4">
+                                    <VideoIcon className="w-6 h-6" />
+                                </div>
+                                <h3 className="font-bold text-foreground mb-1">No Personal Message</h3>
+                                <p className="text-sm text-muted-foreground">No private video message was left for you.</p>
+                            </div>
+                        )}
 
-                        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-                            <div className="w-12 h-12 rounded-full bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center mb-4">
-                                <FileDownIcon className="w-6 h-6" />
+                        {data?.will_document ? (
+                            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                                <div className="w-12 h-12 rounded-full bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center mb-4">
+                                    <FileDownIcon className="w-6 h-6" />
+                                </div>
+                                <h3 className="font-bold text-foreground mb-1">Legal Will (PDF)</h3>
+                                <p className="text-sm text-muted-foreground mb-4">Download the executed will document assigning the allocated assets.</p>
+                                <Button variant="outline" className="w-full rounded-xl gap-2 font-medium">Download PDF</Button>
                             </div>
-                            <h3 className="font-bold text-foreground mb-1">Legal Will (PDF)</h3>
-                            <p className="text-sm text-muted-foreground mb-4">Download the executed will document assigning your allocated assets.</p>
-                            <Button variant="outline" className="w-full rounded-xl gap-2 font-medium">Download PDF</Button>
-                        </div>
+                        ) : (
+                            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm opacity-70">
+                                <div className="w-12 h-12 rounded-full bg-muted text-muted-foreground flex items-center justify-center mb-4">
+                                    <FileDownIcon className="w-6 h-6" />
+                                </div>
+                                <h3 className="font-bold text-foreground mb-1">No Legal Will Found</h3>
+                                <p className="text-sm text-muted-foreground">No executed will document is available.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>

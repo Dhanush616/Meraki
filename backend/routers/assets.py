@@ -40,6 +40,7 @@ class AssetUpdate(BaseModel):
     nominee_registered: Optional[bool] = None
     metadata: Optional[Dict[str, Any]] = None
     status: Optional[str] = None
+    allocations: Optional[List[BeneficiaryAllocation]] = None
 
 class AssetResponse(AssetBase):
     id: UUID
@@ -105,15 +106,54 @@ def create_asset(asset: AssetCreate, user_id: str = Depends(get_current_user_id)
 def update_asset(asset_id: UUID, asset: AssetUpdate, user_id: str = Depends(get_current_user_id)):
     """Update an existing asset."""
     supabase = get_supabase_client()
-    update_data = {k: v for k, v in asset.dict().items() if v is not None}
-    response = supabase.table("assets").update(update_data).eq("id", str(asset_id)).eq("owner_id", user_id).execute()
-    if not response.data:
-        raise HTTPException(status_code=404, detail="Asset not found or not authorized")
+    update_data = {k: v for k, v in asset.dict(exclude={"allocations"}).items() if v is not None}
     
-    updated_asset = response.data[0]
-    log_activity(supabase, user_id, "asset.updated", "asset", updated_asset["id"], {"nickname": updated_asset["nickname"]})
-    
+    if update_data:
+        response = supabase.table("assets").update(update_data).eq("id", str(asset_id)).eq("owner_id", user_id).execute()
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Asset not found or not authorized")
+        updated_asset = response.data[0]
+        log_activity(supabase, user_id, "asset.updated", "asset", updated_asset["id"], {"nickname": updated_asset["nickname"]})
+    else:
+        response = supabase.table("assets").select("*").eq("id", str(asset_id)).eq("owner_id", user_id).execute()
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Asset not found or not authorized")
+        updated_asset = response.data[0]
+
+    if asset.allocations is not None:
+        supabase.table("asset_beneficiary_mappings").delete().eq("asset_id", str(asset_id)).eq("owner_id", user_id).execute()
+        if asset.allocations:
+            mappings = []
+            for alloc in asset.allocations:
+                mappings.append({
+                    "owner_id": user_id,
+                    "asset_id": str(asset_id),
+                    "beneficiary_id": alloc.beneficiary_id,
+                    "percentage": alloc.percentage,
+                    "role": alloc.role,
+                    "priority_order": alloc.priority_order,
+                    "special_instructions": alloc.special_instructions
+                })
+            supabase.table("asset_beneficiary_mappings").insert(mappings).execute()
+            
+            primary_total_pct = sum(a.percentage for a in asset.allocations if a.role == 'primary')
+            primary_count = len([a for a in asset.allocations if a.role == 'primary'])
+            updated_asset["primary_total_pct"] = primary_total_pct
+            updated_asset["primary_beneficiary_count"] = primary_count
+            supabase.table("assets").update({"primary_total_pct": primary_total_pct, "primary_beneficiary_count": primary_count}).eq("id", str(asset_id)).execute()
+        else:
+            updated_asset["primary_total_pct"] = 100
+            updated_asset["primary_beneficiary_count"] = 1
+            supabase.table("assets").update({"primary_total_pct": 100, "primary_beneficiary_count": 1}).eq("id", str(asset_id)).execute()
+            
     return updated_asset
+
+@router.get("/{asset_id}/allocations")
+def get_asset_allocations(asset_id: UUID, user_id: str = Depends(get_current_user_id)):
+    """Get allocations for a specific asset."""
+    supabase = get_supabase_client()
+    response = supabase.table("asset_beneficiary_mappings").select("*").eq("asset_id", str(asset_id)).eq("owner_id", user_id).execute()
+    return response.data
 
 @router.delete("/{asset_id}")
 def delete_asset(asset_id: UUID, user_id: str = Depends(get_current_user_id)):
