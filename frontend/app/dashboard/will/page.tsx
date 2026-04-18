@@ -616,15 +616,6 @@ export default function WillPage() {
         }
     };
 
-    const willData: WillData = {
-        testatorName: "",
-        address: "",
-        religion: "",
-        executorName: will?.executor_name ?? "",
-        specialInstructions: will?.special_instructions ?? "",
-        generatedDate: will?.created_at ?? "",
-        version: will?.version ?? 1,
-    };
 
     const hasWill = will?.will_id != null;
 
