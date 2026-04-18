@@ -43,7 +43,7 @@ async def submit_death_certificate(
 
 
 @router.get("/status/{owner_id}")
-async def get_verification_status(owner_id: str, user_id: str = Depends(get_current_user_id)):
+def get_verification_status(owner_id: str, user_id: str = Depends(get_current_user_id)):
     """Return the latest death verification submission for an owner."""
     supabase = get_supabase_client()
     resp = (

@@ -51,7 +51,7 @@ def _verify_totp(secret: str, code: str, window: int = 1) -> bool:
 # ── Sessions ─────────────────────────────────────────────────────────────────
 
 @router.get("/sessions")
-async def list_sessions(request: Request, user_id: str = Depends(get_current_user_id)):
+def list_sessions(request: Request, user_id: str = Depends(get_current_user_id)):
     supabase = get_supabase_client()
     resp = (
         supabase.table("login_sessions")
@@ -69,7 +69,7 @@ async def list_sessions(request: Request, user_id: str = Depends(get_current_use
 
 
 @router.delete("/sessions/{session_id}")
-async def revoke_session(session_id: UUID, user_id: str = Depends(get_current_user_id)):
+def revoke_session(session_id: UUID, user_id: str = Depends(get_current_user_id)):
     supabase = get_supabase_client()
     resp = (
         supabase.table("login_sessions")
@@ -114,7 +114,7 @@ async def change_password(
 # ── 2FA ───────────────────────────────────────────────────────────────────────
 
 @router.get("/2fa")
-async def get_2fa(user_id: str = Depends(get_current_user_id)):
+def get_2fa(user_id: str = Depends(get_current_user_id)):
     supabase = get_supabase_client()
     resp = (
         supabase.table("two_factor_settings")
@@ -133,7 +133,7 @@ class Toggle2FARequest(BaseModel):
 
 
 @router.post("/2fa/toggle")
-async def toggle_2fa(body: Toggle2FARequest, user_id: str = Depends(get_current_user_id)):
+def toggle_2fa(body: Toggle2FARequest, user_id: str = Depends(get_current_user_id)):
     if body.method not in ("email_otp", "sms_otp"):
         raise HTTPException(status_code=400, detail="Invalid method")
     field = f"{body.method}_enabled"
@@ -147,7 +147,7 @@ async def toggle_2fa(body: Toggle2FARequest, user_id: str = Depends(get_current_
 
 
 @router.get("/2fa/totp/setup")
-async def totp_setup(user_id: str = Depends(get_current_user_id)):
+def totp_setup(user_id: str = Depends(get_current_user_id)):
     secret = _generate_totp_secret()
     label = f"Amaanat:{user_id[:8]}"
     uri = f"otpauth://totp/{label}?secret={secret}&issuer=Amaanat&algorithm=SHA1&digits=6&period=30"
@@ -165,7 +165,7 @@ class TOTPEnableRequest(BaseModel):
 
 
 @router.post("/2fa/totp/enable")
-async def totp_enable(body: TOTPEnableRequest, user_id: str = Depends(get_current_user_id)):
+def totp_enable(body: TOTPEnableRequest, user_id: str = Depends(get_current_user_id)):
     if not _verify_totp(body.secret, body.code):
         raise HTTPException(status_code=400, detail="Invalid code — try again")
     supabase = get_supabase_client()
@@ -179,7 +179,7 @@ async def totp_enable(body: TOTPEnableRequest, user_id: str = Depends(get_curren
 
 
 @router.post("/2fa/totp/disable")
-async def totp_disable(user_id: str = Depends(get_current_user_id)):
+def totp_disable(user_id: str = Depends(get_current_user_id)):
     supabase = get_supabase_client()
     supabase.table("two_factor_settings").update({"totp_enabled": False, "totp_secret": None}).eq("user_id", user_id).execute()
     return {"message": "TOTP disabled"}
@@ -188,7 +188,7 @@ async def totp_disable(user_id: str = Depends(get_current_user_id)):
 # ── Vault Export ──────────────────────────────────────────────────────────────
 
 @router.get("/vault-export")
-async def vault_export(user_id: str = Depends(get_current_user_id)):
+def vault_export(user_id: str = Depends(get_current_user_id)):
     supabase = get_supabase_client()
     assets_data       = (supabase.table("assets").select("*").eq("owner_id", user_id).execute()).data or []
     beneficiaries_data = (supabase.table("beneficiaries").select("*").eq("owner_id", user_id).execute()).data or []

@@ -7,7 +7,7 @@ from core.security import get_current_user_id
 router = APIRouter()
 
 @router.get("/summary", response_model=Dict[str, Any])
-async def get_vault_summary(user_id: str = Depends(get_current_user_id)):
+def get_vault_summary(user_id: str = Depends(get_current_user_id)):
     """Get the dashboard summary for the overview page."""
     supabase = get_supabase_client()
 

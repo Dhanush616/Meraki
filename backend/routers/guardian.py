@@ -38,7 +38,7 @@ class GuardianLoginRequest(BaseModel):
 
 
 @router.post("/login")
-async def guardian_login(body: GuardianLoginRequest):
+def guardian_login(body: GuardianLoginRequest):
     """Issue a short-lived guardian token. Email must match an active guardian record."""
     supabase = get_supabase_client()
     resp = supabase.table("guardians").select("*").eq("email", body.email).eq("status", "active").execute()
@@ -50,7 +50,7 @@ async def guardian_login(body: GuardianLoginRequest):
 
 
 @router.get("/me")
-async def guardian_me(authorization: str | None = Header(default=None)):
+def guardian_me(authorization: str | None = Header(default=None)):
     """Return guardian context: their name, owner name (first + last only), escalation level."""
     payload = _verify_token(authorization)
     supabase = get_supabase_client()

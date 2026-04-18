@@ -1357,7 +1357,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
 -- ============================================================
 
 -- STEP 1: Create the demo user via Supabase Dashboard → Auth → Add User
---         Email: demo@amaanat.in  |  Password: Demo@1234  |  Email confirmed: YES
+--         Email: demo@gmail.com  |  Password: Demo@1234  |  Email confirmed: YES
 -- STEP 2: Copy the UUID from the Users table
 -- STEP 3: Replace 'REPLACE_WITH_DEMO_USER_UUID' below and run
 

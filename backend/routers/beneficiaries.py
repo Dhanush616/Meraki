@@ -52,7 +52,7 @@ class BeneficiaryUpdate(BaseModel):
 # ── Endpoints ────────────────────────────────────────────────────────────────
 
 @router.get("")
-async def list_beneficiaries(user_id: str = Depends(get_current_user_id)):
+def list_beneficiaries(user_id: str = Depends(get_current_user_id)):
     """List all beneficiaries for the current user."""
     supabase = get_supabase_client()
     response = (
@@ -77,7 +77,7 @@ async def list_beneficiaries(user_id: str = Depends(get_current_user_id)):
 
 
 @router.post("")
-async def create_beneficiary(
+def create_beneficiary(
     beneficiary: BeneficiaryCreate,
     user_id: str = Depends(get_current_user_id),
 ):
@@ -93,7 +93,7 @@ async def create_beneficiary(
 
 
 @router.put("/{beneficiary_id}")
-async def update_beneficiary(
+def update_beneficiary(
     beneficiary_id: UUID,
     beneficiary: BeneficiaryUpdate,
     user_id: str = Depends(get_current_user_id),
@@ -118,7 +118,7 @@ async def update_beneficiary(
 
 
 @router.delete("/{beneficiary_id}")
-async def delete_beneficiary(
+def delete_beneficiary(
     beneficiary_id: UUID,
     user_id: str = Depends(get_current_user_id),
 ):

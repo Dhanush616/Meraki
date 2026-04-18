@@ -41,14 +41,14 @@ class AssetResponse(AssetBase):
     updated_at: datetime
 
 @router.get("", response_model=List[AssetResponse])
-async def list_assets(user_id: str = Depends(get_current_user_id)):
+def list_assets(user_id: str = Depends(get_current_user_id)):
     """List all assets for the current user."""
     supabase = get_supabase_client()
     response = supabase.table("assets").select("*").eq("owner_id", user_id).neq("status", "inactive").execute()
     return response.data
 
 @router.post("", response_model=AssetResponse)
-async def create_asset(asset: AssetCreate, user_id: str = Depends(get_current_user_id)):
+def create_asset(asset: AssetCreate, user_id: str = Depends(get_current_user_id)):
     """Create a new asset."""
     supabase = get_supabase_client()
     data = asset.dict()
@@ -59,7 +59,7 @@ async def create_asset(asset: AssetCreate, user_id: str = Depends(get_current_us
     return response.data[0]
 
 @router.put("/{asset_id}", response_model=AssetResponse)
-async def update_asset(asset_id: UUID, asset: AssetUpdate, user_id: str = Depends(get_current_user_id)):
+def update_asset(asset_id: UUID, asset: AssetUpdate, user_id: str = Depends(get_current_user_id)):
     """Update an existing asset."""
     supabase = get_supabase_client()
     update_data = {k: v for k, v in asset.dict().items() if v is not None}
@@ -69,7 +69,7 @@ async def update_asset(asset_id: UUID, asset: AssetUpdate, user_id: str = Depend
     return response.data[0]
 
 @router.delete("/{asset_id}")
-async def delete_asset(asset_id: UUID, user_id: str = Depends(get_current_user_id)):
+def delete_asset(asset_id: UUID, user_id: str = Depends(get_current_user_id)):
     """Soft delete an asset by setting status to inactive."""
     supabase = get_supabase_client()
     response = supabase.table("assets").update({"status": "inactive"}).eq("id", str(asset_id)).eq("owner_id", user_id).execute()

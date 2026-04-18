@@ -8,7 +8,7 @@ router = APIRouter()
 
 
 @router.get("/settings")
-async def get_escalation_settings(user_id: str = Depends(get_current_user_id)):
+def get_escalation_settings(user_id: str = Depends(get_current_user_id)):
     supabase = get_supabase_client()
     resp = supabase.table("escalation_settings").select("*").eq("owner_id", user_id).execute()
     if not resp.data:
@@ -33,7 +33,7 @@ class EscalationSettingsUpdate(BaseModel):
 
 
 @router.put("/settings")
-async def update_escalation_settings(
+def update_escalation_settings(
     body: EscalationSettingsUpdate,
     user_id: str = Depends(get_current_user_id),
 ):
@@ -52,7 +52,7 @@ async def update_escalation_settings(
 
 
 @router.get("/log")
-async def get_escalation_log(user_id: str = Depends(get_current_user_id)):
+def get_escalation_log(user_id: str = Depends(get_current_user_id)):
     supabase = get_supabase_client()
     resp = (
         supabase.table("escalation_log")
