@@ -8,7 +8,8 @@ import {
     BriefcaseIcon, GemIcon, CheckCircle2Icon, ChevronRightIcon, ArrowLeftIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, TrashIcon, AlertCircleIcon } from "lucide-react";
+import { useBeneficiaries } from "@/hooks/useBeneficiaries";
+import { AssetAllocation } from "@/components/dashboard/vault/AssetAllocation";
 
 const ASSET_FIELD_CONFIG: Record<string, { institutionLabel: string; identifierLabel: string; extraFields?: { id: string; label: string; placeholder: string }[] }> = {
     bank_account: { institutionLabel: "Institution / Bank Name", identifierLabel: "Account / Identifier" },
@@ -65,6 +66,7 @@ const ASSET_TYPES = [
 
 export default function AddAssetWizard() {
     const router = useRouter();
+    const { beneficiaries } = useBeneficiaries();
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -75,6 +77,9 @@ export default function AddAssetWizard() {
     const [accountIdentifier, setAccountIdentifier] = useState("");
     const [estimatedValue, setEstimatedValue] = useState("");
     const [customFields, setCustomFields] = useState<Record<string, string>>({});
+    
+    // Allocation State
+    const [allocations, setAllocations] = useState<{ beneficiary_id: string; percentage: number }[]>([]);
 
     const [beneficiaries, setBeneficiaries] = useState<any[]>([]);
     const [allocations, setAllocations] = useState<{ beneficiary_id: string, percentage: number }[]>([]);
@@ -124,25 +129,36 @@ export default function AddAssetWizard() {
         else router.push("/dashboard/vault");
     };
 
+    const handleAllocationSave = (newAllocations: { beneficiary_id: string; percentage: number }[]) => {
+        setAllocations(newAllocations);
+        setStep(4);
+    };
+
+    const handleAllocationSkip = () => {
+        setAllocations([]);
+        setStep(4);
+    };
+
     const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
             const token = localStorage.getItem("paradosis_access_token");
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            
+            const totalPct = allocations.reduce((sum, a) => sum + a.percentage, 0);
 
             const newAsset = {
                 nickname,
                 asset_type: assetType,
                 institution_name: institutionName,
                 account_identifier: accountIdentifier.slice(-4), // Masked for demo
-                estimated_value_inr: estimatedValue ? parseFloat(estimatedValue.replaceAll(',', '')) : 0,
+                estimated_value_inr: estimatedValue ? parseFloat(estimatedValue.toString().replaceAll(',', '')) : 0,
                 metadata: customFields,
                 status: "active",
                 nominee_registered: true,
-                primary_total_pct: allocations.length > 0 ? totalPercentage : 100,
-                primary_beneficiary_count: allocations.length > 0 ? allocations.length : 1,
-                backup_beneficiary_count: 0,
-                allocations: allocations.length > 0 ? allocations.map(a => ({ ...a, role: "primary", priority_order: 1 })) : []
+                primary_total_pct: totalPct,
+                primary_beneficiary_count: allocations.length,
+                backup_beneficiary_count: 0
             };
 
             const res = await fetch(`${apiUrl}/api/assets`, {
@@ -158,7 +174,30 @@ export default function AddAssetWizard() {
                 const errorData = await res.json();
                 throw new Error(errorData.detail || "Failed to save asset to database");
             }
+            
+            const createdAsset = await res.json();
 
+            // Save mappings if any
+            if (allocations.length > 0) {
+                const mappingsRes = await fetch(`${apiUrl}/api/assets/${createdAsset.id}/mappings`, {
+                    method: "PUT",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}` 
+                    },
+                    body: JSON.stringify(allocations.map(a => ({
+                        beneficiary_id: a.beneficiary_id,
+                        role: "primary",
+                        percentage: a.percentage,
+                        priority_order: 1
+                    })))
+                });
+                
+                if (!mappingsRes.ok) {
+                    console.error("Failed to save mappings, but asset was created.");
+                }
+            }
+            
             router.push("/dashboard/vault");
         } catch (err: any) {
             alert(err.message);
@@ -284,62 +323,12 @@ export default function AddAssetWizard() {
 
                     {step === 3 && (
                         <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                            <h2 className="text-xl font-bold font-sans text-foreground mb-6">Assign Beneficiaries</h2>
-                            <p className="text-sm text-muted-foreground mb-8">Allocate percentage shares of this asset to your beneficiaries. You can skip this and allocate later if needed.</p>
-
-                            <div className="space-y-4">
-                                {beneficiaries.length === 0 ? (
-                                    <div className="p-4 text-center border border-dashed border-border rounded-lg text-muted-foreground">
-                                        No beneficiaries added yet. You can skip this step and add them later.
-                                    </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        <div className="flex flex-wrap gap-2">
-                                            {beneficiaries.filter(b => !allocations.find(a => a.beneficiary_id === b.id)).map(b => (
-                                                <button key={b.id} onClick={() => addAllocation(b.id)} className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background text-foreground hover:bg-muted text-sm font-medium transition-colors">
-                                                    <PlusIcon className="w-4 h-4" /> {b.full_name}
-                                                </button>
-                                            ))}
-                                        </div>
-
-                                        {allocations.length > 0 && (
-                                            <div className="space-y-3 mt-6 border-t border-border pt-4">
-                                                <h3 className="font-medium text-sm text-foreground">Current Allocations</h3>
-                                                {allocations.map(alloc => {
-                                                    const bene = beneficiaries.find(b => b.id === alloc.beneficiary_id);
-                                                    return (
-                                                        <div key={alloc.beneficiary_id} className="flex items-center gap-4 bg-muted/50 p-3 rounded-lg border border-border">
-                                                            <span className="flex-1 text-sm font-medium text-foreground">{bene?.full_name}</span>
-                                                            <div className="flex items-center gap-2">
-                                                                <input
-                                                                    type="number"
-                                                                    min="0"
-                                                                    max="100"
-                                                                    value={alloc.percentage === 0 ? '' : alloc.percentage}
-                                                                    onChange={(e) => updateAllocation(alloc.beneficiary_id, parseFloat(e.target.value) || 0)}
-                                                                    className="w-20 bg-background border border-border rounded-md px-3 py-1.5 outline-none focus:ring-2 focus:ring-ring/20 text-center font-sans text-foreground"
-                                                                />
-                                                                <span className="text-sm font-medium text-muted-foreground">%</span>
-                                                            </div>
-                                                            <button onClick={() => removeAllocation(alloc.beneficiary_id)} className="text-red-500 hover:bg-red-50 p-1.5 rounded-md transition-colors">
-                                                                <TrashIcon className="w-4 h-4" />
-                                                            </button>
-                                                        </div>
-                                                    );
-                                                })}
-
-                                                <div className={`p-4 rounded-lg flex items-start gap-3 border ${totalPercentage === 100 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' : 'bg-amber-500/10 border-amber-500/20 text-amber-600'}`}>
-                                                    <AlertCircleIcon className="w-5 h-5 shrink-0 mt-0.5" />
-                                                    <div className="text-sm">
-                                                        <strong>Total Allocated: {totalPercentage}%</strong>
-                                                        <p className="mt-1 opacity-90">{totalPercentage === 100 ? 'Perfect! You have allocated exactly 100%.' : totalPercentage < 100 ? `You have ${100 - totalPercentage}% unallocated percentage. It will fall to the default estate plan.` : 'You have exceeded 100%. Please adjust the allocations.'}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
+                            <AssetAllocation 
+                                assetNickname={nickname || "New Asset"}
+                                beneficiaries={beneficiaries}
+                                onSave={handleAllocationSave}
+                                onSkip={handleAllocationSkip}
+                            />
                         </motion.div>
                     )}
 
@@ -361,15 +350,24 @@ export default function AddAssetWizard() {
                                     <span className="font-semibold text-sm">{institutionName}</span>
                                 </div>
                                 <div className="flex justify-between py-2 border-b border-border/50">
-                                    <span className="text-muted-foreground text-sm">{currentConfig.identifierLabel}</span>
-                                    <span className="font-semibold text-sm font-mono">•••• {accountIdentifier.slice(-4) || "XXXX"}</span>
+                                    <span className="text-muted-foreground text-sm">Allocation</span>
+                                    <span className={`font-semibold text-sm ${allocations.length > 0 ? "text-emerald-600" : "text-amber-600"}`}>
+                                        {allocations.length > 0 ? "100% Allocated" : "Skipped (0%)"}
+                                    </span>
                                 </div>
-                                {currentConfig.extraFields?.map(field => (
-                                    <div key={field.id} className="flex justify-between py-2 border-b border-border/50">
-                                        <span className="text-muted-foreground text-sm">{field.label}</span>
-                                        <span className="font-semibold text-sm">{customFields[field.id] || "--"}</span>
+                                {allocations.length > 0 && (
+                                    <div className="py-2 border-b border-border/50">
+                                        <p className="text-muted-foreground text-xs mb-2">Beneficiary Splits:</p>
+                                        <div className="space-y-1">
+                                            {allocations.map(a => (
+                                                <div key={a.beneficiary_id} className="flex justify-between text-xs">
+                                                    <span>{beneficiaries.find(b => b.id === a.beneficiary_id)?.full_name}</span>
+                                                    <span className="font-medium">{a.percentage}%</span>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                ))}
+                                )}
                                 <div className="flex justify-between py-2">
                                     <span className="text-muted-foreground text-sm">Value</span>
                                     <span className="font-semibold text-sm">₹{estimatedValue || "--"}</span>
@@ -386,17 +384,17 @@ export default function AddAssetWizard() {
 
             {/* Footer Navigation */}
             <div className="flex justify-end mt-8">
-                {step < 4 ? (
-                    <Button
-                        onClick={handleNext}
+                {step < 3 ? (
+                    <Button 
+                        onClick={handleNext} 
                         disabled={(step === 1 && !assetType) || (step === 2 && !nickname)}
                         className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-6 rounded-full"
                     >
                         Continue <ChevronRightIcon className="w-4 h-4 ml-2" />
                     </Button>
-                ) : (
-                    <Button
-                        onClick={handleSubmit}
+                ) : step === 4 ? (
+                    <Button 
+                        onClick={handleSubmit} 
                         disabled={isSubmitting}
                         className="bg-emerald-600 text-white hover:bg-emerald-700 px-8 py-6 rounded-full shadow-lg shadow-emerald-500/20"
                     >
@@ -404,7 +402,7 @@ export default function AddAssetWizard() {
                             <>Confirm & Save Asset <CheckCircle2Icon className="w-4 h-4 ml-2" /></>
                         )}
                     </Button>
-                )}
+                ) : null}
             </div>
         </div>
     );
