@@ -8,7 +8,7 @@ import {
     ShieldCheckIcon, BuildingIcon, WalletIcon, LandmarkIcon, CreditCardIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import { Logo } from "@/components/shared/Logo";
 
 const AssetDetailsCard = ({ type, details }: { type: string, details: any }) => {
     if (!details || Object.keys(details).length === 0) {
@@ -157,12 +157,7 @@ export default function BeneficiaryDashboard() {
     return (
         <div className="min-h-screen bg-background flex flex-col px-4 py-8 pb-24 font-sans">
             <header className="w-full max-w-5xl mx-auto flex items-center justify-between mb-12">
-                <Link href="/" className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg">
-                        <span className="w-2.5 h-2.5 bg-card rounded-full"></span>
-                    </div>
-                    <span className="text-xl font-bold text-foreground">Paradosis</span>
-                </Link>
+                <Logo />
                 <div className="flex items-center gap-4">
                     <div className="hidden sm:flex px-3 py-1.5 bg-green-50/50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-500/20 rounded-full text-xs font-bold uppercase tracking-wider items-center gap-1.5">
                         <ShieldCheckIcon className="w-3.5 h-3.5" /> Vault Unlocked
@@ -176,7 +171,7 @@ export default function BeneficiaryDashboard() {
             <main className="w-full max-w-5xl mx-auto flex-1 flex flex-col">
                 <div className="bg-card border border-border shadow-sm rounded-3xl p-8 mb-8 flex flex-col sm:flex-row items-center gap-6 justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-foreground mb-2">{data?.owner_name || "Vault Owner"}'s Vault</h1>
+                        <h1 className="text-3xl font-bold text-foreground mb-2">{data?.owner_name || "Vault Owner"}&apos;s Vault</h1>
                         <p className="text-muted-foreground">The death certificate has been verified. You now have full access to your allocated assets, personal messages, and next-step instructions left by the vault owner.</p>
                     </div>
                     <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center shrink-0">

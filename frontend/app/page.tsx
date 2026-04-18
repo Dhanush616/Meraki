@@ -40,8 +40,8 @@ const faqs = [
         a: "You can download a full encrypted backup of your vault at any time in an open, documented format. We publish the decryption specification so any developer can build a compatible reader. Your data is never held hostage by our platform.",
     },
     {
-        q: "How does crypto routing work without sharing private keys?",
-        a: "You never share your private keys. When you set up crypto routing, a smart contract on Polygon is authorised to transfer specific amounts to your beneficiaries' wallets after death is independently verified. Your private keys stay with you, always — until the moment they're no longer needed.",
+        q: "How does the automated document delivery work?",
+        a: "When a vault is executed, Paradosis automatically generates pre-filled claim forms and instruction sets for each asset. These are delivered securely to your beneficiaries' private portals, ensuring they have everything needed to interface with banks and authorities without legal guesswork.",
     },
     {
         q: "Is a Paradosis-generated will legally valid in India?",
@@ -113,7 +113,7 @@ export default function LandingPage() {
                 >
                     {[
                         { value: "₹1.5 Lakh Crore", label: "sitting unclaimed in\nIndian bank accounts" },
-                        { value: "3.7 Million BTC", label: "lost forever due to\ncrypto inheritance failures" },
+                        { value: "₹2.5 Lakh Crore", label: "dormant across insurance,\nPF, and physical assets" },
                         { value: "6–18 Months", label: "average time families\nspend navigating claims" },
                     ].map((stat, i) => (
                         <motion.div key={i} variants={fadeUp} className="flex-1 pt-6 md:pt-0">
@@ -123,7 +123,7 @@ export default function LandingPage() {
                     ))}
                 </motion.div>
                 <p className="text-center mt-12 text-sm text-[#a3a3a3] font-sans">
-                    Statistics sourced from RBI, Outlook Money, and Chainalysis reports.
+                    Statistics sourced from RBI, Outlook Money, and Ministry of Finance reports.
                 </p>
             </section>
 
@@ -143,7 +143,7 @@ export default function LandingPage() {
                                 Secure your digital and physical assets.<br />Ensure smooth transfer when it matters.
                             </h2>
                             <p className="text-lg font-sans text-[#737373] max-w-2xl mx-auto leading-relaxed">
-                                The modern portfolio is fragmented across institutions, wallets, and accounts. We organize, secure, and legally route your life's work without friction.
+                                The modern portfolio is fragmented across dozens of institutions and private records. We organize, secure, and legally route your life's work without friction.
                             </p>
                         </motion.div>
 
@@ -156,19 +156,19 @@ export default function LandingPage() {
                                 {
                                     title: "The Discovery Problem",
                                     icon: <SearchIcon className="w-8 h-8 text-black mb-6" />,
-                                    desc: "Your family doesn't know what bank accounts exist, which insurance policies are active, or whether you have any crypto. Assets worth crores disappear simply because no one knew to look.",
+                                    desc: "Your family doesn't know what bank accounts exist, which insurance policies are active, or where the property deeds are. Assets worth crores disappear simply because no one knew to look.",
                                     stat: "₹1.5 lakh crore unclaimed in Indian banks",
                                 },
                                 {
-                                    title: "The Crypto Black Hole",
+                                    title: "The Administrative Gap",
                                     icon: <LockIcon className="w-8 h-8 text-black mb-6" />,
-                                    desc: "When a crypto investor dies, their private key dies with them. No court order, no lawyer, no amount of grief can recover a wallet without its key. The money is mathematically gone.",
-                                    stat: "3.7 million BTC lost to inaccessible wallets",
+                                    desc: "Hidden assets like physical gold, private investments, and secondary bank accounts are often lost forever. Without a central roadmap, your family faces an impossible search during their hardest time.",
+                                    stat: "₹2.5 lakh crore lost to fragmented records",
                                 },
                                 {
                                     title: "The Paperwork Nightmare",
                                     icon: <FileTextIcon className="w-8 h-8 text-black mb-6" />,
-                                    desc: "A death certificate alone unlocks almost nothing. Banks need a succession certificate. Property needs mutation. Each institution has different forms, different offices, different waiting periods.",
+                                    desc: "A death certificate alone unlocks almost nothing. Banks need a succession certificate. Property needs mutation. Each institution has different forms, different offices, and different waiting periods.",
                                     stat: "6–18 months of bureaucratic delays",
                                 },
                             ].map((item, i) => (
@@ -230,7 +230,7 @@ export default function LandingPage() {
                                 icon: <MailIcon className="w-8 h-8 text-black mb-6" />,
                                 phase: "Phase 3 — After",
                                 title: "Your Family Receives Everything",
-                                desc: "The moment death is verified, your crypto routes automatically. Every asset generates a pre-filled legal claim form — delivered directly to beneficiaries. No confusion.",
+                                desc: "The moment death is verified, document packages are delivered securely. Every asset generates a pre-filled legal claim form — sent directly to beneficiaries. No confusion.",
                             },
                         ].map((item, i) => (
                             <motion.div
@@ -312,7 +312,7 @@ export default function LandingPage() {
                             {
                                 icon: <FolderIcon className="w-5 h-5 text-black" />,
                                 title: "Complete Asset Vault",
-                                desc: "Bank accounts, fixed deposits, property, insurance, mutual funds, crypto. Every asset in one place, encrypted so only you can read it.",
+                                desc: "Bank accounts, fixed deposits, property, insurance, mutual funds, and private records. Every asset in one place, encrypted so only you can read it.",
                                 tag: "12 Asset Types",
                             },
                             {
@@ -331,13 +331,13 @@ export default function LandingPage() {
                                 icon: <SettingsIcon className="w-5 h-5 text-black" />,
                                 title: "Smart Escalation",
                                 desc: "Quarterly check-ins. If you go quiet, we reach out to an emergency contact, then beneficiaries. Governed by verified death certificates.",
-                                tag: "No guardians required",
+                                tag: "No intermediaries",
                             },
                             {
                                 icon: <GitBranchIcon className="w-5 h-5 text-black" />,
-                                title: "Crypto Routing",
-                                desc: "Assign crypto wallets to beneficiaries beforehand. Smart contracts route assets automatically. No private key handoff needed.",
-                                tag: "Polygon Smart Contract",
+                                title: "Automated Asset Claiming",
+                                desc: "Generate pre-filled forms for every asset class automatically. Smart logic routes document packages to the right authorities.",
+                                tag: "Frictionless Transfer",
                             },
                         ].map((ft, i) => (
                             <motion.div
@@ -381,7 +381,7 @@ export default function LandingPage() {
                             {
                                 icon: <ShieldCheckIcon className="w-8 h-8 text-black mx-auto mb-6" />,
                                 title: "Zero-Knowledge Encryption",
-                                desc: "Every sensitive field — account numbers, Aadhaar, PAN, wallet addresses — is encrypted in your browser before it ever reaches our servers. Only your password can unlock it.",
+                                desc: "Every sensitive field — account numbers, Aadhaar, and PAN — is encrypted in your browser before it ever reaches our servers. Only your password can unlock it.",
                             },
                             {
                                 icon: <FileTextIcon className="w-8 h-8 text-black mx-auto mb-6" />,

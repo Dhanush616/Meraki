@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRightIcon, ShieldCheckIcon, KeySquareIcon, EyeOffIcon, ShieldIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/shared/Logo";
 
 const steps = [
     {
@@ -102,12 +103,7 @@ export default function SignUpPage() {
             >
                 {/* Left Side: Form */}
                 <div className="flex-1 p-12 relative flex flex-col">
-                    <Link href="/" className="mb-12 inline-block">
-                        <span className="font-sans text-2xl font-bold text-foreground flex items-center gap-2">
-                            <span className="w-4 h-4 rounded-full bg-primary"></span>
-                            Paradosis
-                        </span>
-                    </Link>
+                    <Logo className="mb-12" />
 
                     <div className="mb-8">
                         <h1 className="text-3xl font-sans text-foreground mb-2">
