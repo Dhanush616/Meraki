@@ -2,11 +2,11 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, UserPlus, Phone, Mail, User } from "lucide-react";
+import { ShieldCheck, User, Phone, Mail } from "lucide-react";
 
 const formSchema = z.object({
     full_name: z.string().min(2, "Name must be at least 2 characters"),
@@ -32,61 +32,60 @@ export function EmergencyContactForm({ initialData, onSubmit }: EmergencyContact
     });
 
     return (
-        <Card className="border-2 border-oat-border shadow-clay h-full">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-slushie-800">
-                    <ShieldCheck className="w-5 h-5 text-slushie-500" />
-                    Emergency Contact
+        <Card className="border border-border rounded-xl shadow-sm overflow-hidden">
+            <CardHeader className="bg-muted/30 border-b border-border py-4 px-6">
+                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider">
+                    <ShieldCheck className="w-4 h-4" />
+                    Primary Emergency Point
                 </CardTitle>
-                <CardDescription>
-                    This person is contacted before your beneficiaries to check on your wellbeing.
-                </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-8">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="full_name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Full Name</FormLabel>
-                                    <FormControl>
-                                        <div className="relative">
-                                            <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                            <Input placeholder="Ramesh Iyer" className="pl-10 h-11 border-2" {...field} />
-                                        </div>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <FormField
+                                control={form.control}
+                                name="full_name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Full Legal Name</FormLabel>
+                                        <FormControl>
+                                            <div className="relative">
+                                                <User className="absolute left-3 top-3 h-3.5 w-3.5 text-muted-foreground" />
+                                                <Input placeholder="Enter name" className="pl-10 h-10 border rounded-lg text-sm bg-background focus:ring-black/5" {...field} />
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                        <FormField
-                            control={form.control}
-                            name="relationship"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Relationship</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Brother, Spouse, Close Friend" className="h-11 border-2" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                            <FormField
+                                control={form.control}
+                                name="relationship"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Relationship</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g. Spouse" className="h-10 border rounded-lg text-sm bg-background focus:ring-black/5" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <FormField
                                 control={form.control}
                                 name="phone_number"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Phone Number</FormLabel>
+                                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Contact Number</FormLabel>
                                         <FormControl>
                                             <div className="relative">
-                                                <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                                <Input placeholder="+91 9876543210" className="pl-10 h-11 border-2" {...field} />
+                                                <Phone className="absolute left-3 top-3 h-3.5 w-3.5 text-muted-foreground" />
+                                                <Input placeholder="+91..." className="pl-10 h-10 border rounded-lg text-sm bg-background focus:ring-black/5 font-mono" {...field} />
                                             </div>
                                         </FormControl>
                                         <FormMessage />
@@ -99,11 +98,11 @@ export function EmergencyContactForm({ initialData, onSubmit }: EmergencyContact
                                 name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email (Optional)</FormLabel>
+                                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Email Address</FormLabel>
                                         <FormControl>
                                             <div className="relative">
-                                                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                                <Input placeholder="contact@example.com" className="pl-10 h-11 border-2" {...field} />
+                                                <Mail className="absolute left-3 top-3 h-3.5 w-3.5 text-muted-foreground" />
+                                                <Input placeholder="contact@vault.com" className="pl-10 h-10 border rounded-lg text-sm bg-background focus:ring-black/5" {...field} />
                                             </div>
                                         </FormControl>
                                         <FormMessage />
@@ -112,13 +111,14 @@ export function EmergencyContactForm({ initialData, onSubmit }: EmergencyContact
                             />
                         </div>
 
-                        <Button 
-                            type="submit" 
-                            className="w-full h-12 rounded-xl mt-4 font-bold shadow-clay hover:rotate-[-2deg] hover:translate-y-[-2px] transition-all bg-slushie-500 hover:bg-slushie-600 text-white"
-                        >
-                            <UserPlus className="mr-2 h-5 w-5" />
-                            Update Contact Information
-                        </Button>
+                        <div className="flex justify-end pt-2">
+                            <Button 
+                                type="submit" 
+                                className="h-11 rounded-full px-8 font-bold bg-black text-white hover:bg-zinc-800 transition-all text-xs uppercase tracking-widest"
+                            >
+                                Commit Updates
+                            </Button>
+                        </div>
                     </form>
                 </Form>
             </CardContent>

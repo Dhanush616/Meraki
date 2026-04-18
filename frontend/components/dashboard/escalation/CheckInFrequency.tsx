@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
 import { format, addDays } from "date-fns";
 import { CalendarClock } from "lucide-react";
 
@@ -12,49 +11,56 @@ interface CheckInFrequencyProps {
 }
 
 export function CheckInFrequency({ value, lastCheckIn, onChange }: CheckInFrequencyProps) {
+    // Sync local state with incoming value prop
     const [localValue, setLocalValue] = useState(value);
     
+    useEffect(() => {
+        setLocalValue(value);
+    }, [value]);
+
     const lastDate = lastCheckIn ? new Date(lastCheckIn) : new Date();
     const nextCheckIn = addDays(lastDate, localValue);
 
+    const handleValueChange = (val: number | number[]) => {
+        const newValue = Array.isArray(val) ? val[0] : val;
+        setLocalValue(newValue);
+    };
+
+    const handleValueChangeEnd = (val: number | number[]) => {
+        const finalValue = Array.isArray(val) ? val[0] : val;
+        onChange(finalValue);
+    };
+
     return (
-        <Card className="border-2 border-oat-border shadow-clay">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <CalendarClock className="w-5 h-5 text-matcha-600" />
-                    Check-in Frequency
+        <Card className="border border-border rounded-xl shadow-sm h-full">
+            <CardHeader className="bg-muted/30 border-b border-border py-3 px-5">
+                <CardTitle className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    <CalendarClock className="w-3.5 h-3.5" />
+                    Frequency
                 </CardTitle>
-                <CardDescription>
-                    How often should we ask you to confirm you're doing okay?
-                </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-8">
-                <div className="space-y-4">
+            <CardContent className="p-5 space-y-4">
+                <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                        <Label className="text-sm font-medium">Frequency: <span className="text-primary font-bold">{localValue} days</span></Label>
-                        <span className="text-xs text-muted-foreground">(Min: 30, Max: 180)</span>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Interval</span>
+                        <span className="text-xs font-black font-mono">{localValue} Days</span>
                     </div>
                     <Slider
-                        defaultValue={[localValue]}
+                        value={[localValue]}
                         max={180}
                         min={30}
                         step={15}
-                        onValueChange={(vals) => setLocalValue(vals[0])}
-                        onValueCommit={(vals) => onChange(vals[0])}
-                        className="py-4"
+                        onValueChange={handleValueChange}
+                        onValueChangeEnd={handleValueChangeEnd}
+                        className="py-1"
                     />
                 </div>
 
-                <div className="bg-matcha-50 border border-matcha-200 p-4 rounded-xl flex items-center justify-between">
-                    <div>
-                        <p className="text-xs uppercase tracking-widest text-matcha-600 font-bold mb-1">Next Check-In</p>
-                        <p className="text-xl font-bold text-matcha-800">
-                            {format(nextCheckIn, "MMMM do, yyyy")}
-                        </p>
-                    </div>
-                    <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-matcha-600 shadow-sm border border-matcha-100">
-                        <CalendarClock className="w-6 h-6" />
-                    </div>
+                <div className="bg-muted/50 border border-border px-3 py-2.5 rounded-lg flex items-center justify-between">
+                    <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold">Next Poll</p>
+                    <p className="text-[11px] font-bold text-foreground">
+                        {format(nextCheckIn, "MMM d, yyyy")}
+                    </p>
                 </div>
             </CardContent>
         </Card>
