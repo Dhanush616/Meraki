@@ -2,7 +2,6 @@
 import React from "react";
 import { ShieldAlertIcon, LayoutDashboardIcon } from "lucide-react";
 import { useVaultSummary } from "@/hooks/useVaultSummary";
-import { OnboardingChecklist } from "@/components/dashboard/overview/OnboardingChecklist";
 import { AssetSummaryCards } from "@/components/dashboard/overview/AssetSummaryCards";
 import { BeneficiarySummary } from "@/components/dashboard/overview/BeneficiarySummary";
 import { EscalationStatus } from "@/components/dashboard/overview/EscalationStatus";
@@ -39,13 +38,6 @@ export default function DashboardOverview() {
                     </p>
                 </div>
             </header>
-
-            {!data?.onboarding_done && (
-                <OnboardingChecklist
-                    step={data?.onboarding_step ?? 0}
-                    onboardingDone={data?.onboarding_done ?? false}
-                />
-            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Assets Column */}

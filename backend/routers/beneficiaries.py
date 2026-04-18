@@ -163,6 +163,11 @@ def create_beneficiary(
     new_bene = response.data[0]
     log_activity(supabase, user_id, "beneficiary.created", "beneficiary", new_bene["id"], {"name": new_bene["full_name"], "relation": new_bene["relationship"]})
     
+    # Auto-increment onboarding step if it is 2
+    current_profile = supabase.table("profiles").select("onboarding_step").eq("id", user_id).single().execute()
+    if current_profile.data and current_profile.data.get("onboarding_step", 0) == 2:
+        supabase.table("profiles").update({"onboarding_step": 3}).eq("id", user_id).execute()
+    
     return _map_from_db_fields(new_bene)
 
 

@@ -5,13 +5,12 @@ import { CheckCircle2Icon, CircleIcon, ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const STEPS = [
-    { label: "Complete your profile",          href: "/dashboard/settings" },
-    { label: "Add your first asset",           href: "/dashboard/vault/add" },
-    { label: "Add a beneficiary",              href: "/dashboard/beneficiaries" },
-    { label: "Assign assets to beneficiaries", href: "/dashboard/vault" },
-    { label: "Record your video will",         href: "/dashboard/intent" },
-    { label: "Generate your will document",    href: "/dashboard/will" },
-    { label: "Set an emergency contact",       href: "/dashboard/escalation" },
+    { label: "Complete your profile", href: "/dashboard/settings" },
+    { label: "Add your first asset", href: "/dashboard/vault/add" },
+    { label: "Add a beneficiary", href: "/dashboard/beneficiaries" },
+    { label: "Record your video will", href: "/dashboard/intent" },
+    { label: "Generate your will document", href: "/dashboard/will" },
+    { label: "Set an emergency contact", href: "/dashboard/escalation" },
 ];
 
 interface Props { step: number; onboardingDone: boolean; }
