@@ -105,7 +105,7 @@ export default function SignUpPage() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         className="w-full bg-parchment border border-border-cream rounded-lg px-4 py-4 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/40 transition-all font-sans text-near-black text-lg shadow-inner"
-                                        placeholder="you@example.com"
+                                        placeholder="********"
                                         autoFocus
                                         required
                                     />
@@ -127,7 +127,7 @@ export default function SignUpPage() {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         className="w-full bg-parchment border-2 border-brand rounded-lg px-4 py-4 outline-none focus:ring-4 focus:ring-brand/20 transition-all font-sans text-near-black text-lg shadow-inner"
-                                        placeholder="••••••••"
+                                        placeholder="********"
                                         autoFocus
                                         required
                                     />
