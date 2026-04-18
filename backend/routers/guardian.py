@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from datetime import datetime, timezone, timedelta
 from jose import jwt, JWTError
 from core.supabase import get_supabase_client
-from core.config import settings
+import os
 
 router = APIRouter()
 
@@ -15,7 +15,7 @@ def _create_token(guardian_id: str, owner_id: str) -> str:
     exp = datetime.now(timezone.utc) + timedelta(hours=_EXPIRE_HOURS)
     return jwt.encode(
         {"sub": guardian_id, "owner_id": owner_id, "role": "guardian", "exp": exp},
-        settings.JWT_SECRET, algorithm=_ALGO,
+        os.getenv("JWT_SECRET"), algorithm=_ALGO,
     )
 
 
@@ -24,7 +24,7 @@ def _verify_token(authorization: str | None) -> dict:
         raise HTTPException(status_code=401, detail="Missing guardian token")
     try:
         payload = jwt.decode(
-            authorization.removeprefix("Bearer "), settings.JWT_SECRET, algorithms=[_ALGO]
+            authorization.removeprefix("Bearer "), os.getenv("JWT_SECRET"), algorithms=[_ALGO]
         )
         if payload.get("role") != "guardian":
             raise HTTPException(status_code=403, detail="Not a guardian token")

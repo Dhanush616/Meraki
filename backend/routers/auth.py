@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from typing import Optional
 import httpx
-from core.config import settings
+import os
 
 router = APIRouter()
 
@@ -31,9 +31,9 @@ async def signup(credentials: SignupRequest):
     """
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            f"{settings.SUPABASE_URL}/auth/v1/signup",
+            f"{os.getenv("SUPABASE_URL")}/auth/v1/signup",
             headers={
-                "apikey": settings.SUPABASE_SERVICE_ROLE_KEY,
+                "apikey": os.getenv("SUPABASE_SERVICE_ROLE_KEY"),
                 "Content-Type": "application/json"
             },
             json={
@@ -67,9 +67,9 @@ async def login(credentials: LoginRequest):
     # But if the backend requires handling it, we hit the Supabase GOTRUE API
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            f"{settings.SUPABASE_URL}/auth/v1/token?grant_type=password",
+            f"{os.getenv("SUPABASE_URL")}/auth/v1/token?grant_type=password",
             headers={
-                "apikey": settings.SUPABASE_SERVICE_ROLE_KEY,
+                "apikey": os.getenv("SUPABASE_SERVICE_ROLE_KEY"),
                 "Content-Type": "application/json"
             },
             json={
@@ -105,9 +105,9 @@ async def logout(access_token: str):
     """
     async with httpx.AsyncClient() as client:
         await client.post(
-            f"{settings.SUPABASE_URL}/auth/v1/logout",
+            f"{os.getenv("SUPABASE_URL")}/auth/v1/logout",
             headers={
-                "apikey": settings.SUPABASE_SERVICE_ROLE_KEY,
+                "apikey": os.getenv("SUPABASE_SERVICE_ROLE_KEY"),
                 "Authorization": f"Bearer {access_token}"
             }
         )
