@@ -1,10 +1,12 @@
-"use client";
+﻿"use client";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
     UploadCloudIcon, FileTextIcon, CheckCircle2Icon,
     XCircleIcon, ArrowLeftIcon, LoaderIcon, ArrowRightIcon,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -69,72 +71,81 @@ export default function BeneficiaryVerifyPage() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col">
-            {/* Header */}
-            <header className="px-6 py-5 border-b border-white/5 flex items-center gap-4">
-                <button
-                    onClick={() => step === "instructions" ? router.back() : setStep("instructions")}
-                    className="text-white/40 hover:text-white/70 transition-colors"
-                >
-                    <ArrowLeftIcon className="w-5 h-5" />
-                </button>
-                <span className="text-sm font-medium text-white/60">Death Certificate Verification</span>
+        <div className="min-h-screen bg-background flex flex-col p-4 md:p-8">
+            <header className="w-full max-w-4xl mx-auto flex items-center justify-between mb-12">
+                <Link href="/" className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                        <span className="w-2.5 h-2.5 bg-card rounded-full"></span>
+                    </div>
+                    <span className="font-sans text-xl font-bold text-foreground hidden sm:block">Paradosis</span>
+                </Link>
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => step === "instructions" ? router.back() : setStep("instructions")}
+                        className="text-muted-foreground hover:text-foreground transition-colors p-2"
+                    >
+                        <ArrowLeftIcon className="w-5 h-5" />
+                    </button>
+                    <div className="text-sm font-medium text-muted-foreground bg-white px-4 py-2 rounded-full border border-border shadow-sm">
+                        Verification
+                    </div>
+                </div>
             </header>
 
-            <main className="flex-1 flex items-center justify-center p-6">
-                <div className="w-full max-w-lg">
-
+            <main className="w-full max-w-4xl mx-auto flex-1 flex flex-col items-center justify-center text-center -mt-16">
+                <div className="bg-card border border-border rounded-3xl p-8 md:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-2xl">
+                    
                     {/* Step 1 — Instructions */}
                     {step === "instructions" && (
                         <div className="space-y-6 text-center">
-                            <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto">
-                                <FileTextIcon className="w-7 h-7 text-white/40" />
+                            <div className="w-16 h-16 rounded-2xl bg-background border border-border flex items-center justify-center mx-auto shadow-sm">
+                                <FileTextIcon className="w-8 h-8 text-primary" />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-serif font-medium text-white mb-3">Upload the Death Certificate</h1>
-                                <p className="text-white/50 leading-relaxed">
+                                <h1 className="text-2xl font-sans font-bold text-foreground mb-3">Upload the Death Certificate</h1>
+                                <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
                                     Please obtain the official death certificate. If you have a digital copy,
                                     you can download it from{" "}
-                                    <a href="https://digilocker.gov.in" target="_blank" rel="noopener noreferrer" className="text-white/70 underline">
+                                    <a href="https://digilocker.gov.in" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                                         DigiLocker
                                     </a>
                                     {" "}or your local Municipal Corporation portal.
                                 </p>
                             </div>
-                            <div className="bg-white/5 rounded-xl border border-white/10 p-4 text-left space-y-2">
+                            <div className="bg-background rounded-xl border border-border p-5 text-left space-y-3 max-w-md mx-auto">
                                 {["PDF, JPG, or PNG format", "Under 10 MB", "Clear, readable scan or digital copy", "Must show name, date, and issuing authority"].map(t => (
-                                    <div key={t} className="flex items-center gap-2 text-sm text-white/60">
-                                        <CheckCircle2Icon className="w-3.5 h-3.5 text-white/30 shrink-0" />
+                                    <div key={t} className="flex items-center gap-3 text-sm text-muted-foreground font-medium">
+                                        <CheckCircle2Icon className="w-4 h-4 text-green-500 shrink-0" />
                                         {t}
                                     </div>
                                 ))}
                             </div>
-                            <button
+                            <Button
                                 onClick={() => setStep("upload")}
-                                className="w-full flex items-center justify-center gap-2 h-11 rounded-xl bg-white text-zinc-900 text-sm font-medium hover:bg-white/90 transition-colors"
+                                className="w-full sm:w-auto px-8 py-6 rounded-full text-base font-medium shadow-lg mt-4"
                             >
-                                Continue <ArrowRightIcon className="w-4 h-4" />
-                            </button>
+                                Continue <ArrowRightIcon className="w-4 h-4 ml-2" />
+                            </Button>
                         </div>
                     )}
 
                     {/* Step 2 — Upload */}
                     {step === "upload" && (
-                        <div className="space-y-5">
-                            <h2 className="text-xl font-serif font-medium text-white text-center">Upload Certificate</h2>
+                        <div className="space-y-6 text-left max-w-md mx-auto">
+                            <h2 className="text-2xl font-sans font-bold text-foreground text-center">Upload Certificate</h2>
 
                             {/* Owner ID input */}
                             <div>
-                                <label className="block text-xs font-medium text-white/40 mb-1.5">
+                                <label className="block text-sm font-medium text-foreground mb-2">
                                     Vault Owner&apos;s User ID
-                                    <span className="text-white/25 ml-1">(provided separately by Amaanat)</span>
+                                    <span className="text-muted-foreground font-normal ml-2 block sm:inline text-xs">(provided separately by Paradosis)</span>
                                 </label>
                                 <input
                                     type="text"
                                     value={ownerId}
                                     onChange={e => setOwnerId(e.target.value)}
-                                    placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                                    className="w-full h-9 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 font-mono focus:outline-none focus:ring-2 focus:ring-white/20"
+                                    placeholder="xxxxxxxx-xxxx-xxxx"
+                                    className="w-full h-12 rounded-xl border border-border bg-background px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 font-mono"
                                 />
                             </div>
 
@@ -145,19 +156,19 @@ export default function BeneficiaryVerifyPage() {
                                 onDragLeave={() => setDragOver(false)}
                                 onClick={() => fileRef.current?.click()}
                                 className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors ${
-                                    dragOver ? "border-white/40 bg-white/10" : "border-white/15 hover:border-white/25 hover:bg-white/5"
+                                    dragOver ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-background"
                                 }`}
                             >
-                                <UploadCloudIcon className="w-8 h-8 text-white/30" />
+                                <UploadCloudIcon className={`w-10 h-10 ${dragOver ? "text-primary" : "text-muted-foreground"}`} />
                                 {file ? (
                                     <div className="text-center">
-                                        <p className="text-sm font-medium text-white">{file.name}</p>
-                                        <p className="text-xs text-white/40 mt-1">{(file.size / 1024).toFixed(0)} KB · Click to change</p>
+                                        <p className="text-sm font-semibold text-foreground">{file.name}</p>
+                                        <p className="text-xs text-muted-foreground mt-1">{(file.size / 1024).toFixed(0)} KB · Click to change</p>
                                     </div>
                                 ) : (
                                     <div className="text-center">
-                                        <p className="text-sm text-white/60">Drag & drop or click to select</p>
-                                        <p className="text-xs text-white/30 mt-1">PDF, JPG, PNG — max 10 MB</p>
+                                        <p className="text-sm font-medium text-foreground">Drag & drop or click to select</p>
+                                        <p className="text-xs text-muted-foreground mt-1">PDF, JPG, PNG — max 10 MB</p>
                                     </div>
                                 )}
                                 <input
@@ -169,64 +180,73 @@ export default function BeneficiaryVerifyPage() {
                                 />
                             </div>
 
-                            <button
+                            <Button
                                 onClick={submitCertificate}
                                 disabled={!file || !ownerId.trim()}
-                                className="w-full flex items-center justify-center gap-2 h-11 rounded-xl bg-white text-zinc-900 text-sm font-medium hover:bg-white/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                className="w-full py-6 rounded-xl text-base font-medium shadow-md transition-all"
                             >
                                 Submit for Verification
-                            </button>
+                            </Button>
                         </div>
                     )}
 
                     {/* Step 3 — Processing */}
                     {step === "processing" && (
                         <div className="text-center space-y-6 py-12">
-                            <LoaderIcon className="w-12 h-12 text-white/40 mx-auto animate-spin" />
+                            <LoaderIcon className="w-12 h-12 text-primary mx-auto animate-spin" />
                             <div>
-                                <h2 className="text-xl font-serif font-medium text-white mb-2">Verifying Certificate</h2>
-                                <p className="text-white/50">Verifying certificate with government records…</p>
-                                <p className="text-white/30 text-sm mt-2">This may take a moment.</p>
+                                <h2 className="text-xl font-sans font-bold text-foreground mb-2">Verifying Certificate</h2>
+                                <p className="text-muted-foreground font-medium">Verifying certificate with government records…</p>
+                                <p className="text-muted-foreground/60 text-sm mt-2">This may take a moment.</p>
                             </div>
                         </div>
                     )}
 
                     {/* Step 4 — Result */}
                     {step === "result" && result && (
-                        <div className="text-center space-y-6 py-6">
+                        <div className="text-center space-y-6 py-6 max-w-md mx-auto">
                             {result.status === "verified" ? (
                                 <>
-                                    <CheckCircle2Icon className="w-14 h-14 text-emerald-400 mx-auto" />
-                                    <div>
-                                        <h2 className="text-xl font-serif font-medium text-white mb-3">Certificate Verified ✓</h2>
-                                        <p className="text-white/60 leading-relaxed">
-                                            The death certificate has been verified. The vault owner will have{" "}
-                                            <strong className="text-white">{result.liveness_window_days ?? 15} days</strong>{" "}
-                                            to confirm they are alive.
-                                        </p>
-                                        <p className="text-white/40 text-sm mt-3">
-                                            If there is no response, the vault will be unlocked and you will be notified.
-                                        </p>
+                                    <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                                        <CheckCircle2Icon className="w-8 h-8 text-green-600" />
                                     </div>
-                                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
-                                        <p className="text-emerald-400 text-sm">
-                                            You will receive an email once the process is complete.
+                                    <div>
+                                        <h2 className="text-2xl font-sans font-bold text-foreground mb-3">Certificate Verified</h2>
+                                        <div className="bg-background rounded-xl border border-border p-5 text-left mb-6">
+                                            <p className="text-muted-foreground text-sm leading-relaxed">
+                                                The death certificate has been verified. The vault owner will have{" "}
+                                                <strong className="text-foreground">{result.liveness_window_days ?? 15} days</strong>{" "}
+                                                to confirm they are alive.
+                                            </p>
+                                            <p className="text-muted-foreground text-sm mt-3 pt-3 border-t border-border">
+                                                If there is no response, the vault will be unlocked and you will be notified.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-left">
+                                        <p className="text-primary text-sm font-medium flex items-center gap-2">
+                                            <CheckCircle2Icon className="w-4 h-4" /> You will receive an email once the process is complete.
                                         </p>
                                     </div>
                                 </>
                             ) : (
                                 <>
-                                    <XCircleIcon className="w-14 h-14 text-rose-400 mx-auto" />
-                                    <div>
-                                        <h2 className="text-xl font-serif font-medium text-white mb-3">Verification Failed ✗</h2>
-                                        <p className="text-white/60">{result.rejection_reason ?? "The certificate could not be verified."}</p>
+                                    <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                                        <XCircleIcon className="w-8 h-8 text-red-600" />
                                     </div>
-                                    <button
+                                    <div>
+                                        <h2 className="text-2xl font-sans font-bold text-foreground mb-3">Verification Failed</h2>
+                                        <div className="bg-background rounded-xl border border-border p-5">
+                                            <p className="text-muted-foreground text-sm">{result.rejection_reason ?? "The certificate could not be verified."}</p>
+                                        </div>
+                                    </div>
+                                    <Button
                                         onClick={() => { setFile(null); setStep("upload"); }}
-                                        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-medium transition-colors"
+                                        variant="outline"
+                                        className="mt-4"
                                     >
                                         Try Again
-                                    </button>
+                                    </Button>
                                 </>
                             )}
                         </div>
