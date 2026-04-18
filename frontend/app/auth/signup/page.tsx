@@ -52,7 +52,7 @@ export default function SignUpPage() {
 
                 console.log("Signup successful", data);
                 // Optionally auto-login and push to /dashboard
-                router.push("/dashboard"); 
+                router.push("/dashboard");
             } catch (err: any) {
                 setError(err.message || "An unexpected error occurred");
             } finally {
@@ -127,7 +127,7 @@ export default function SignUpPage() {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         className="w-full bg-parchment border-2 border-brand rounded-lg px-4 py-4 outline-none focus:ring-4 focus:ring-brand/20 transition-all font-sans text-near-black text-lg shadow-inner"
-                                        placeholder="••••••••"
+                                        placeholder="********"
                                         autoFocus
                                         required
                                     />
@@ -155,7 +155,7 @@ export default function SignUpPage() {
                 </div>
 
                 {/* Right Side: Philosophy */}
-                <div className="flex-1 bg-near-black p-12 text-ivory flex flex-col justify-center relative overflow-hidden hidden md:flex lg:w-1/2">
+                <div className="flex-1 bg-near-black p-12 text-ivory flex-col justify-center relative overflow-hidden hidden md:flex lg:w-1/2">
                     <div className="absolute top-0 right-0 p-8 opacity-10">
                         <span className="text-[200px] font-serif text-parchment border-b-2">P</span>
                     </div>
