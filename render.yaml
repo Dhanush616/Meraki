@@ -1,0 +1,31 @@
+# Render Blueprint — deploy via Render Dashboard → "New → Blueprint".
+# Must live at the repository root for Render to detect it.
+services:
+  - type: web
+    name: meraki-backend
+    rootDir: backend
+    env: python
+    region: ohio
+    plan: free
+    branch: main
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT"
+    healthCheckPath: /
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      # ── Set these in the Render dashboard when creating the service ──
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ENCRYPTION_MASTER_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      # Comma-separated list of allowed frontend origins (CORS),
+      # e.g. "https://meraki.vercel.app,http://localhost:3000"
+      - key: FRONTEND_URL
+        sync: false
