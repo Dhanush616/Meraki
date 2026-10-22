@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { ShieldCheckIcon, Loader2 } from "lucide-center";
 import { ShieldCheckIcon as ShieldIcon, Loader2 as LoaderIcon } from "lucide-react";
 import { useSecurity } from "@/hooks/useSecurity";
 import { TwoFactorManager } from "@/components/dashboard/security/TwoFactorManager";

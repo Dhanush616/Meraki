@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,7 +18,7 @@ const steps = [
     }
 ];
 
-export default function SignUpPage() {
+function SignUpContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const role = searchParams.get("role");
@@ -222,3 +222,13 @@ export default function SignUpPage() {
         </div>
     );
 }
+
+
+export default function SignUpPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-background" />}>
+            <SignUpContent />
+        </Suspense>
+    );
+}
+

@@ -31,7 +31,7 @@ async def signup(credentials: SignupRequest):
     """
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            f"{os.getenv("SUPABASE_URL")}/auth/v1/signup",
+            f"{os.getenv('SUPABASE_URL')}/auth/v1/signup",
             headers={
                 "apikey": os.getenv("SUPABASE_SERVICE_ROLE_KEY"),
                 "Content-Type": "application/json"
@@ -67,7 +67,7 @@ async def login(credentials: LoginRequest):
     # But if the backend requires handling it, we hit the Supabase GOTRUE API
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            f"{os.getenv("SUPABASE_URL")}/auth/v1/token?grant_type=password",
+            f"{os.getenv('SUPABASE_URL')}/auth/v1/token?grant_type=password",
             headers={
                 "apikey": os.getenv("SUPABASE_SERVICE_ROLE_KEY"),
                 "Content-Type": "application/json"
@@ -105,7 +105,7 @@ async def logout(access_token: str):
     """
     async with httpx.AsyncClient() as client:
         await client.post(
-            f"{os.getenv("SUPABASE_URL")}/auth/v1/logout",
+            f"{os.getenv('SUPABASE_URL')}/auth/v1/logout",
             headers={
                 "apikey": os.getenv("SUPABASE_SERVICE_ROLE_KEY"),
                 "Authorization": f"Bearer {access_token}"
@@ -263,4 +263,46 @@ async def get_beneficiary_context(user_id: str = Depends(get_current_user_id)):
         response_data["allocated_assets"] = allocated_assets
         
     return response_data
+
+
+@router.post("/verify-2fa")
+async def verify_2fa(body: Verify2FARequest):
+    """
+    Verify a 2FA code during login (called when /login returns temp_session=True).
+    TOTP is verified against the stored secret in two_factor_settings.
+    """
+    from core.supabase import get_supabase_client
+    supabase = get_supabase_client()
+
+    # Find the user id by email
+    users_res = supabase.auth.admin.list_users()
+    users_list = getattr(users_res, 'users', users_res)
+    user_id = next((u.id for u in users_list if u.email == body.email), None)
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or verification code",
+        )
+
+    settings_res = (
+        supabase.table("two_factor_settings")
+        .select("totp_enabled, totp_secret, email_otp_enabled")
+        .eq("user_id", user_id)
+        .execute()
+    )
+    row = settings_res.data[0] if settings_res.data else None
+    if not row or not (row.get("totp_enabled") or row.get("email_otp_enabled")):
+        raise HTTPException(status_code=400, detail="Two-factor auth is not enabled for this account")
+
+    # TOTP check
+    if row.get("totp_enabled"):
+        from routers.security import _verify_totp
+        secret = row.get("totp_secret")
+        if not secret or not _verify_totp(secret, body.token):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or verification code",
+            )
+
+    return {"verified": True}
 

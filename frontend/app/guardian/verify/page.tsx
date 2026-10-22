@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -22,7 +22,7 @@ interface VerificationResult {
     submission_id?: string;
 }
 
-export default function GuardianVerifyPage() {
+function GuardianVerifyContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const queryOwnerId = searchParams.get("ownerId");
@@ -312,3 +312,13 @@ export default function GuardianVerifyPage() {
         </div>
     );
 }
+
+
+export default function GuardianVerifyPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-background" />}>
+            <GuardianVerifyContent />
+        </Suspense>
+    );
+}
+

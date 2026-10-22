@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -7,7 +8,7 @@ import { ArrowRightIcon, ShieldIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/shared/Logo";
 
-export default function SignInPage() {
+function SignInContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const role = searchParams.get("role");
@@ -100,8 +101,11 @@ export default function SignInPage() {
 
             console.log("Login successful", data);
 
-            // Store the token in localStorage for authenticated requests
-            if (data.access_token) {
+            // If 2FA is required, route through the verification step first
+            if (data.temp_session) {
+                router.push(`/auth/2fa-verify?email=${encodeURIComponent(email)}`);
+            } else if (data.access_token) {
+                // Store the token in localStorage for authenticated requests
                 localStorage.setItem("paradosis_access_token", data.access_token);
             }
 
@@ -176,7 +180,7 @@ export default function SignInPage() {
                             <div className="space-y-2">
                                 <div className="flex justify-between">
                                     <label className="text-sm font-medium text-foreground font-sans">Password</label>
-                                    <Link href="#" className="text-sm text-primary hover:underline font-sans">Forgot password?</Link>
+                                    <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline font-sans">Forgot password?</Link>
                                 </div>
                                 <input
                                     type="password"
@@ -201,5 +205,13 @@ export default function SignInPage() {
                 </p>
             </motion.div>
         </div>
+    );
+}
+
+export default function SignInPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-background" />}>
+            <SignInContent />
+        </Suspense>
     );
 }
