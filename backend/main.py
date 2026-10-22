@@ -17,14 +17,20 @@ app = FastAPI(
     docs_url="/docs" if os.getenv("ENVIRONMENT", "development") == "development" else None
 )
 
+# FRONTEND_URL may be a comma-separated list of origins (e.g. the Vercel
+# production domain plus any preview domains).
+frontend_origins = [
+    origin.strip()
+    for origin in os.getenv("FRONTEND_URL", "http://localhost:3000").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        os.getenv("FRONTEND_URL", "http://localhost:3000"),
+        *frontend_origins,
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000"
     ],
     allow_credentials=True,
     allow_methods=["*"],

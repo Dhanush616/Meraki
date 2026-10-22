@@ -44,12 +44,12 @@ env/
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Environment variables
+# Environment variables — never commit real values (keep *.env.example tracked)
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
+*.tsbuildinfo
+.vercel
 
 # IDEs and Editors
 .vscode/
